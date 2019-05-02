@@ -15,11 +15,11 @@ $(document).ready( function() {
     // specific fields
     const toggleDeliveryInfo = function() {
         if($('#publication-accumulating').is(':checked')) {
-            $('label[for="publication-delivery_info"]').show();
-            $('#publication-delivery_info').show();
+            $('label[for="publication-delivery_info"]').show(400, "swing");
+            $('#publication-delivery_info').show(400, "swing");
         } else {
-            $('label[for="publication-delivery_info"]').hide();
-            $('#publication-delivery_info').hide();
+            $('label[for="publication-delivery_info"]').hide(400, "swing");
+            $('#publication-delivery_info').hide(400, "swing");
         }
     }
     $('#publication-accumulating').change(toggleDeliveryInfo);
@@ -27,10 +27,10 @@ $(document).ready( function() {
 
     const toggleCollectionFields = function() {
         if($("input[name='dataset-type']:checked").val() == 'collection') {
-            $('.collection-field').show();
+            $('.collection-field').show(400, "swing");
             $('.collection-field :input').removeAttr("disabled");
         } else {
-            $('.collection-field').hide();
+            $('.collection-field').hide(400, "swing");
             $('.collection-field :input').attr("disabled", "disabled");
         }
     }
@@ -97,5 +97,4 @@ const validate = function() {
 const sanitize = function() {
     $('.form-group.empty').remove();
     $('#dataset-form :input[value=""]').attr("disabled", "disabled");
-    console.log($('#dataset-form :input[value=""]').length)
 }
