@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link rel="stylesheet" href="stylesheet.css" type="text/css">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+        type="text/css">
+    <script src="https://code.jquery.com/jquery-3.4.0.min.js"
+        integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+        type="text/javascript"></script>
+    <title>Archive Loader</title>
+</head>
+
+<body class="container">
+    <h1>Archive Loader</h1>
+
+    <form class="form-group">
+        <div>
+            <input type="radio" id="bundle-radio" name="dataset-type" value="bundle" checked>
+            <label for="bundle-radio">Bundle</label>
+        </div>
+        <div>
+            <input type="radio" id="collection-radio" name="dataset-type" value="collection">
+            <label for="collection-radio">Collection</label>
+        </div>
+    </form>
+
+    <form id="dataset-form" action="/add" method="post">
+        <div class="form-group">
+            <label>LID:</label> <input class="form-control" type="text" name="logical_identifier">
+            <label>Dataset Display Name: </label><input class="form-control" type="text" name="display_name">
+            <label>DOI: </label><input class="form-control" type="text" name="doi">
+            <label>Display Description: </label><textarea class="form-control" name="display_description"></textarea>
+            <label>Citation: </label><textarea class="form-control" name="citation"></textarea>
+            <label class="collection-field">Is Document Collection: </label><input class="form-control collection-field"
+                type="checkbox" name="document_flag" id="document_flag">
+            <label>Permalink: </label><input class="form-control" type="url" name="permalink">
+            <label>Browse URL: </label><input class="form-control" type="url" name="browse_url">
+            <label>Download URL: </label><input class="form-control" type="url" name="download_url">
+            <label>Download Size: </label><input class="form-control" type="text" name="download_size">
+            <label>Checksum URL: </label><input class="form-control" type="url" name="checksum_url">
+            <label>Mission Bundle LID: </label><input class="form-control" type="text" name="mission_bundle">
+            <label>Local Documents URL: </label><input class="form-control" type="url" name="local_documents_url">
+            <label>Other Instruments URL: </label><input class="form-control" type="url" name="other_instruments_url">
+            <label>PDS3 Version URL: </label><input class="form-control" type="url" name="pds3_version_url">
+        </div>
+        <section id="related-tools" class="repeating-group" data-fieldname="tags">
+            <h2>Tags</h2>
+            <div class="form-group empty">
+                <input class="form-control" type="text">
+            </div>
+        </section>
+
+        <div class="form-group empty">
+            <label>Publish Status: </label>
+            <select class="form-control" name="publication[publish_status]" id="exampleFormControlSelect1">
+                <option>Archived</option>
+                <option>Certified & Liens Resolution</option>
+                <option>Superseded</option>
+                <option>Under Review</option>
+            </select>
+            <label>Date Published: </label><input class="form-control" type="text" name="publication[publication_date]">
+            <label for="publication-accumulating">Accumulating:</label> <input class="form-control" type="checkbox"
+                name="publication[accumulating]" id="publication-accumulating">
+            <label for="publication-delivery_info">Delivery Info: </label><textarea class="form-control" type="text"
+                name="publication[delivery_info]" id="publication-delivery_info"></textarea>
+        </div>
+
+        <div class="form-group empty collection-field">
+            <label>Example Display Name: </label><input class="form-control" type="text" name="example[title]">
+            <label>Example Filename: </label><input class="form-control" type="text" name="example[filename]">
+            <label>Example URL: </label><input class="form-control" type="url" name="example[url]">
+            <label>Example Thumbnail URL: </label><input class="form-control" type="url" name="example[thumbnail_url]">
+        </div>
+
+        <section id="related-tools" class="repeating-group" data-fieldname="related_tools">
+            <h2>Related Tools</h2>
+            <div class="form-group animated empty">
+                <label>Tool Name: </label><input class="form-control" type="text" data-fieldname="name">
+                <label>Description: </label><textarea class="form-control" data-fieldname="description"></textarea>
+                <label>URL: </label><input class="form-control" type="url" data-fieldname="url">
+                <label>Icon URL: </label><input class="form-control" type="url" data-fieldname="icon_url">
+            </div>
+        </section>
+
+        <section id="related-data" class="repeating-group" data-fieldname="related_data">
+            <h2>Related Data</h2>
+            <div class="form-group empty">
+                <label>Display Name: </label><input class="form-control" type="text" data-fieldname="name">
+                <label>LID: </label><input class="form-control" type="text" data-fieldname="lid">
+            </div>
+        </section>
+
+        <section id="superseded-data" class="repeating-group" data-fieldname="superseded_data">
+            <h2>Superseded Data</h2>
+            <div class="form-group empty">
+                <label>Display Name: </label><input class="form-control" type="text" data-fieldname="name">
+                <label>Browse URL: </label><input class="form-control" type="url" data-fieldname="browse_url">
+            </div>
+        </section>
+
+        <section id="download-packages" class="repeating-group" data-fieldname="download_packages">
+            <h2>Download Packages</h2>
+            <div class="form-group empty">
+                <label>Display Name: </label><input class="form-control" type="text" data-fieldname="name">
+                <label>Download URL: </label><input class="form-control" type="url" data-fieldname="browse_url">
+                <label>Download Size: </label><input class="form-control" type="text" data-fieldname="download_size">
+            </div>
+        </section>
+
+        <input type="submit" value="Submit">
+    </form>
+    <script src="frontend.js" type="text/javascript"></script>
+</body>
+
+</html>

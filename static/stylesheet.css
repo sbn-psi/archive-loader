@@ -1,0 +1,12 @@
+.repeating-group .form-group {
+    margin-left: 20px;
+    margin-right: 20px;
+}
+.repeating-group .form-group:not(:last-child) {
+    padding-bottom: 12px;
+    border-bottom: 1px solid lightgray;
+}
+
+body {
+    padding: 80px 0;
+}
