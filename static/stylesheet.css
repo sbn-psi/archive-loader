@@ -10,3 +10,7 @@
 body {
     padding: 80px 0;
 }
+
+#primary-input {
+    padding: 50px;
+}
