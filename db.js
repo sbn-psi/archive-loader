@@ -19,12 +19,24 @@ module.exports = {
             console.log("Closed database connection");
         })
     },
-    insert: async function(document, db) {
+    insert: async function(documents, db) {
         const collection = db.collection(datasetsCollection)
-        document._isActive = true;
-        const result = await collection.insertOne(document)
-        assert.equal(1, result.result.n)
-        assert.equal(1, result.ops.length)
+        if (documents.constructor === Array) {
+            for(doc of documents) {
+                doc._isActive = true;
+            }
+            console.log('inserting documents')
+            // console.log(documents)
+            var result = await collection.insertMany(documents)
+            assert.equal(documents.length, result.result.n)
+            assert.equal(documents.length, result.ops.length)
+        } else {
+            documents._isActive = true;
+            // console.log('uh oh')
+            var result = await collection.insertOne(documents)
+            assert.equal(1, result.result.n)
+            assert.equal(1, result.ops.length)
+        }
         return result
     },
     find: async function(db, inputFilter) {
