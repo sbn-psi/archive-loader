@@ -109,10 +109,21 @@ app.directive('importForm', function () {
         },
         link: function($scope) {
             $scope.groupRepeater = function(array) {
-                if(array.length === 0 || !array.last().isEmpty()) {
+                if(array.length === 0 || !isEmptyObject(array.last())) {
                     array.push({})
                 }
                 return array;
+            }
+
+            const isEmptyObject = obj =>  {
+                if (obj.constructor === Object) {
+                    for(var key in obj) {
+                        if(obj.hasOwnProperty(key) && !key.startsWith('$$'))
+                            return false;
+                    }
+                    return true;
+                }
+                return false;
             }
         }
     };

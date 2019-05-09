@@ -14,15 +14,7 @@ if (!String.prototype.replaceAll) {
         return target.split(search).join(replacement);
     };
 }
-if (!Object.prototype.isEmpty) {
-    Object.prototype.isEmpty = function() {
-        for(var key in this) {
-            if(this.hasOwnProperty(key) && !key.startsWith('$$'))
-                return false;
-        }
-        return true;
-    }
-}
+
 if (!Array.prototype.isEmpty) {
     Array.prototype.isEmpty = function() {
         for(var val of this) {
