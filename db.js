@@ -2,7 +2,6 @@ const url = 'mongodb://localhost:27017'
 const name = 'app'
 const assert = require('assert')
 
-
 const {MongoClient} = require('mongodb')
 
 const datasetsCollection = 'datasets'
@@ -25,14 +24,11 @@ module.exports = {
             for(doc of documents) {
                 doc._isActive = true;
             }
-            console.log('inserting documents')
-            // console.log(documents)
             var result = await collection.insertMany(documents)
             assert.equal(documents.length, result.result.n)
             assert.equal(documents.length, result.ops.length)
         } else {
             documents._isActive = true;
-            // console.log('uh oh')
             var result = await collection.insertOne(documents)
             assert.equal(1, result.result.n)
             assert.equal(1, result.ops.length)

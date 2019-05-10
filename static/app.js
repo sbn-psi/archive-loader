@@ -6,7 +6,9 @@ app.controller('RootController', function($scope) {
         datasetType: 'Bundle',
         progress: function() {
             $scope.state.name = 'Import';
-        }
+        },
+        loading: false,
+        error: null
     };
 });
 
@@ -15,13 +17,23 @@ app.controller('LoaderController', function ($scope, $http) {
     const bundleCheckUrl = '/check/bundle';
 
     $scope.fetch = function () {
+        $scope.state.error = null;
         // normally, we would just go fetch
         if($scope.state.datasetUrl) {
-            let url = $scope.state.datasetType == 'Bundle' ? bundleCheckUrl : collectionCheckUrl;
-            $http.get(url).then(function (res) {
+            const options = { params: {
+                url: $scope.state.datasetUrl
+            }}
+
+            let endpoint = $scope.state.datasetType == 'Bundle' ? bundleCheckUrl : collectionCheckUrl;
+            $http.get(endpoint, options).then(function (res) {
                 $scope.state.datasets = res.data;
                 $scope.state.progress();
+                $scope.state.loading = false;
+            }, function(err) {
+                $scope.state.loading = false;
+                $scope.state.error = err.responseText;
             })
+            $scope.state.loading = true;
         }
     };
 });
@@ -53,6 +65,8 @@ app.controller('ImportController', function($scope, $http) {
     }
 
     $scope.submit = function() {
+        $scope.state.error = null;
+
         $http.post('/add', {
             bundle: sanitize($scope.model.bundle),
             collections: $scope.model.collections.map(c => sanitize(c))
@@ -128,3 +142,9 @@ app.directive('importForm', function () {
         }
     };
 });
+
+app.directive('loading', function() {
+    return {
+        template: '<div class="lds-ring"><div></div><div></div><div></div><div></div></div>'
+    }
+})

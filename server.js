@@ -1,6 +1,6 @@
 // external modules
-const {ObjectId} = require('mongodb')
 const assert = require('assert')
+const request = require('request-promise-native')
 
 // internal modules
 require('./static/helpers.js')
@@ -15,6 +15,8 @@ app.use(bodyParser.json())
 app.use(express.static('static'))
 app.listen(8989)
 console.log('running on port 8989...')
+
+const HARVESTWRAPPER = 'http://localhost:3009/labels'
 
 app.post('/add', function(req, res) {
     let bailed = false
@@ -89,77 +91,60 @@ app.get('/export', function(req, res) {
     })
 })
 
-app.get('/check/bundle', function(req, res) {
-    res.status(200).send(TEMPORARYEXAMPLE);
+
+const fieldMapper = dataset => { return {
+    name: dataset.title,
+    lidvid: dataset.lidvid,
+    abstract: dataset.description,
+    browseUrl: ''
+}}
+app.get('/check/bundle', async function(req, res) {
+    let bundleUrl = req.query.url;
+
+    let discovered = await httpRequest(HARVESTWRAPPER, { url: bundleUrl })
+    
+    try {
+        assert(discovered.bundles, 'Could not find any bundles at that URL')
+        assert(discovered.bundles.length > 0, 'Could not find any bundles at that URL')
+        assert(discovered.collections, 'Could not find any collections at that URL')
+        assert(discovered.collections.length > 0, 'Could not find any collections at that URL')
+    } catch (err) {
+        res.status(400).send(err.message)
+        return
+    }
+
+    const response = {
+        bundle: discovered.bundles.map(fieldMapper)[0],
+        collections: discovered.collections.map(fieldMapper)
+    }
+    res.status(200).send(response);
 })
 
-app.get('/check/collection', function(req, res) {
-    res.status(200).send({ collections: [TEMPORARYEXAMPLE.collections[0]] });
+
+app.get('/check/collection', async function(req, res) {
+    
+    let bundleUrl = req.query.url;
+    let discovered = await httpRequest(HARVESTWRAPPER, { url: bundleUrl })
+    
+    try {
+        assert(discovered.collections, 'Could not find any collections at that URL')
+        assert(discovered.collections.length > 0, 'Could not find any collections at that URL')
+    } catch (err) {
+        res.status(400).send(err.message)
+        return
+    }
+
+    const response = {
+        collections: discovered.collections.map(fieldMapper)
+    }
+    res.status(200).send(response);
 })
 
-const TEMPORARYEXAMPLE = {
-    bundle: {
-        name: 'Example Bundle',
-        lidvid: 'urn:nasa:pds:orex.ocams:1.0',
-        abstract: `This bundle collects all the operational data products produced by the OSIRIS-REx Camera Suite (OCAMS).
-        OCAMS is a suite of scientific cameras used for the characterization of the surface of (101955) Bennu.`,
-        browseUrl: '',
-    },
-    collections: [
-        {
-            name: 'Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-REx): Document',
-            lidvid: 'urn:nasa:pds:orex.ocams:document:1.1',
-            abstract: 'This collection contains the documents applicable to the OSIRIS-REx Camera Suite (OCAMS).',
-            browseUrl: '',
-        },
-        {
-            name: `Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-REx): 
-            OSIRIS-REx Camera Suite (OCAMS) calibration file collection.`,
-            lidvid: 'urn:nasa:pds:orex.ocams:calibration:2.0',
-            abstract: 'This collection contains the calibration files used to calibrate and correct the images acquired by the OCAMS instrument onboard the OSIRIS-REx spacecraft.',
-            browseUrl: '',
-        },
-        {
-            name: `Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-REx): 
-            OSIRIS-REx Camera Suite (OCAMS) raw science image data products.`,
-            lidvid: 'urn:nasa:pds:orex.ocams:data_raw:2.0',
-            abstract: 'This collection contains the raw (processing level 0) science image data products produced by the OCAMS instrument onboard the OSIRIS-REx spacecraft.',
-            browseUrl: '',
-        },
-        {
-            name: `Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-REx): 
-            OSIRIS-REx Camera Suite (OCAMS) reduced science image data products.`,
-            lidvid: 'urn:nasa:pds:orex.ocams:data_reduced:2.0',
-            abstract: `This collection contains the reduced (processing level 1 - bias, dark and flat field corrected) science image data products produced by the OCAMS instrument onboard the OSIRIS-REx spacecraft.`,
-            browseUrl: '',
-        },
-        {
-            name: `Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-REx): 
-            OSIRIS-REx Camera Suite (OCAMS) calibrated science image data products.`,
-            lidvid: 'urn:nasa:pds:orex.ocams:data_calibrated:2.0',
-            abstract: `This collection contains the calibrated (processing level 2 radiometrically calibrated and reflectance) science image data products produced by the OCAMS instrument onboard the OSIRIS-REx spacecraft.`,
-            browseUrl: '',
-        },
-        {
-            name: `Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-REx): 
-            OSIRIS-REx Camera Suite (OCAMS) raw housekeeping data products.`,
-            lidvid: 'urn:nasa:pds:orex.ocams:data_hkl0:1.0',
-            abstract: `This collection contains the raw housekeeping data products produced by the OCAMS instrument suite onboard the OSIRIS-REx spacecraft.`,
-            browseUrl: '',
-        },
-        {
-            name: `Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-REx): 
-            OSIRIS-REx Camera Suite (OCAMS) converted housekeeping data products.`,
-            lidvid: 'urn:nasa:pds:orex.ocams:data_hkl1:1.0',
-            abstract: `This collection contains the converted housekeeping data products produced by the OCAMS instrument suite onboard the OSIRIS-REx spacecraft.`,
-            browseUrl: '',
-        },
-        {
-            name: `Origins, Spectral Interpretation, Resource Identification, Security, Regolith Explorer (OSIRIS-REx): 
-            OSIRIS-REx Camera Suite (OCAMS) ancillary image information data products.`,
-            lidvid: 'urn:nasa:pds:orex.ocams:data_eng:1.0',
-            abstract: `This collection contains the ancillary image information data products produced by the OCAMS instrument onboard the OSIRIS-REx spacecraft. This product contains all instrument housekeeping data collected at the time of image acquisition.`,
-            browseUrl: '',
-        }
-    ]
+async function httpRequest(baseUrl, params) {
+    const options = {
+        uri: baseUrl,
+        json: true,
+        qs: params
+    };
+    return await request(options)
 }

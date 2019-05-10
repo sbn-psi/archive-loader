@@ -19,6 +19,7 @@
 
 <body class="container" ng-controller="RootController">
     <h1>Archive Loader</h1>
+    <h4 class="error" ng-if="state.error">{{state.error}}</h4>
     <form class="form-group" ng-if="state.name === 'Loader'" ng-controller="LoaderController">
         <div>
             <input type="radio" id="bundle-radio" ng-model="state.datasetType" name="dataset-type" value="Bundle">
@@ -32,7 +33,8 @@
             <h2>{{state.datasetType}} URL: </h2>
             <input class="form-control" type="url" ng-model="state.datasetUrl">
         </div>
-        <input type="submit" value="Fetch" ng-click="fetch()">
+        <input type="submit" value="Fetch" ng-click="fetch()" ng-if="!state.loading">
+        <loading ng-if="state.loading"></loading>
     </form>
     <div ng-if="state.name === 'Import'" ng-controller="ImportController">
         <div class="row">
