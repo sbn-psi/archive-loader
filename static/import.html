@@ -15,8 +15,8 @@
             <label>Download Size: </label><input class="form-control" type="text" ng-model="dataset.download_size">
             <label>Checksum URL: </label><input class="form-control" type="url" ng-model="dataset.checksum_url">
             <label>Mission Bundle LID: </label><input class="form-control" type="text" ng-model="dataset.mission_bundle">
-            <label>Local Documents URL: </label><input class="form-control" type="url" ng-model="dataset.local_documents_url">
-            <label>Other Instruments URL: </label><input class="form-control" type="url" ng-model="dataset.other_instruments_url">
+            <label ng-if="type === 'Collection'">Local Documents URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.local_documents_url">
+            <label ng-if="type === 'Collection'">Other Instruments URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.other_instruments_url">
             <label>PDS3 Version URL: </label><input class="form-control" type="url" ng-model="dataset.pds3_version_url">
         </div>
         <section id="related-tools" class="repeating-group">
