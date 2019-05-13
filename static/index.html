@@ -20,7 +20,7 @@
 <body class="container" ng-controller="RootController">
     <h1>Archive Loader</h1>
     <h4 class="error" ng-if="state.error">{{state.error}}</h4>
-    <form class="form-group" ng-if="state.name === 'Loader'" ng-controller="LoaderController">
+    <form class="form-group" ng-if="state.name === states.load" ng-controller="LoaderController">
         <div>
             <input type="radio" id="bundle-radio" ng-model="state.datasetType" name="dataset-type" value="Bundle">
             <label for="bundle-radio">Bundle</label>
@@ -36,12 +36,12 @@
         <input type="submit" value="Fetch" ng-click="fetch()" ng-if="!state.loading">
         <loading ng-if="state.loading"></loading>
     </form>
-    <div ng-if="state.name === 'Import'" ng-controller="ImportController">
+    <div ng-if="state.name === states.import" ng-controller="ImportController">
         <div class="row">
             <nav ng-if="model.collections.length > 0" aria-label="Dataset selection" class="col">
                 <ul class="pagination flex-column">
-                    <li class="page-item" ng-if="model.bundle" ng-class="{active: view.active === model.bundle}"><a class="page-link" href="#" ng-click="view.active = model.bundle; view.type = 'Bundle'">{{model.bundle.lidvid}}</a></li>
-                    <li class="page-item" ng-repeat="collection in model.collections" ng-class="{active: view.active.lidvid === collection.lidvid}"><a class="page-link" href="#" ng-click="view.active = collection; view.type = 'Collection'">{{collection.lidvid}}</a></li>
+                    <li class="page-item" ng-if="model.bundle" ng-class="{active: view.active === model.bundle}"><a class="page-link" href="#" ng-click="view.active = model.bundle; view.type = constants.bundleType">{{model.bundle.lidvid}}</a></li>
+                    <li class="page-item" ng-repeat="collection in model.collections" ng-class="{active: view.active.lidvid === collection.lidvid}"><a class="page-link" href="#" ng-click="view.active = collection; view.type = constants.collectionType">{{collection.lidvid}}</a></li>
                 </ul>
             </nav>
             <div class="col tab-container">
@@ -51,6 +51,9 @@
         <div class="row d-flex justify-content-center">
             <input type="submit" value="Submit" ng-click="submit()">
         </div>
+    </div>
+    <div ng-if="state.name === states.manage" ng-controller="ManageController">
+        
     </div>
 </body>
 

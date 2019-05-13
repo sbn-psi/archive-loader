@@ -1,30 +1,44 @@
 var app = angular.module('app', []);
 
-app.controller('RootController', function($scope) {
+app.constant('states', {
+    load: 'Loader',
+    import: 'Import',
+    manage: 'Manage'
+}).constant('constants', {
+    bundleType: 'Bundle',
+    collectionType: 'Collection'
+});
+
+app.controller('RootController', function($scope, constants, states) {
     $scope.state = {
-        name: 'Loader',
-        datasetType: 'Bundle',
+        name: states.load,
+        datasetType: constants.bundleType,
         progress: function() {
-            $scope.state.name = 'Import';
+            switch($scope.state.name) {
+                case states.load: $scope.state.name = states.import; break;
+                case states.import: $scope.state.name = states.manage; break;
+            }
         },
         loading: false,
         error: null
     };
+
+    $scope.constants = constants;
+    $scope.states = states;
 });
 
-app.controller('LoaderController', function ($scope, $http) {
+app.controller('LoaderController', function ($scope, $http, constants) {
     const collectionCheckUrl = '/check/collection';
     const bundleCheckUrl = '/check/bundle';
 
     $scope.fetch = function () {
         $scope.state.error = null;
-        // normally, we would just go fetch
         if($scope.state.datasetUrl) {
             const options = { params: {
                 url: $scope.state.datasetUrl
             }}
 
-            let endpoint = $scope.state.datasetType == 'Bundle' ? bundleCheckUrl : collectionCheckUrl;
+            let endpoint = $scope.state.datasetType == constants.bundleType ? bundleCheckUrl : collectionCheckUrl;
             $http.get(endpoint, options).then(function (res) {
                 $scope.state.datasets = res.data;
                 $scope.state.progress();
@@ -38,7 +52,7 @@ app.controller('LoaderController', function ($scope, $http) {
     };
 });
 
-app.controller('ImportController', function($scope, $http) {
+app.controller('ImportController', function($scope, $http, constants) {
     $scope.$watch('view.active', function(newVal) {
         if(newVal && !newVal.logical_identifier) {
             prepDataset(newVal)
@@ -61,7 +75,7 @@ app.controller('ImportController', function($scope, $http) {
 
     $scope.view = {
         active: $scope.model.bundle ? $scope.model.bundle : $scope.model.collections[0],
-        type: $scope.model.bundle ? 'Bundle' : 'Collection'
+        type: $scope.model.bundle ? constants.bundleType : constants.collectionType
     }
 
     $scope.submit = function() {
