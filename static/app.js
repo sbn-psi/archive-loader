@@ -53,19 +53,30 @@ app.controller('LoaderController', function ($scope, $http, constants) {
 });
 
 app.controller('ImportController', function($scope, $http, constants) {
+    $scope.allDatasets = function() {
+        let themAll = [$scope.model.bundle];
+        return themAll.concat($scope.model.collections);
+    }
+
+    const datasetHasBeenPrepped = function(dataset) {
+        return !!(dataset && dataset.logical_identifier)
+    }
+
     $scope.$watch('view.active', function(newVal) {
-        if(newVal && !newVal.logical_identifier) {
+        if(!datasetHasBeenPrepped(newVal)) {
             prepDataset(newVal)
         }
     })
 
     const prepDataset = function(dataset) {
-        const template = templateModel()
-        Object.assign(dataset, template)
-        dataset.logical_identifier = dataset.lidvid
-        dataset.display_name = dataset.name
-        dataset.display_description = dataset.abstract
-        dataset.browse_url = dataset.browseUrl
+        if(dataset && dataset.constructor === Object) {
+            const template = templateModel();
+            Object.assign(dataset, template);
+            dataset.logical_identifier = dataset.lidvid;
+            dataset.display_name = dataset.name;
+            dataset.display_description = dataset.abstract;
+            dataset.browse_url = dataset.browseUrl;
+        }
     }
 
     $scope.model = {
@@ -79,16 +90,29 @@ app.controller('ImportController', function($scope, $http, constants) {
     }
 
     $scope.submit = function() {
-        $scope.state.error = null;
+        if(validate()) {
+            $scope.state.error = null;
+            let postable = {
+                bundle: sanitize($scope.model.bundle),
+                collections: $scope.model.collections.map(c => sanitize(c))
+            }
+            console.log(postable);
+            $http.post('/add', postable).then(function(res) {
+                $scope.state.progress();
+            }, function(err) {
+                $scope.state.error = 'There was a problem';
+                console.log(err);
+            })
+        } else {
+            $scope.state.error = 'Some datasets are invalid';
+        }
+    }
 
-        $http.post('/add', {
-            bundle: sanitize($scope.model.bundle),
-            collections: $scope.model.collections.map(c => sanitize(c))
-        }).then(function(res) {
-            console.log(res);
-        }, function(err) {
-            console.log(err);
-        })
+    const validate = function() {
+        const isValid = function(dataset) {
+            return datasetHasBeenPrepped(dataset);
+        }
+        return $scope.allDatasets().every(isValid);
     }
 
     const sanitize = function(dataset) {
@@ -110,7 +134,7 @@ app.controller('ImportController', function($scope, $http, constants) {
                     let trimmed = value.filter(item => !isEmptyObject(item)) 
                     sanitized[key] = trimmed;
                 } else {
-                    sanitized[key] = value;
+                    sanitized[key] = isEmptyObject(value) ? null : value;
                 }
             }
         }

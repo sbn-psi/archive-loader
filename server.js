@@ -77,7 +77,6 @@ app.post('/add', function(req, res) {
         const result = await db.insert(toInsert, dbConnection)
         complete()
         // let newRecord = result.ops[0]
-        console.log(result)
         res.status(201).send( 'yay' )
     })
 
