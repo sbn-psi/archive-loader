@@ -10,7 +10,7 @@ const isDictList = function(item) {
 const solrizeDocument = function(doc, name) {
     let docs = []
     if (isDict(doc)) {
-        docs.push(solrizeNode("", name, doc))
+        docs.push(solrizeNode("", name, doc, ""))
     }
     if (isDictList(doc)) {
         for (key in Object.keys(doc)) {
