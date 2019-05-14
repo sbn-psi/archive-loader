@@ -10,34 +10,33 @@ const isDictList = function(item) {
 const solrizeDocument = function(doc, name) {
     let docs = []
     if (isDict(doc)) {
-        docs.push(solrizeNode("", name, doc, ""))
+        docs.push(solrizeNode("", name, doc))
     }
     if (isDictList(doc)) {
         for (key in Object.keys(doc)) {
-            docs.push(solrizeNode("", name, doc[key], ""))
+            docs.push(solrizeNode("", name, doc[key]))
         }
     }
     return docs
 }
 
-const solrizeNode = function(parentPath, name, node, parentId) {
+const solrizeNode = function(parentPath, name, node) {
     let id = uuid4()
     let path = parentPath ? `${parentPath}.${name}` : name
     let doc = {
         attrname: name,
         attrpath: path,
-        parentId: parentId,
         id: id
     }
     let childDocs = []
 
     for (const [key, value] of Object.entries(node)) {
         if (isDict(value)) {
-            childDocs.push(solrizeNode(path, key, value, id))
+            childDocs.push(solrizeNode(path, key, value))
         }
         else if(isDictList(value)) {
             for (element of value) {
-                childDocs.push(solrizeNode(path, key, element, id))
+                childDocs.push(solrizeNode(path, key, element))
             }
         }
         else {
