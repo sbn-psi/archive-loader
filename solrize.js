@@ -12,7 +12,9 @@ const solrizeDocument = function(doc, name) {
     }
     if (isDictList(doc)) {
         for (key in Object.keys(doc)) {
-            docs.push(solrizeNode("", name, doc[key]))
+            if(doc.hasOwnProperty(key)) {
+                docs.push(solrizeNode("", name, doc[key]))
+            }
         }
     }
     return docs
