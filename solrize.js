@@ -1,3 +1,5 @@
+const uuid4 = require('uuid/v4')
+
 const isDict = function(item) {
     return (!!item) && (item.constructor === Object)
 }
@@ -12,27 +14,30 @@ const solrizeDocument = function(doc, name) {
     }
     if (isDictList(doc)) {
         for (key in Object.keys(doc)) {
-            docs.push(solrizeNode("", name, doc[key]))
+            docs.push(solrizeNode("", name, doc[key], ""))
         }
     }
     return docs
 }
 
-const solrizeNode = function(parentPath, name, node) {
+const solrizeNode = function(parentPath, name, node, parentId) {
+    let id = uuid4()
     let path = parentPath ? `${parentPath}.${name}` : name
     let doc = {
         attrname: name,
-        attrpath: path
+        attrpath: path,
+        parentId: parentId,
+        id: id
     }
     let childDocs = []
 
     for (const [key, value] of Object.entries(node)) {
         if (isDict(value)) {
-            childDocs.push(solrizeNode(path, key, value))
+            childDocs.push(solrizeNode(path, key, value, id))
         }
         else if(isDictList(value)) {
             for (element of value) {
-                childDocs.push(solrizeNode(path, key, element))
+                childDocs.push(solrizeNode(path, key, element, id))
             }
         }
         else {
