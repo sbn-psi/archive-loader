@@ -92,11 +92,22 @@ app.controller('ImportController', function($scope, $http, constants) {
     }
 
     const sanitize = function(dataset) {
+        const isEmptyObject = obj =>  {
+            if (obj.constructor === Object) {
+                for(var key in obj) {
+                    if(obj.hasOwnProperty(key) && !key.startsWith('$$'))
+                        return false;
+                }
+                return true;
+            }
+            return false;
+        }
+
         let sanitized = templateModel()
         for (const [key, value] of Object.entries(dataset)) {
             if (dataset.hasOwnProperty(key) && !key.startsWith('$$')) {
                 if(value.constructor === Array) {
-                    let trimmed = value.filter(item => !item.isEmpty())
+                    let trimmed = value.filter(item => !isEmptyObject(item)) 
                     sanitized[key] = trimmed;
                 } else {
                     sanitized[key] = value;
