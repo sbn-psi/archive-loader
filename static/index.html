@@ -29,10 +29,13 @@
         </div>
         <div id="primary-input" class="form-group">
             <h2>{{state.datasetType}} URL: </h2>
-            <input class="form-control" type="url" ng-model="state.datasetUrl">
+            <input class="form-control" type="url" ng-model="state.datasetUrl"><br/>
+            <p>
+                <input type="submit" value="Fetch" ng-click="fetch()" ng-if="!state.loading">
+                <loading ng-if="state.loading"></loading>
+            </p>
         </div>
-        <input type="submit" value="Fetch" ng-click="fetch()" ng-if="!state.loading">
-        <loading ng-if="state.loading"></loading>
+        <button ng-click="state.name = states.manage">View Status</button>
     </form>
     <div ng-if="state.name === states.import" ng-controller="ImportController">
         <div class="row">
@@ -53,7 +56,11 @@
         </div>
     </div>
     <div ng-if="state.name === states.manage" ng-controller="ManageController">
-        You did it!
+        <h2>There are {{status.count}} datasets saved:</h2>
+        <ul>
+            <li ng-repeat="lid in status.lids track by $index">{{lid}}</li>
+        </ul>
+        <button ng-click="state.name = states.load">Load datasets</button>
     </div>
 </body>
 

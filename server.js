@@ -90,6 +90,16 @@ app.get('/export', function(req, res) {
     })
 })
 
+app.get('/status', function(req, res) {
+    db.connect(async function(dbConnection, complete) {
+        const result = await db.find(dbConnection, {})
+        complete()
+        res.status(200).send({
+            count: result.length,
+            lids: result.map(ds => ds.logical_identifier)
+        })
+    })
+})
 
 const fieldMapper = dataset => { return {
     name: dataset.title,

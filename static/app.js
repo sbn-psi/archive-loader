@@ -27,10 +27,13 @@ app.controller('RootController', function($scope, constants, states) {
     $scope.states = states;
 });
 
-app.controller('LoaderController', function ($scope, $http, constants) {
+app.controller('LoaderController', function ($scope, $http, constants, states) {
     const collectionCheckUrl = '/check/collection';
     const bundleCheckUrl = '/check/bundle';
 
+    $scope.viewStatus = function() {
+        $scope.state.name = states.manage;
+    }
     $scope.fetch = function () {
         $scope.state.error = null;
         if($scope.state.datasetUrl) {
@@ -174,6 +177,14 @@ app.controller('ImportController', function($scope, $http, constants) {
             download_packages: [],
         }
     }
+});
+
+app.controller('ManageController', function($scope, $http, constants) {
+    $http.get('/status').then(function(res) {
+        $scope.status = res.data;
+    }, function(err) {
+        $scope.state.error = err;
+    })
 });
 
 app.directive('importForm', function () {
