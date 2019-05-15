@@ -3,26 +3,26 @@
     <form id="dataset-form">
         <div class="form-group">
             <label>LIDVID:</label> <input class="form-control" type="text" ng-model="dataset.logical_identifier" disabled>
-            <label>Dataset Display Name: </label><input class="form-control" type="text" ng-model="dataset.display_name">
-            <label>DOI: </label><input class="form-control" type="text" ng-model="dataset.doi">
-            <label>Display Description: </label><textarea class="form-control" ng-model="dataset.display_description"></textarea>
-            <label>Citation: </label><textarea class="form-control" ng-model="dataset.citation"></textarea>
+            <label>Dataset Display Name: </label><input class="form-control" type="text" ng-model="dataset.display_name" uib-typeahead="val for val in autocomplete('display_name', $viewValue)">
+            <label>DOI: </label><input class="form-control" type="text" ng-model="dataset.doi" uib-typeahead="val for val in autocomplete('doi', $viewValue)">
+            <label>Display Description: </label><textarea class="form-control" ng-model="dataset.display_description" uib-typeahead="val for val in autocomplete('display_description', $viewValue)"></textarea>
+            <label>Citation: </label><textarea class="form-control" ng-model="dataset.citation" uib-typeahead="val for val in autocomplete('citation', $viewValue)"></textarea>
             <label class="collection-field" ng-if="type === 'Collection'">Is Document Collection: </label><input ng-if="type === 'Collection'" class="form-control collection-field"
                 type="checkbox" ng-model="dataset.document_flag" id="document_flag">
-            <label>Permalink: </label><input class="form-control" type="url" ng-model="dataset.permalink">
-            <label>Browse URL: </label><input class="form-control" type="url" ng-model="dataset.browse_url">
-            <label>Download URL: </label><input class="form-control" type="url" ng-model="dataset.download_url">
-            <label>Download Size: </label><input class="form-control" type="text" ng-model="dataset.download_size">
-            <label>Checksum URL: </label><input class="form-control" type="url" ng-model="dataset.checksum_url">
-            <label>Mission Bundle LID: </label><input class="form-control" type="text" ng-model="dataset.mission_bundle">
-            <label ng-if="type === 'Collection'">Local Documents URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.local_documents_url">
-            <label ng-if="type === 'Collection'">Other Instruments URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.other_instruments_url">
-            <label>PDS3 Version URL: </label><input class="form-control" type="url" ng-model="dataset.pds3_version_url">
+            <label>Permalink: </label><input class="form-control" type="url" ng-model="dataset.permalink" uib-typeahead="val for val in autocomplete('permalink', $viewValue)">
+            <label>Browse URL: </label><input class="form-control" type="url" ng-model="dataset.browse_url" uib-typeahead="val for val in autocomplete('browse_url', $viewValue)">
+            <label>Download URL: </label><input class="form-control" type="url" ng-model="dataset.download_url" uib-typeahead="val for val in autocomplete('download_url', $viewValue)">
+            <label>Download Size: </label><input class="form-control" type="text" ng-model="dataset.download_size" uib-typeahead="val for val in autocomplete('download_size', $viewValue)">
+            <label>Checksum URL: </label><input class="form-control" type="url" ng-model="dataset.checksum_url" uib-typeahead="val for val in autocomplete('checksum_url', $viewValue)">
+            <label>Mission Bundle LID: </label><input class="form-control" type="text" ng-model="dataset.mission_bundle" uib-typeahead="val for val in autocomplete('mission_bundle', $viewValue)">
+            <label ng-if="type === 'Collection'">Local Documents URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.local_documents_url" uib-typeahead="val for val in autocomplete('local_documents_url', $viewValue)">
+            <label ng-if="type === 'Collection'">Other Instruments URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.other_instruments_url" uib-typeahead="val for val in autocomplete('other_instruments_url', $viewValue)">
+            <label>PDS3 Version URL: </label><input class="form-control" type="url" ng-model="dataset.pds3_version_url" uib-typeahead="val for val in autocomplete('pds3_version_url', $viewValue)">
         </div>
         <section id="related-tools" class="repeating-group">
             <h2>Tags</h2>
             <div class="form-group empty" ng-repeat="tag in groupRepeater(dataset.tags)">
-                <input class="form-control" type="text" ng-model="tag.name">
+                <input class="form-control" type="text" ng-model="tag.name" uib-typeahead="val for val in autocomplete('name', $viewValue, 'tags')">
             </div>
         </section>
 
@@ -34,52 +34,52 @@
                 <option>Superseded</option>
                 <option>Under Review</option>
             </select>
-            <label>Date Published: </label><input class="form-control" type="text" ng-model="dataset.publication.publication_date">
+            <label>Date Published: </label><input class="form-control" type="text" ng-model="dataset.publication.publication_date" uib-typeahead="val for val in autocomplete('publication_date', $viewValue, 'publication')">
             <label for="publication-accumulating">Accumulating:</label> <input class="form-control" type="checkbox"
                 ng-model="dataset.publication.accumulating" id="publication-accumulating">
             <label for="publication-delivery_info" ng-if="dataset.publication.accumulating">Delivery Info: </label><textarea class="form-control" type="text"
-                ng-model="dataset.publication.delivery_info" id="publication-delivery_info" ng-if="dataset.publication.accumulating"></textarea>
+                ng-model="dataset.publication.delivery_info" id="publication-delivery_info" ng-if="dataset.publication.accumulating" uib-typeahead="val for val in autocomplete('accumulating', $viewValue, 'publication')"></textarea>
         </div>
 
         <div class="form-group empty collection-field" ng-if="type === 'Collection'">
-            <label>Example Display Name: </label><input class="form-control" type="text" ng-model="dataset.example.title">
-            <label>Example Filename: </label><input class="form-control" type="text" ng-model="dataset.example.filename">
-            <label>Example URL: </label><input class="form-control" type="url" ng-model="dataset.example.url">
-            <label>Example Thumbnail URL: </label><input class="form-control" type="url" ng-model="dataset.example.thumbnail_url">
+            <label>Example Display Name: </label><input class="form-control" type="text" ng-model="dataset.example.title" uib-typeahead="val for val in autocomplete('title', $viewValue, 'example')">
+            <label>Example Filename: </label><input class="form-control" type="text" ng-model="dataset.example.filename" uib-typeahead="val for val in autocomplete('publication_date', $viewValue, 'filename')">
+            <label>Example URL: </label><input class="form-control" type="url" ng-model="dataset.example.url" uib-typeahead="val for val in autocomplete('publication_date', $viewValue, 'url')">
+            <label>Example Thumbnail URL: </label><input class="form-control" type="url" ng-model="dataset.example.thumbnail_url" uib-typeahead="val for val in autocomplete('publication_date', $viewValue, 'thumbnail_url')">
         </div>
 
         <section id="related-tools" class="repeating-group">
             <h2>Related Tools</h2>
-            <div class="form-group animated empty" ng-repeat="tool in groupRepeater(dataset.related_tools)">
-                <label>Tool Name: </label><input class="form-control" type="text" ng-model="tool.name">
-                <label>Description: </label><textarea class="form-control" ng-model="tool.description"></textarea>
-                <label>URL: </label><input class="form-control" type="url" ng-model="tool.url">
-                <label>Icon URL: </label><input class="form-control" type="url" ng-model="tool.icon_url">
+            <div class="form-group animated" ng-repeat="tool in groupRepeater(dataset.related_tools)">
+                <label>Tool Name: </label><input class="form-control" type="text" ng-model="tool.name" uib-typeahead="val for val in autocomplete('name', $viewValue, 'related_tools')">
+                <label>Description: </label><textarea class="form-control" ng-model="tool.description" uib-typeahead="val for val in autocomplete('description', $viewValue, 'related_tools')"></textarea>
+                <label>URL: </label><input class="form-control" type="url" ng-model="tool.url" uib-typeahead="val for val in autocomplete('url', $viewValue, 'related_tools')">
+                <label>Icon URL: </label><input class="form-control" type="url" ng-model="tool.icon_url" uib-typeahead="val for val in autocomplete('icon_url', $viewValue, 'related_tools')">
             </div>
         </section>
 
         <section id="related-data" class="repeating-group">
             <h2>Related Data</h2>
-            <div class="form-group empty" ng-repeat="data in groupRepeater(dataset.related_data)">
-                <label>Display Name: </label><input class="form-control" type="text" ng-model="data.name">
-                <label>LID: </label><input class="form-control" type="text" ng-model="data.lid">
+            <div class="form-group" ng-repeat="data in groupRepeater(dataset.related_data)">
+                <label>Display Name: </label><input class="form-control" type="text" ng-model="data.name" uib-typeahead="val for val in autocomplete('name', $viewValue, 'related_data')">
+                <label>LID: </label><input class="form-control" type="text" ng-model="data.lid" uib-typeahead="val for val in autocomplete('lid', $viewValue, 'related_data')">
             </div>
         </section>
 
         <section id="superseded-data" class="repeating-group">
             <h2>Superseded Data</h2>
-            <div class="form-group empty" ng-repeat="data in groupRepeater(dataset.superseded_data)">
-                <label>Display Name: </label><input class="form-control" type="text" ng-model="data.name">
-                <label>Browse URL: </label><input class="form-control" type="url" ng-model="data.browse_url">
+            <div class="form-group" ng-repeat="data in groupRepeater(dataset.superseded_data)">
+                <label>Display Name: </label><input class="form-control" type="text" ng-model="data.name" uib-typeahead="val for val in autocomplete('name', $viewValue, 'superseded_data')">
+                <label>Browse URL: </label><input class="form-control" type="url" ng-model="data.browse_url" uib-typeahead="val for val in autocomplete('browse_url', $viewValue, 'superseded_data')">
             </div>
         </section>
 
         <section id="download-packages" class="repeating-group" ng-if="type === 'Collection'">
             <h2>Download Packages</h2>
-            <div class="form-group empty" ng-repeat="package in groupRepeater(dataset.download_packages)">
-                <label>Display Name: </label><input class="form-control" type="text" ng-model="package.name">
-                <label>Download URL: </label><input class="form-control" type="url" ng-model="package.browse_url">
-                <label>Download Size: </label><input class="form-control" type="text" ng-model="package.download_size">
+            <div class="form-group" ng-repeat="package in groupRepeater(dataset.download_packages)">
+                <label>Display Name: </label><input class="form-control" type="text" ng-model="package.name" uib-typeahead="val for val in autocomplete('name', $viewValue, 'download_packages')">
+                <label>Download URL: </label><input class="form-control" type="url" ng-model="package.browse_url" uib-typeahead="val for val in autocomplete('browse_url', $viewValue, 'download_packages')">
+                <label>Download Size: </label><input class="form-control" type="text" ng-model="package.download_size" uib-typeahead="val for val in autocomplete('download_size', $viewValue, 'download_packages')">
             </div>
         </section>
     </form>

@@ -1,4 +1,4 @@
-var app = angular.module('app', []);
+var app = angular.module('app', ['ui.bootstrap']);
 
 app.constant('states', {
     load: 'Loader',
@@ -89,6 +89,20 @@ app.controller('ImportController', function($scope, $http, constants) {
         type: $scope.model.bundle ? constants.bundleType : constants.collectionType
     }
 
+    $scope.autocomplete = function(model, current, parentObj) {
+        let vals = [current];
+        let fieldPool;
+        if(!!parentObj) {
+            fieldPool = $scope.allDatasets().reduce((pool, ds) => { 
+                let item = ds[parentObj]; if(!item) { return pool };
+                return item.constructor === Array ? pool.concat(item) : [...pool, item]
+            }, [])
+        } else {
+            fieldPool = $scope.allDatasets();
+        }
+        return vals.concat(fieldPool.map(ds => ds[model]).filter(field => !!field).reduce((pool, item) => pool.includes(item) ? pool : [...pool, item], []))
+    }
+
     $scope.submit = function() {
         if(validate()) {
             $scope.state.error = null;
@@ -96,7 +110,6 @@ app.controller('ImportController', function($scope, $http, constants) {
                 bundle: sanitize($scope.model.bundle),
                 collections: $scope.model.collections.map(c => sanitize(c))
             }
-            console.log(postable);
             $http.post('/add', postable).then(function(res) {
                 $scope.state.progress();
             }, function(err) {
@@ -168,7 +181,8 @@ app.directive('importForm', function () {
         templateUrl: '/import.html',
         scope: {
             dataset: '=',
-            type: '<'
+            type: '<',
+            autocomplete: '='
         },
         link: function($scope) {
             $scope.groupRepeater = function(array) {

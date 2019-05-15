@@ -5,13 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <link rel="stylesheet" href="stylesheet.css" type="text/css">
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        type="text/css">
-    <script src="https://code.jquery.com/jquery-3.4.0.min.js"
-        integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
-    
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.7.8/angular.min.js"
-        type="text/javascript"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" type="text/css">
+    <script src="https://code.jquery.com/jquery-3.4.0.min.js" integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
+    <script src="/lib/ui-bootstrap-tpls-3.0.6.min.js" type="text/javascript"></script>
     <script src="/helpers.js" type="text/javascript"></script>
     <script src="/app.js" type="text/javascript"></script>
     <title>Archive Loader</title>
@@ -38,14 +36,16 @@
     </form>
     <div ng-if="state.name === states.import" ng-controller="ImportController">
         <div class="row">
-            <nav ng-if="model.collections.length > 0" aria-label="Dataset selection" class="col">
-                <ul class="pagination flex-column">
-                    <li class="page-item" ng-if="model.bundle" ng-class="{active: view.active === model.bundle}"><a class="page-link" href="#" ng-click="view.active = model.bundle; view.type = constants.bundleType">{{model.bundle.lidvid}}</a></li>
-                    <li class="page-item" ng-repeat="collection in model.collections" ng-class="{active: view.active.lidvid === collection.lidvid}"><a class="page-link" href="#" ng-click="view.active = collection; view.type = constants.collectionType">{{collection.lidvid}}</a></li>
-                </ul>
-            </nav>
+            <div class="col" ng-if="model.collections.length > 0">
+                <nav aria-label="Dataset selection" id="dataset-nav" class="sticky-top">
+                    <ul class="pagination flex-column">
+                        <li class="page-item" ng-if="model.bundle" ng-class="{active: view.active === model.bundle}"><a class="page-link" href="#" ng-click="view.active = model.bundle; view.type = constants.bundleType">{{model.bundle.lidvid}}</a></li>
+                        <li class="page-item" ng-repeat="collection in model.collections" ng-class="{active: view.active.lidvid === collection.lidvid}"><a class="page-link" href="#" ng-click="view.active = collection; view.type = constants.collectionType">{{collection.lidvid}}</a></li>
+                    </ul>
+                </nav>
+            </div>
             <div class="col tab-container">
-                <import-form dataset="view.active" type="view.type"></import-form>
+                <import-form dataset="view.active" type="view.type" autocomplete="autocomplete"></import-form>
             </div>
         </div>
         <div class="row d-flex justify-content-center">
