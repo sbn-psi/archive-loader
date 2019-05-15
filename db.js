@@ -1,4 +1,4 @@
-const url = 'mongodb://localhost:27017'
+const url = process.env.NODE_ENV === 'production' ? 'mongodb://mongo:27017' : 'mongodb://localhost:27017'
 const name = 'app'
 const assert = require('assert')
 

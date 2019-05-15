@@ -1,0 +1,17 @@
+version: "2"
+services:
+  app:
+    container_name: app
+    restart: always
+    build: .
+    ports:
+      - "8989:8989"
+    links:
+      - mongo
+    environment:
+      - NODE_ENV=production
+  mongo:
+    container_name: mongo
+    image: mongo
+    ports:
+      - "27017:27017"
