@@ -55,7 +55,7 @@ app.post('/add', function(req, res) {
             return
         }
 
-        dataset._timestamp = new Date().toLocaleString()
+        dataset._timestamp = new Date()
     }
 
     validateDataset(req.body.bundle)
@@ -76,8 +76,7 @@ app.post('/add', function(req, res) {
     db.connect(async function(dbConnection, complete) {
         const result = await db.insert(toInsert, dbConnection)
         complete()
-        // let newRecord = result.ops[0]
-        res.status(201).send( 'yay' )
+        res.status(201).send( result.ops )
     })
 
 })
