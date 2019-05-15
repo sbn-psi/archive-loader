@@ -10,6 +10,8 @@ services:
       - mongo
     environment:
       - NODE_ENV=production
+    env_file:
+      - ./services.env
   mongo:
     container_name: mongo
     image: mongo

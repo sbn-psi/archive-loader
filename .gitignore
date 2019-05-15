@@ -65,3 +65,6 @@ typings/
 
 # database
 data/
+
+# services environment config
+services.env

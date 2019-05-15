@@ -16,7 +16,7 @@ app.use(express.static('static'))
 app.listen(8989)
 console.log('running on port 8989...')
 
-const HARVESTWRAPPER = 'http://localhost:3009/extract'
+const HARVESTWRAPPER = (process.env.HARVEST ? process.env.HARVEST : 'http://localhost:3009') + '/extract'
 
 app.post('/add', function(req, res) {
     let bailed = false
