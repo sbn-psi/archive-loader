@@ -1,3 +1,5 @@
+const uuid4 = require('uuid/v4')
+
 const isDict = function(item) {
     return (!!item) && (item.constructor === Object)
 }
@@ -21,10 +23,12 @@ const solrizeDocument = function(doc, name) {
 }
 
 const solrizeNode = function(parentPath, name, node) {
+    let id = uuid4()
     let path = parentPath ? `${parentPath}.${name}` : name
     let doc = {
         attrname: name,
-        attrpath: path
+        attrpath: path,
+        id: id
     }
     let childDocs = []
 
