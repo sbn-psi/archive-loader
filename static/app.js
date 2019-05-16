@@ -28,8 +28,8 @@ app.controller('RootController', function($scope, constants, states) {
 });
 
 app.controller('LoaderController', function ($scope, $http, constants, states) {
-    const collectionCheckUrl = '/check/collection';
-    const bundleCheckUrl = '/check/bundle';
+    const collectionCheckUrl = './check/collection';
+    const bundleCheckUrl = './check/bundle';
 
     $scope.viewStatus = function() {
         $scope.state.name = states.manage;
@@ -113,7 +113,7 @@ app.controller('ImportController', function($scope, $http, constants) {
                 bundle: sanitize($scope.model.bundle),
                 collections: $scope.model.collections.map(c => sanitize(c))
             }
-            $http.post('/add', postable).then(function(res) {
+            $http.post('./add', postable).then(function(res) {
                 $scope.state.progress();
             }, function(err) {
                 $scope.state.error = 'There was a problem';
@@ -180,7 +180,7 @@ app.controller('ImportController', function($scope, $http, constants) {
 });
 
 app.controller('ManageController', function($scope, $http, constants) {
-    $http.get('/status').then(function(res) {
+    $http.get('./status').then(function(res) {
         $scope.status = res.data;
     }, function(err) {
         $scope.state.error = err;
@@ -189,7 +189,7 @@ app.controller('ManageController', function($scope, $http, constants) {
 
 app.directive('importForm', function () {
     return {
-        templateUrl: '/import.html',
+        templateUrl: './import.html',
         scope: {
             dataset: '=',
             type: '<',
