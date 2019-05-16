@@ -108,10 +108,10 @@ const fieldMapper = dataset => { return {
 }}
 app.get('/check/bundle', async function(req, res) {
     let bundleUrl = req.query.url;
-
-    let discovered = await httpRequest(HARVESTWRAPPER, { url: bundleUrl })
+    let discovered;
     
     try {
+        discovered = await httpRequest(HARVESTWRAPPER, { url: bundleUrl })
         assert(discovered.bundles, 'Could not find any bundles at that URL')
         assert(discovered.bundles.length > 0, 'Could not find any bundles at that URL')
         assert(discovered.collections, 'Could not find any collections at that URL')
@@ -132,9 +132,10 @@ app.get('/check/bundle', async function(req, res) {
 app.get('/check/collection', async function(req, res) {
     
     let bundleUrl = req.query.url;
-    let discovered = await httpRequest(HARVESTWRAPPER, { url: bundleUrl })
+    let discovered;
     
     try {
+        discovered = await httpRequest(HARVESTWRAPPER, { url: bundleUrl })
         assert(discovered.collections, 'Could not find any collections at that URL')
         assert(discovered.collections.length > 0, 'Could not find any collections at that URL')
     } catch (err) {

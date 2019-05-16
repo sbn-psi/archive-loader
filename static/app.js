@@ -48,7 +48,7 @@ app.controller('LoaderController', function ($scope, $http, constants, states) {
                 $scope.state.loading = false;
             }, function(err) {
                 $scope.state.loading = false;
-                $scope.state.error = err.responseText;
+                $scope.state.error = err.data;
             })
             $scope.state.loading = true;
         }
