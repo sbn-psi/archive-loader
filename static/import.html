@@ -38,14 +38,14 @@
             <label for="publication-accumulating">Accumulating:</label> <input class="form-control" type="checkbox"
                 ng-model="dataset.publication.accumulating" id="publication-accumulating">
             <label for="publication-delivery_info" ng-if="dataset.publication.accumulating">Delivery Info: </label><textarea class="form-control" type="text"
-                ng-model="dataset.publication.delivery_info" id="publication-delivery_info" ng-if="dataset.publication.accumulating" uib-typeahead="val for val in autocomplete('accumulating', $viewValue, 'publication')"></textarea>
+                ng-model="dataset.publication.delivery_info" id="publication-delivery_info" ng-if="dataset.publication.accumulating" uib-typeahead="val for val in autocomplete('delivery_info', $viewValue, 'publication')"></textarea>
         </div>
 
         <div class="form-group empty collection-field" ng-if="type === 'Collection'">
             <label>Example Display Name: </label><input class="form-control" type="text" ng-model="dataset.example.title" uib-typeahead="val for val in autocomplete('title', $viewValue, 'example')">
-            <label>Example Filename: </label><input class="form-control" type="text" ng-model="dataset.example.filename" uib-typeahead="val for val in autocomplete('publication_date', $viewValue, 'filename')">
-            <label>Example URL: </label><input class="form-control" type="url" ng-model="dataset.example.url" uib-typeahead="val for val in autocomplete('publication_date', $viewValue, 'url')">
-            <label>Example Thumbnail URL: </label><input class="form-control" type="url" ng-model="dataset.example.thumbnail_url" uib-typeahead="val for val in autocomplete('publication_date', $viewValue, 'thumbnail_url')">
+            <label>Example Filename: </label><input class="form-control" type="text" ng-model="dataset.example.filename" uib-typeahead="val for val in autocomplete('filename', $viewValue, 'example')">
+            <label>Example URL: </label><input class="form-control" type="url" ng-model="dataset.example.url" uib-typeahead="val for val in autocomplete('url', $viewValue, 'example')">
+            <label>Example Thumbnail URL: </label><input class="form-control" type="url" ng-model="dataset.example.thumbnail_url" uib-typeahead="val for val in autocomplete('thumbnail_url', $viewValue, 'example')">
         </div>
 
         <section id="related-tools" class="repeating-group">
