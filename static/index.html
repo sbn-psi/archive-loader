@@ -17,7 +17,6 @@
 
 <body class="container" ng-controller="RootController">
     <h1>Archive Loader</h1>
-    <h4 class="error" ng-if="state.error">{{state.error}}</h4>
     <form class="form-group" ng-if="state.name === states.load" ng-controller="LoaderController">
         <div>
             <input type="radio" id="bundle-radio" ng-model="state.datasetType" name="dataset-type" value="Bundle">
@@ -52,15 +51,21 @@
             </div>
         </div>
         <div class="row d-flex justify-content-center">
-            <input type="submit" value="Submit" ng-click="submit()">
+            <input type="submit" value="Submit" ng-click="submit()" ng-if="!state.loading">
+            <loading ng-if="state.loading"></loading>
         </div>
     </div>
     <div ng-if="state.name === states.manage" ng-controller="ManageController">
         <h2>There are {{status.count}} datasets saved:</h2>
+        <loading ng-if="!status.count"></loading>
         <ul>
             <li ng-repeat="lid in status.lids track by $index">{{lid}}</li>
         </ul>
         <button ng-click="state.name = states.load">Load datasets</button>
+    </div>
+    <div id="alert-frame">
+        <div uib-alert ng-repeat="alert in state.alerts" ng-class="'alert-' + (alert.type || 'warning')" close="closeAlert($index)">{{alert.message}}</div>
+        <div uib-alert ng-if="state.error" class="alert-danger" close="state.error = null">{{state.error}}</div>
     </div>
 </body>
 

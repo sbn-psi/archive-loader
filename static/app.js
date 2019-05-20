@@ -20,7 +20,8 @@ app.controller('RootController', function($scope, constants, states) {
             }
         },
         loading: false,
-        error: null
+        error: null,
+        alerts: []
     };
 
     $scope.constants = constants;
@@ -109,14 +110,17 @@ app.controller('ImportController', function($scope, $http, constants) {
     $scope.submit = function() {
         if(validate()) {
             $scope.state.error = null;
+            $scope.state.loading = true;            
             let postable = {
                 bundle: sanitize($scope.model.bundle),
                 collections: $scope.model.collections.map(c => sanitize(c))
             }
             $http.post('./add', postable).then(function(res) {
                 $scope.state.progress();
+                $scope.state.loading = false;
             }, function(err) {
                 $scope.state.error = 'There was a problem';
+                $scope.state.loading = false;
                 console.log(err);
             })
         } else {
