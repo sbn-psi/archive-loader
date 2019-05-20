@@ -2,42 +2,36 @@
 
 The archive loader is a database, web server and client application used to load and manage the metadata used by the PDS Registry and Web UI services
 
-## Installation
+## Installation and Deployment
 
-After cloning this repo be sure to install its dependencies:
+First, you will need a services.env file that lists the locations of the other services that this application requires. See the services-EXAMPLE.env file for how these should be configured. Set the URLs for your deployments of the [PDS Harvest Server](https://github.com/sbn-psi/harvest-server) and [PDS Registry Build 9b or higher](https://pds-engineering.jpl.nasa.gov/content/pds4-software) in this file.
 
-```bash
-$ npm install
-```
-
-Additionally, you will need these software stacks:
-* [MongoDB Community Server](https://www.mongodb.com/download-center/community)
-* [PDS Harvest Server](https://github.com/sbn-psi/harvest-server)
-* [PDS Registry Build 9b or higher](https://pds-engineering.jpl.nasa.gov/content/pds4-software)
-
-## Local Deployment
-
-1. Start the node server
+This application is hosted as a docker container, and should be instantiated along with the database by using docker-compose:
 
 ```bash
-$ npm start
+$ docker-compose build
+$ docker-compose up -d
 ```
 
-Or, consider using [nodemon](https://www.npmjs.com/package/nodemon) to keep the node server running and updated:
+If you have the correct services.env file created, this will build and run your server at `http://localhost:8989/`. If the Archive Loader is running properly, you should see a web form with an input asking for a Bundle URL.
+
+## Troubleshooting
+
+If you're having trouble running the server, try running docker-compose without the -d flag. This will then log the output of the output to the terminal, and you can see what might be going wrong.
+
+If you need to connect to the database directly, you can do so by running:
 
 ```bash
-$ nodemon
+$ docker exec -it mongo bash
 ```
 
-2. Start the database server in a terminal window
+which will put you inside a [bash environment of the databse](https://docs.mongodb.com/manual/mongo/), and then run:
 
 ```bash
-$ mongod --dbpath=/data
+$ mongo
 ```
 
-3. Verify that the server is running
-
-Navigate to `http://localhost:8989/`. If the Archive Loader is running properly, you should see a web form with an input asking for a Bundle URL.
+From there you can [run commands on the database as documented here](https://docs.mongodb.com/manual/mongo/#working-with-the-mongo-shell). The application uses the database "app" and collection "datasets", primarily.
 
 ## Usage
 
