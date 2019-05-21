@@ -1,24 +1,26 @@
 const url = process.env.NODE_ENV === 'production' ? 'mongodb://mongo:27017' : 'mongodb://localhost:27017'
-const name = 'app'
+const APP_NAME = 'app'
 const assert = require('assert')
 
 const {MongoClient} = require('mongodb')
 
 const datasetsCollection = 'datasets'
+
+let db;
+
 module.exports = {
-    connect: async function(callback) {
-        // Use connect method to connect to the server
-        const client = await MongoClient.connect(url, { useNewUrlParser: true });
-        console.log("Connected successfully to database server");
-    
-        const db = client.db(name);
-    
-        await callback(db, function() {
-            client.close();
-            console.log("Closed database connection");
-        })
+    connect: async function() {
+        if(!db) {
+            const client = await MongoClient.connect(url, { 
+                useNewUrlParser: true,
+                poolSize: 10
+            });
+            console.log("Connected successfully to database server");
+
+            db = client.db(APP_NAME);
+        }
     },
-    insert: async function(documents, db) {
+    insert: async function(documents) {
         assert(documents.constructor === Array, "First argument must be an array of documents to insert")
         const collection = db.collection(datasetsCollection)
         const bulkOperation = collection.initializeUnorderedBulkOp()
@@ -31,7 +33,7 @@ module.exports = {
         assert(result.result.ok)
         return result
     },
-    find: async function(db, inputFilter) {
+    find: async function(inputFilter) {
         const collection = db.collection(datasetsCollection)
         let activeFilter = { _isActive: true }
         Object.assign(activeFilter, inputFilter)
@@ -47,7 +49,7 @@ module.exports = {
                 }, {});
         })
     },
-    deleteOne: async function(db, id) {
+    deleteOne: async function(id) {
         const collection = db.collection(datasetsCollection);
         // do a soft delete
         const result = await collection.updateOne({ '_id': id }, { $set: { _isActive: false }});

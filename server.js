@@ -18,7 +18,7 @@ console.log('running on port 8989...')
 
 const HARVESTWRAPPER = (process.env.HARVEST ? process.env.HARVEST : 'http://localhost:3009') + '/extract'
 
-app.post('/add', function(req, res) {
+app.post('/add', async function(req, res) {
     let bailed = false
     // ensure input
     try {
@@ -71,35 +71,29 @@ app.post('/add', function(req, res) {
     if(bailed) { return }
 
     // insert and return
-    db.connect(async function(dbConnection, complete) {
-        try {
-            const result = await db.insert(toInsert, dbConnection)
-            complete()
-            res.status(201).send( result.ops )
-        } catch(err) {
-            res.status(500).send('Unexpected database error while saving')
-            console.log(err);
-        }
-    })
+    await db.connect()
+    try {
+        const result = await db.insert(toInsert)
+        res.status(201).send( result.ops )
+    } catch(err) {
+        res.status(500).send('Unexpected database error while saving')
+        console.log(err);
+    }
 
 })
 
-app.get('/export', function(req, res) {
-    db.connect(async function(dbConnection, complete) {
-        const result = await db.find(dbConnection, {})
-        complete()
-        res.status(200).send( solrize(result, "dataset") )
-    })
+app.get('/export', async function(req, res) {
+    await db.connect()
+    const result = await db.find({})
+    res.status(200).send( solrize(result, "dataset") )
 })
 
-app.get('/status', function(req, res) {
-    db.connect(async function(dbConnection, complete) {
-        const result = await db.find(dbConnection, {})
-        complete()
-        res.status(200).send({
-            count: result.length,
-            lids: result.map(ds => ds.logical_identifier)
-        })
+app.get('/status', async function(req, res) {
+    await db.connect()
+    const result = await db.find({})
+    res.status(200).send({
+        count: result.length,
+        lids: result.map(ds => ds.logical_identifier)
     })
 })
 
@@ -152,7 +146,7 @@ app.get('/check/collection', async function(req, res) {
     res.status(200).send(response);
 })
 
-app.get('/edit', function(req, res) {
+app.get('/edit', async function(req, res) {
 
     try {
         assert(req.query.lidvid, 'Expected lidvid argument')
@@ -162,11 +156,9 @@ app.get('/edit', function(req, res) {
         return
     }
 
-    db.connect(async function(dbConnection, complete) {
-        const result = await db.find(dbConnection, { "logical_identifier": req.query.lidvid })
-        complete()
-        res.status(200).send( result )
-    })
+    await db.connect()
+    const result = await db.find({ "logical_identifier": req.query.lidvid })
+    res.status(200).send( result )
 })
 
 async function httpRequest(baseUrl, params) {
