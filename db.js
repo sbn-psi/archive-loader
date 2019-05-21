@@ -36,7 +36,16 @@ module.exports = {
         let activeFilter = { _isActive: true }
         Object.assign(activeFilter, inputFilter)
         const docs = await collection.find(activeFilter).toArray()
-        return docs
+
+        // hide internal properties
+        return docs.map(doc => {
+            return Object.keys(doc)
+                .filter(key => !key.startsWith('_'))
+                .reduce((obj, key) => {
+                    obj[key] = doc[key];
+                    return obj;
+                }, {});
+        })
     },
     deleteOne: async function(db, id) {
         const collection = db.collection(datasetsCollection);

@@ -152,6 +152,23 @@ app.get('/check/collection', async function(req, res) {
     res.status(200).send(response);
 })
 
+app.get('/edit', function(req, res) {
+
+    try {
+        assert(req.query.lidvid, 'Expected lidvid argument')
+        assert(req.query.lidvid.startsWith('urn:nasa:pds:'), 'Expected lidvid to start with urn:nasa:pds')
+    } catch (err) {
+        res.status(400).send(err.message)
+        return
+    }
+
+    db.connect(async function(dbConnection, complete) {
+        const result = await db.find(dbConnection, { "logical_identifier": req.query.lidvid })
+        complete()
+        res.status(200).send( result )
+    })
+})
+
 async function httpRequest(baseUrl, params) {
     const options = {
         uri: baseUrl,

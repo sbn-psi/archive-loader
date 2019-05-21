@@ -59,7 +59,7 @@
         <h2>There are {{status.count}} datasets saved:</h2>
         <loading ng-if="!status.count"></loading>
         <ul>
-            <li ng-repeat="lid in status.lids track by $index">{{lid}}</li>
+            <li ng-repeat="lid in status.lids track by $index">{{lid}} <a ng-click="edit(lid)">Edit</a></li>
         </ul>
         <button ng-click="state.name = states.load">Load datasets</button>
     </div>

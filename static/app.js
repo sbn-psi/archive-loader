@@ -17,6 +17,7 @@ app.controller('RootController', function($scope, constants, states) {
             switch($scope.state.name) {
                 case states.load: $scope.state.name = states.import; break;
                 case states.import: $scope.state.name = states.manage; break;
+                case states.manage: $scope.state.name = states.import; break;
             }
         },
         loading: false,
@@ -191,6 +192,36 @@ app.controller('ManageController', function($scope, $http, constants) {
     }, function(err) {
         $scope.state.error = err;
     })
+
+    $scope.edit = function(lidvid) {
+        $http.get('./edit', { params: { lidvid }}).then(function(res) {
+            $scope.state.datasets = prepDatasets(res.data);
+            $scope.state.progress();
+            $scope.state.loading = false;
+        }, function(err) {
+            $scope.state.error = err;
+        })
+    }
+
+    const prepDatasets = function(sets) {
+        let obj = {
+            bundle: null,
+            collections: []
+        }
+        if(sets && sets.constructor === Array) {
+            for(dataset of sets) {
+                dataset.lidvid = dataset.logical_identifier;
+                console.log(dataset)
+                if(dataset.logical_identifier && dataset.logical_identifier.split(':').length === 7) { // a lidvid with a collection will have 6 colons, thus 7 parts
+                    obj.collections.push(dataset)
+                } else {
+                    obj.bundle = dataset
+                }
+                console.log(obj)
+            }
+        }
+        return obj
+    }
 });
 
 app.directive('importForm', function () {
