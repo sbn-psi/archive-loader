@@ -30,11 +30,11 @@
             <h2>{{state.datasetType}} URL: </h2>
             <input class="form-control" type="url" ng-model="state.datasetUrl"><br/>
             <p>
-                <input type="submit" value="Fetch" ng-click="fetch()" ng-if="!state.loading">
+                <input class="btn btn-primary" type="submit" value="Fetch" ng-click="fetch()" ng-if="!state.loading">
                 <loading ng-if="state.loading"></loading>
             </p>
         </div>
-        <button ng-click="state.name = states.manage">View Status</button>
+        <button class="btn btn-secondary" ng-click="state.name = states.manage">Manage Datasets</button>
     </form>
     <div ng-if="state.name === states.import" ng-controller="ImportController">
         <div class="row">
@@ -45,13 +45,14 @@
                         <li class="page-item" ng-repeat="collection in model.collections" ng-class="{active: view.active.lidvid === collection.lidvid}"><a class="page-link" href="#" ng-click="view.active = collection; view.type = constants.collectionType">{{collection.lidvid}}</a></li>
                     </ul>
                 </nav>
+                <button class="btn btn-danger" ng-click="state.name = states.load">Cancel</button>
             </div>
             <div class="col tab-container">
                 <import-form dataset="view.active" type="view.type" autocomplete="autocomplete"></import-form>
             </div>
         </div>
         <div class="row d-flex justify-content-center">
-            <input type="submit" value="Submit" ng-click="submit()" ng-if="!state.loading">
+            <input class="btn btn-primary" type="submit" value="Submit" ng-click="submit()" ng-if="!state.loading">
             <loading ng-if="state.loading"></loading>
         </div>
     </div>
@@ -59,9 +60,9 @@
         <h2>There are {{status.count}} datasets saved:</h2>
         <loading ng-if="!status.count"></loading>
         <ul>
-            <li ng-repeat="lid in status.lids track by $index">{{lid}} <a ng-click="edit(lid)">Edit</a></li>
+            <li ng-repeat="lid in status.lids track by $index">{{lid}} <button class="btn btn-link" ng-click="edit(lid)">Edit</button></li>
         </ul>
-        <button ng-click="state.name = states.load">Load datasets</button>
+        <button class="btn btn-secondary" ng-click="state.name = states.load">Load datasets</button>
     </div>
     <div id="alert-frame">
         <div uib-alert ng-repeat="alert in state.alerts" ng-class="'alert-' + (alert.type || 'warning')" close="closeAlert($index)">{{alert.message}}</div>
