@@ -1,7 +1,7 @@
 version: "2"
 services:
   app:
-    container_name: app
+    container_name: archiveloader-app
     restart: always
     build: .
     ports:
@@ -13,10 +13,12 @@ services:
     env_file:
       - ./services.env
   mongo:
-    container_name: mongo
+    container_name: archiveloader-mongo
     image: mongo
     restart: always
     ports:
       - "27017:27017"
     volumes:
-      - './data:/db'
+      - 'archiveloader-data:/data/db'
+volumes: 
+  archiveloader-data:
