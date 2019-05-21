@@ -74,9 +74,14 @@ app.post('/add', function(req, res) {
 
     // insert and return
     db.connect(async function(dbConnection, complete) {
-        const result = await db.insert(toInsert, dbConnection)
-        complete()
-        res.status(201).send( result.ops )
+        try {
+            const result = await db.insert(toInsert, dbConnection)
+            complete()
+            res.status(201).send( result.ops )
+        } catch(err) {
+            res.status(500).send('Unexpected database error while saving')
+            console.log(err);
+        }
     })
 
 })
@@ -133,7 +138,7 @@ app.get('/check/collection', async function(req, res) {
     
     let bundleUrl = req.query.url;
     let discovered;
-    
+
     try {
         discovered = await httpRequest(HARVESTWRAPPER, { url: bundleUrl })
         assert(discovered.collections, 'Could not find any collections at that URL')

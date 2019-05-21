@@ -19,20 +19,16 @@ module.exports = {
         })
     },
     insert: async function(documents, db) {
+        assert(documents.constructor === Array, "First argument must be an array of documents to insert")
         const collection = db.collection(datasetsCollection)
-        if (documents.constructor === Array) {
-            for(doc of documents) {
-                doc._isActive = true;
-            }
-            var result = await collection.insertMany(documents)
-            assert.equal(documents.length, result.result.n)
-            assert.equal(documents.length, result.ops.length)
-        } else {
-            documents._isActive = true;
-            var result = await collection.insertOne(documents)
-            assert.equal(1, result.result.n)
-            assert.equal(1, result.ops.length)
+        const bulkOperation = collection.initializeUnorderedBulkOp()
+
+        for(doc of documents) {
+            doc._isActive = true;
+            bulkOperation.find({logical_identifier: doc.logical_identifier}).upsert().replaceOne(doc)
         }
+        var result = await bulkOperation.execute();
+        assert(result.result.ok)
         return result
     },
     find: async function(db, inputFilter) {
