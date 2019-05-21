@@ -23,7 +23,7 @@ app.post('/add', function(req, res) {
     // ensure input
     try {
         assert(req.body, "Failed to parse request")
-        assert(req.body.bundle, "Expected bundle to be specified")
+        assert(req.body.bundle !== undefined, "Expected bundle to be specified")
         assert(req.body.collections, "Expected collections to be specified")
 
     } catch (err) {
@@ -58,14 +58,12 @@ app.post('/add', function(req, res) {
         dataset._timestamp = new Date()
     }
 
-    validateDataset(req.body.bundle)
-    let toInsert = [req.body.bundle]
+    let toInsert = []
+    for(dataset of [req.body.bundle, ...req.body.collections]) {
+        if(!dataset || bailed) { continue }
 
-    for(collection of req.body.collections) {
-        if(bailed) { return }
-
-        validateDataset(collection)
-        toInsert.push(collection)
+        validateDataset(dataset)
+        toInsert.push(dataset)
     }
 
     // pull fields out of request for db insert

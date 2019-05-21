@@ -38,7 +38,7 @@
     </form>
     <div ng-if="state.name === states.import" ng-controller="ImportController">
         <div class="row">
-            <div class="col" ng-if="model.collections.length > 0">
+            <div class="col" ng-if="allDatasets().length > 0">
                 <nav aria-label="Dataset selection" id="dataset-nav" class="sticky-top">
                     <ul class="pagination flex-column">
                         <li class="page-item" ng-if="model.bundle" ng-class="{active: view.active === model.bundle}"><a class="page-link" href="#" ng-click="view.active = model.bundle; view.type = constants.bundleType">{{model.bundle.lidvid}}</a></li>

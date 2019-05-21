@@ -58,7 +58,8 @@ app.controller('LoaderController', function ($scope, $http, constants, states) {
 
 app.controller('ImportController', function($scope, $http, constants) {
     $scope.allDatasets = function() {
-        let themAll = [$scope.model.bundle];
+        let themAll = []
+        if(!!$scope.model.bundle) { themAll.push($scope.model.bundle) }
         return themAll.concat($scope.model.collections);
     }
 
@@ -137,7 +138,7 @@ app.controller('ImportController', function($scope, $http, constants) {
 
     const sanitize = function(dataset) {
         const isEmptyObject = obj =>  {
-            if (obj.constructor === Object) {
+            if (obj && obj.constructor === Object) {
                 for(var key in obj) {
                     if(obj.hasOwnProperty(key) && !key.startsWith('$$'))
                         return false;
@@ -146,10 +147,11 @@ app.controller('ImportController', function($scope, $http, constants) {
             }
             return false;
         }
+        if(!dataset) { return null }
 
         let sanitized = templateModel()
         for (const [key, value] of Object.entries(dataset)) {
-            if (dataset.hasOwnProperty(key) && !key.startsWith('$$')) {
+            if (dataset.hasOwnProperty(key) && !key.startsWith('$$') && !!value) {
                 if(value.constructor === Array) {
                     let trimmed = value.filter(item => !isEmptyObject(item)) 
                     sanitized[key] = trimmed;
