@@ -152,19 +152,25 @@ app.controller('ImportController', function($scope, $http, constants) {
 
         let sanitized = templateModel()
         for (const [key, value] of Object.entries(dataset)) {
+            // put each field into the new sanitized object, unless it's inherited or angular-specific
             if (dataset.hasOwnProperty(key) && !key.startsWith('$$') && !!value) {
                 if(value.constructor === Array) {
+                    // trim empty objects from the arrays
                     let trimmed = value.filter(item => !isEmptyObject(item)) 
                     sanitized[key] = trimmed;
                 } else {
+                    // turn empty objects into nulls
                     sanitized[key] = isEmptyObject(value) ? null : value;
                 }
             }
         }
+        
+        // put tag names into a direct array
         if(sanitized.tags) {
             sanitized.tags = sanitized.tags.map(tag => tag.name)
         }
 
+        // remove original extracted values
         delete sanitized.lidvid;
         delete sanitized.name;
         delete sanitized.abstract;
@@ -210,14 +216,18 @@ app.controller('ManageController', function($scope, $http, constants) {
         }
         if(sets && sets.constructor === Array) {
             for(dataset of sets) {
+                // set the variable normally set by label extractor
                 dataset.lidvid = dataset.logical_identifier;
-                console.log(dataset)
+
+                // put tags back in objects
+                dataset.tags = dataset.tags.map(tag => { return { name: tag} })
+
+                // sort into bundle and collections
                 if(dataset.logical_identifier && dataset.logical_identifier.split(':').length === 7) { // a lidvid with a collection will have 6 colons, thus 7 parts
                     obj.collections.push(dataset)
                 } else {
                     obj.bundle = dataset
                 }
-                console.log(obj)
             }
         }
         return obj
