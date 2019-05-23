@@ -99,13 +99,27 @@ app.controller('ImportController', function($scope, $http, constants) {
         let vals = [current];
         let fieldPool;
         if(!!parentObj) {
+            //if this is a child object set (like 'related datasets'), create an array of all objects that contain the field in question
             fieldPool = $scope.allDatasets().reduce((pool, ds) => { 
                 let item = ds[parentObj]; if(!item) { return pool };
                 return item.constructor === Array ? pool.concat(item) : [...pool, item]
             }, [])
+            
+            // for related data, also add in the names/lids of other datasets being worked on
+            if(parentObj === 'related_data') {
+                let otherDatasets = $scope.allDatasets().filter(ds => ds.logical_identifier !== $scope.view.active.logical_identifier)
+                if(model === 'name') { 
+                    vals = vals.concat(otherDatasets.map(ds => ds.name));
+                } else if (model === 'lid'){
+                    vals = vals.concat(otherDatasets.map(ds => ds.lidvid.split('::')[0]));
+                }
+            }
         } else {
+            // otherwise, just draw from all datasets, since the field will be directly on them
             fieldPool = $scope.allDatasets();
         }
+
+        // create a list of all values accross all datasets, filtering out empty or duplicated entries
         return vals.concat(fieldPool.map(ds => ds[model]).filter(field => !!field).reduce((pool, item) => pool.includes(item) ? pool : [...pool, item], []))
     }
 
