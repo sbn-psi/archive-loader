@@ -78,7 +78,7 @@
             <h2>Download Packages</h2>
             <div class="form-group" ng-repeat="package in groupRepeater(dataset.download_packages)">
                 <label>Display Name: </label><input class="form-control" type="text" ng-model="package.name" uib-typeahead="val for val in autocomplete('name', $viewValue, 'download_packages')">
-                <label>Download URL: </label><input class="form-control" type="url" ng-model="package.browse_url" uib-typeahead="val for val in autocomplete('browse_url', $viewValue, 'download_packages')">
+                <label>Download URL: </label><input class="form-control" type="url" ng-model="package.download_url" uib-typeahead="val for val in autocomplete('browse_url', $viewValue, 'download_packages')">
                 <label>Download Size: </label><input class="form-control" type="text" ng-model="package.download_size" uib-typeahead="val for val in autocomplete('download_size', $viewValue, 'download_packages')">
             </div>
         </section>
