@@ -11,6 +11,7 @@
     <script src="https://code.jquery.com/jquery-3.4.0.min.js" integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.7.6/angular-animate.min.js"></script>
+    <script src="https://unpkg.com/@uirouter/angularjs/release/angular-ui-router.min.js"></script>
     <script src="./lib/ui-bootstrap-tpls-3.0.6.min.js" type="text/javascript"></script>
     <script src="./helpers.js" type="text/javascript"></script>
     <script src="./app.js" type="text/javascript"></script>
@@ -19,53 +20,9 @@
 
 <body class="container" ng-controller="RootController">
     <h1>Archive Loader</h1>
-    <form class="form-group" ng-if="state.name === states.load" ng-controller="LoaderController">
-        <div>
-            <input type="radio" id="bundle-radio" ng-model="state.datasetType" name="dataset-type" value="Bundle">
-            <label for="bundle-radio">Bundle</label>
-        </div>
-        <div>
-            <input type="radio" id="collection-radio" ng-model="state.datasetType" name="dataset-type" value="Collection">
-            <label for="collection-radio">Collection</label>
-        </div>
-        <div id="primary-input" class="form-group">
-            <h2>{{state.datasetType}} URL: </h2>
-            <input class="form-control" type="url" ng-model="state.datasetUrl"><br/>
-            <p>
-                <input class="btn btn-primary" type="submit" value="Fetch" ng-click="fetch()" ng-if="!state.loading">
-                <loading ng-if="state.loading"></loading>
-            </p>
-        </div>
-        <button class="btn btn-secondary" ng-click="state.name = states.manage">Manage Datasets</button>
-    </form>
-    <div ng-if="state.name === states.import" ng-controller="ImportController">
-        <div class="row">
-            <div class="col" ng-if="allDatasets().length > 0">
-                <nav aria-label="Dataset selection" id="dataset-nav" class="sticky-top">
-                    <ul class="pagination flex-column">
-                        <li class="page-item" ng-if="model.bundle" ng-class="{active: view.active === model.bundle}"><a class="page-link" href="#" ng-click="view.active = model.bundle; view.type = constants.bundleType">{{model.bundle.lidvid}}</a></li>
-                        <li class="page-item" ng-repeat="collection in model.collections" ng-class="{active: view.active.lidvid === collection.lidvid}"><a class="page-link" href="#" ng-click="view.active = collection; view.type = constants.collectionType">{{collection.lidvid}}</a></li>
-                    </ul>
-                </nav>
-                <button class="btn btn-danger" ng-click="state.name = states.load">Cancel</button>
-            </div>
-            <div class="col tab-container">
-                <import-form dataset="view.active" type="view.type" autocomplete="autocomplete"></import-form>
-            </div>
-        </div>
-        <div class="row d-flex justify-content-center">
-            <input class="btn btn-primary" type="submit" value="Submit" ng-click="submit()" ng-if="!state.loading">
-            <loading ng-if="state.loading"></loading>
-        </div>
-    </div>
-    <div ng-if="state.name === states.manage" ng-controller="ManageController">
-        <h2>There are {{status.count}} datasets saved:</h2>
-        <loading ng-if="!status.count"></loading>
-        <ul>
-            <li ng-repeat="lid in status.lids track by $index">{{lid}} <button class="btn btn-link" ng-click="edit(lid)">Edit</button></li>
-        </ul>
-        <button class="btn btn-secondary" ng-click="state.name = states.load">Load datasets</button>
-    </div>
+    
+    <ui-view></ui-view>
+    
     <div id="alert-frame">
         <div uib-alert ng-repeat="alert in state.alerts" ng-class="'alert-' + (alert.type || 'warning')" close="closeAlert($index)">{{alert.message}}</div>
         <div uib-alert ng-if="state.error" class="alert-danger" close="state.error = null">{{state.error}}</div>

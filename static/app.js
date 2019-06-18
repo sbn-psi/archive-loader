@@ -1,23 +1,36 @@
-var app = angular.module('app', ['ui.bootstrap']);
+var app = angular.module('app', ['ui.bootstrap', 'ui.router']);
 
-app.constant('states', {
-    load: 'Loader',
-    import: 'Import',
-    manage: 'Manage'
-}).constant('constants', {
+app.constant('constants', {
     bundleType: 'Bundle',
     collectionType: 'Collection'
 });
 
-app.controller('RootController', function($scope, constants, states) {
+app.config(function($stateProvider) {
+    $stateProvider.state({
+      name: 'import',
+      url: '/Import',
+      templateUrl: 'states/import-state.html'
+    })
+    $stateProvider.state({
+        name: 'load',
+        url: '/Load',
+        templateUrl: 'states/load-state.html'
+    })
+    $stateProvider.state({
+        name: 'manage',
+        url: '/Manage',
+        templateUrl: 'states/manage-state.html'
+    })
+});
+
+app.controller('RootController', function($scope, constants, $state) {
     $scope.state = {
-        name: states.load,
         datasetType: constants.bundleType,
         progress: function() {
-            switch($scope.state.name) {
-                case states.load: $scope.state.name = states.import; break;
-                case states.import: $scope.state.name = states.manage; break;
-                case states.manage: $scope.state.name = states.import; break;
+            switch($state.current.name) {
+                case 'load': $state.go('import'); break;
+                case 'import': $state.go('manage'); break;
+                case 'manage': $state.go('import'); break;
             }
         },
         loading: false,
@@ -26,16 +39,13 @@ app.controller('RootController', function($scope, constants, states) {
     };
 
     $scope.constants = constants;
-    $scope.states = states;
+    $state.go('load');
 });
 
-app.controller('LoaderController', function ($scope, $http, constants, states) {
+app.controller('LoaderController', function ($scope, $http, constants) {
     const collectionCheckUrl = './check/collection';
     const bundleCheckUrl = './check/bundle';
 
-    $scope.viewStatus = function() {
-        $scope.state.name = states.manage;
-    }
     $scope.fetch = function () {
         $scope.state.error = null;
         if($scope.state.datasetUrl) {
@@ -206,7 +216,7 @@ app.controller('ImportController', function($scope, $http, constants) {
     }
 });
 
-app.controller('ManageController', function($scope, $http, constants) {
+app.controller('ManageController', function($scope, $http) {
     $http.get('./status').then(function(res) {
         $scope.status = res.data;
     }, function(err) {
@@ -250,7 +260,7 @@ app.controller('ManageController', function($scope, $http, constants) {
 
 app.directive('importForm', function () {
     return {
-        templateUrl: './import.html',
+        templateUrl: './import-form.html',
         scope: {
             dataset: '=',
             type: '<',

@@ -1,0 +1,8 @@
+<div ng-controller="ManageController">
+    <h2>There are {{status.count}} datasets saved:</h2>
+    <loading ng-if="!status.count"></loading>
+    <ul>
+        <li ng-repeat="lid in status.lids track by $index">{{lid}} <button class="btn btn-link" ng-click="edit(lid)">Edit</button></li>
+    </ul>
+    <button class="btn btn-secondary" ui-sref="load">Load datasets</button>
+</div>

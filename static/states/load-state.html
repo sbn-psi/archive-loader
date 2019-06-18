@@ -1,0 +1,19 @@
+<form class="form-group" ng-controller="LoaderController">
+    <div>
+        <input type="radio" id="bundle-radio" ng-model="state.datasetType" name="dataset-type" value="Bundle">
+        <label for="bundle-radio">Bundle</label>
+    </div>
+    <div>
+        <input type="radio" id="collection-radio" ng-model="state.datasetType" name="dataset-type" value="Collection">
+        <label for="collection-radio">Collection</label>
+    </div>
+    <div id="primary-input" class="form-group">
+        <h2>{{state.datasetType}} URL: </h2>
+        <input class="form-control" type="url" ng-model="state.datasetUrl"><br/>
+        <p>
+            <input class="btn btn-primary" type="submit" value="Fetch" ng-click="fetch()" ng-if="!state.loading">
+            <loading ng-if="state.loading"></loading>
+        </p>
+    </div>
+    <button class="btn btn-secondary" ui-sref="manage">Manage Datasets</button>
+</form>
