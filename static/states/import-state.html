@@ -7,7 +7,7 @@
                     <li class="page-item" ng-repeat="collection in model.collections" ng-class="{active: view.active.lidvid === collection.lidvid}"><a class="page-link" href="#" ng-click="view.active = collection; view.type = constants.collectionType">{{collection.lidvid}}</a></li>
                 </ul>
             </nav>
-            <button class="btn btn-danger" ui-sref="load">Cancel</button>
+            <button class="btn btn-danger" ui-sref="datasets">Cancel</button>
         </div>
         <div class="col tab-container">
             <import-form dataset="view.active" type="view.type" autocomplete="autocomplete"></import-form>

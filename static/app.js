@@ -7,19 +7,33 @@ app.constant('constants', {
 
 app.config(function($stateProvider) {
     $stateProvider.state({
-      name: 'import',
-      url: '/Import',
-      templateUrl: 'states/import-state.html'
+        name: 'datasets',
+        url: '/Datasets',
+        redirectTo: 'datasets.load'
     })
     $stateProvider.state({
-        name: 'load',
+        name: 'datasets.import',
+        url: '/Import',
+        templateUrl: 'states/import-state.html',
+        data: {
+            title: 'Load Datasets'
+        }
+    })
+    $stateProvider.state({
+        name: 'datasets.load',
         url: '/Load',
-        templateUrl: 'states/load-state.html'
+        templateUrl: 'states/load-state.html',
+        data: {
+            title: 'Load Datasets'
+        }
     })
     $stateProvider.state({
-        name: 'manage',
+        name: 'datasets.manage',
         url: '/Manage',
-        templateUrl: 'states/manage-state.html'
+        templateUrl: 'states/manage-state.html',
+        data: {
+            title: 'Manage Datasets'
+        }
     })
 });
 
@@ -28,9 +42,9 @@ app.controller('RootController', function($scope, constants, $state) {
         datasetType: constants.bundleType,
         progress: function() {
             switch($state.current.name) {
-                case 'load': $state.go('import'); break;
-                case 'import': $state.go('manage'); break;
-                case 'manage': $state.go('import'); break;
+                case 'datasets.load': $state.go('datasets.import'); break;
+                case 'datasets.import': $state.go('datasets.manage'); break;
+                case 'datasets.manage': $state.go('datasets.import'); break;
             }
         },
         loading: false,
@@ -39,7 +53,7 @@ app.controller('RootController', function($scope, constants, $state) {
     };
 
     $scope.constants = constants;
-    $state.go('load');
+    $state.go('datasets.load');
 });
 
 app.controller('LoaderController', function ($scope, $http, constants) {
