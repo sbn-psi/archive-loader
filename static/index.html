@@ -21,9 +21,9 @@
 </head>
 
 <body class="container" ng-controller="RootController">
-    <h1>Archive Loader</h1>
 
     <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="/">Archive Loader</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
@@ -66,6 +66,7 @@
         </div>
     </nav>
 
+    <h1 ng-controller="titleController">{{title}}</h1>
     <ui-view></ui-view>
 
     <div id="alert-frame">
