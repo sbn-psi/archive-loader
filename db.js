@@ -9,6 +9,7 @@ const datasetsCollection = 'datasets'
 let db;
 
 module.exports = {
+    datasets: datasetsCollection,
     connect: async function() {
         if(!db) {
             const client = await MongoClient.connect(url, { 
@@ -20,9 +21,9 @@ module.exports = {
             db = client.db(APP_NAME);
         }
     },
-    insert: async function(documents) {
+    insert: async function(documents, type) {
         assert(documents.constructor === Array, "First argument must be an array of documents to insert")
-        const collection = db.collection(datasetsCollection)
+        const collection = db.collection(type)
         const bulkOperation = collection.initializeUnorderedBulkOp()
 
         for(doc of documents) {
@@ -33,8 +34,8 @@ module.exports = {
         assert(result.result.ok)
         return result
     },
-    find: async function(inputFilter) {
-        const collection = db.collection(datasetsCollection)
+    find: async function(inputFilter, type) {
+        const collection = db.collection(type)
         let activeFilter = { _isActive: true }
         Object.assign(activeFilter, inputFilter)
         const docs = await collection.find(activeFilter).toArray()
@@ -49,8 +50,8 @@ module.exports = {
                 }, {});
         })
     },
-    deleteOne: async function(id) {
-        const collection = db.collection(datasetsCollection);
+    deleteOne: async function(id, type) {
+        const collection = db.collection(type);
         // do a soft delete
         const result = await collection.updateOne({ '_id': id }, { $set: { _isActive: false }});
         return result;

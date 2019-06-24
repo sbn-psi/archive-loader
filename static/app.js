@@ -14,7 +14,7 @@ app.config(function($stateProvider) {
     $stateProvider.state({
         name: 'datasets.import',
         url: '/Import',
-        templateUrl: 'states/import-state.html',
+        templateUrl: 'states/datasets/import.html',
         data: {
             title: 'Load Datasets'
         }
@@ -22,7 +22,7 @@ app.config(function($stateProvider) {
     $stateProvider.state({
         name: 'datasets.load',
         url: '/Load',
-        templateUrl: 'states/load-state.html',
+        templateUrl: 'states/datasets/load.html',
         data: {
             title: 'Load Datasets'
         }
@@ -30,7 +30,7 @@ app.config(function($stateProvider) {
     $stateProvider.state({
         name: 'datasets.manage',
         url: '/Manage',
-        templateUrl: 'states/manage-state.html',
+        templateUrl: 'states/datasets/manage.html',
         data: {
             title: 'Manage Datasets'
         }
@@ -72,9 +72,9 @@ app.controller('RootController', function($scope, constants, $state) {
     $state.go('datasets.load');
 });
 
-app.controller('LoaderController', function ($scope, $http, constants) {
-    const collectionCheckUrl = './check/collection';
-    const bundleCheckUrl = './check/bundle';
+app.controller('DatasetLoaderController', function ($scope, $http, constants) {
+    const collectionCheckUrl = './datasets/check/collection';
+    const bundleCheckUrl = './datasets/check/bundle';
 
     $scope.fetch = function () {
         $scope.state.error = null;
@@ -97,7 +97,7 @@ app.controller('LoaderController', function ($scope, $http, constants) {
     };
 });
 
-app.controller('ImportController', function($scope, $http, constants) {
+app.controller('DatasetImportController', function($scope, $http, constants) {
     $scope.allDatasets = function() {
         let themAll = []
         if(!!$scope.model.bundle) { themAll.push($scope.model.bundle) }
@@ -171,7 +171,7 @@ app.controller('ImportController', function($scope, $http, constants) {
                 bundle: sanitize($scope.model.bundle),
                 collections: $scope.model.collections.map(c => sanitize(c))
             }
-            $http.post('./add', postable).then(function(res) {
+            $http.post('./datasets/add', postable).then(function(res) {
                 $scope.state.progress();
                 $scope.state.loading = false;
             }, function(err) {
@@ -246,15 +246,15 @@ app.controller('ImportController', function($scope, $http, constants) {
     }
 });
 
-app.controller('ManageController', function($scope, $http) {
-    $http.get('./status').then(function(res) {
+app.controller('DatasetManageController', function($scope, $http) {
+    $http.get('./datasets/status').then(function(res) {
         $scope.status = res.data;
     }, function(err) {
         $scope.state.error = err;
     })
 
     $scope.edit = function(lidvid) {
-        $http.get('./edit', { params: { lidvid }}).then(function(res) {
+        $http.get('./datasets/edit', { params: { lidvid }}).then(function(res) {
             $scope.state.datasets = prepDatasets(res.data);
             $scope.state.progress();
             $scope.state.loading = false;
@@ -288,33 +288,35 @@ app.controller('ManageController', function($scope, $http) {
     }
 });
 
-app.directive('importForm', function () {
+app.controller('FormController', function($scope) {
+    $scope.groupRepeater = function(array) {
+        if(array.length === 0 || !isEmptyObject(array.last())) {
+            array.push({})
+        }
+        return array;
+    }
+
+    const isEmptyObject = obj =>  {
+        if (obj.constructor === Object) {
+            for(var key in obj) {
+                if(obj.hasOwnProperty(key) && !key.startsWith('$$'))
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
+})
+
+app.directive('datasetImportForm', function () {
     return {
-        templateUrl: './import-form.html',
+        templateUrl: 'directives/dataset-import-form.html',
         scope: {
             dataset: '=',
             type: '<',
             autocomplete: '='
         },
-        link: function($scope) {
-            $scope.groupRepeater = function(array) {
-                if(array.length === 0 || !isEmptyObject(array.last())) {
-                    array.push({})
-                }
-                return array;
-            }
-
-            const isEmptyObject = obj =>  {
-                if (obj.constructor === Object) {
-                    for(var key in obj) {
-                        if(obj.hasOwnProperty(key) && !key.startsWith('$$'))
-                            return false;
-                    }
-                    return true;
-                }
-                return false;
-            }
-        }
+        controller: 'FormController'
     };
 });
 

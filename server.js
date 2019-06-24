@@ -18,7 +18,7 @@ console.log('running on port 8989...')
 
 const HARVESTWRAPPER = (process.env.HARVEST ? process.env.HARVEST : 'http://localhost:3009') + '/extract'
 
-app.post('/add', async function(req, res) {
+app.post('/datasets/add', async function(req, res) {
     let bailed = false
     // ensure input
     try {
@@ -73,7 +73,7 @@ app.post('/add', async function(req, res) {
     // insert and return
     await db.connect()
     try {
-        const result = await db.insert(toInsert)
+        const result = await db.insert(toInsert, db.datasets)
         res.status(201).send( result.ops )
     } catch(err) {
         res.status(500).send('Unexpected database error while saving')
@@ -84,13 +84,13 @@ app.post('/add', async function(req, res) {
 
 app.get('/export', async function(req, res) {
     await db.connect()
-    const result = await db.find({})
+    const result = await db.find({}, db.datasets)
     res.status(200).send( solrize(result, "dataset") )
 })
 
-app.get('/status', async function(req, res) {
+app.get('/datasets/status', async function(req, res) {
     await db.connect()
-    const result = await db.find({})
+    const result = await db.find({}, db.datasets)
     res.status(200).send({
         count: result.length,
         lids: result.map(ds => ds.logical_identifier)
@@ -103,7 +103,7 @@ const fieldMapper = dataset => { return {
     abstract: dataset.description,
     browseUrl: ''
 }}
-app.get('/check/bundle', async function(req, res) {
+app.get('/datasets/check/bundle', async function(req, res) {
     let bundleUrl = req.query.url;
     let discovered;
     
@@ -126,7 +126,7 @@ app.get('/check/bundle', async function(req, res) {
 })
 
 
-app.get('/check/collection', async function(req, res) {
+app.get('/datasets/check/collection', async function(req, res) {
     
     let bundleUrl = req.query.url;
     let discovered;
@@ -146,7 +146,7 @@ app.get('/check/collection', async function(req, res) {
     res.status(200).send(response);
 })
 
-app.get('/edit', async function(req, res) {
+app.get('/datasets/edit', async function(req, res) {
 
     try {
         assert(req.query.lidvid, 'Expected lidvid argument')
@@ -157,7 +157,7 @@ app.get('/edit', async function(req, res) {
     }
 
     await db.connect()
-    const result = await db.find({ "logical_identifier": req.query.lidvid })
+    const result = await db.find({ "logical_identifier": req.query.lidvid }, db.datasets)
     res.status(200).send( result )
 })
 

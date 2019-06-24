@@ -1,4 +1,4 @@
-<div ng-controller="ImportController">
+<div ng-controller="DatasetImportController">
     <div class="row">
         <div class="col" ng-if="allDatasets().length > 0">
             <nav aria-label="Dataset selection" id="dataset-nav" class="sticky-top">
@@ -10,7 +10,7 @@
             <button class="btn btn-danger" ui-sref="datasets">Cancel</button>
         </div>
         <div class="col tab-container">
-            <import-form dataset="view.active" type="view.type" autocomplete="autocomplete"></import-form>
+            <dataset-import-form dataset="view.active" type="view.type" autocomplete="autocomplete"></import-form>
         </div>
     </div>
     <div class="row d-flex justify-content-center">
