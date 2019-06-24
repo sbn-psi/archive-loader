@@ -37,15 +37,20 @@ app.config(function($stateProvider) {
     })
 });
 
-app.controller('titleController', function($scope, $transitions) {
-    $transitions.onStart({}, function(trans) {
-        let entering = trans.entering();
-        if(!!entering[entering.length-1].data) {
-            $scope.title = entering[entering.length-1].data.title;
-        } else {
-            $scope.title = 'Archive Loader';
+app.directive('titleContainer', function() {
+    return {
+        template: '{{title}}',
+        controller: function($scope, $transitions) {
+            $transitions.onStart({}, function(trans) {
+                let entering = trans.entering();
+                if(!!entering[entering.length-1].data) {
+                    $scope.title = entering[entering.length-1].data.title;
+                } else {
+                    $scope.title = 'Archive Loader';
+                }
+            })
         }
-    })
+    }   
 })
 
 app.controller('RootController', function($scope, constants, $state) {
