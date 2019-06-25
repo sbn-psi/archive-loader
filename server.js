@@ -82,6 +82,65 @@ app.post('/datasets/add', async function(req, res) {
 
 })
 
+app.post('/targets/add', async function(req, res) {
+    let bailed = false
+    // ensure input
+    try {
+        assert(req.body, "Failed to parse request")
+
+    } catch (err) {
+        res.status(400).send(err.message)
+        bailed = true
+        return
+    }
+
+    let target = req.body
+
+    const validateTarget = function(target) {
+        const require = function(fieldname) {
+            if(fieldname.constructor === Array) {
+                for(field of fieldname) {
+                    require(field)
+                }
+            }
+            assert(target[fieldname], `Expected ${fieldname} to be present`)
+        }
+        try {
+            require(
+                'logical_identifier',
+                'display_name',
+                'display_description',
+                'image_url',
+                'category',
+                )
+    
+        } catch (err) {
+            res.status(400).send(err.message)
+            bailed = true
+            return
+        }
+
+        target._timestamp = new Date()
+    }
+
+    if(!bailed) {validateTarget(target)}
+
+    // pull fields out of request for db insert
+
+    if(bailed) { return }
+
+    // insert and return
+    await db.connect()
+    try {
+        const result = await db.insert([target], db.targets)
+        res.status(201).send( result.ops )
+    } catch(err) {
+        res.status(500).send('Unexpected database error while saving')
+        console.log(err);
+    }
+
+})
+
 app.get('/export', async function(req, res) {
     await db.connect()
     const result = await db.find({}, db.datasets)
@@ -91,6 +150,15 @@ app.get('/export', async function(req, res) {
 app.get('/datasets/status', async function(req, res) {
     await db.connect()
     const result = await db.find({}, db.datasets)
+    res.status(200).send({
+        count: result.length,
+        lids: result.map(ds => ds.logical_identifier)
+    })
+})
+
+app.get('/targets/status', async function(req, res) {
+    await db.connect()
+    const result = await db.find({}, db.targets)
     res.status(200).send({
         count: result.length,
         lids: result.map(ds => ds.logical_identifier)
@@ -147,19 +215,26 @@ app.get('/datasets/check/collection', async function(req, res) {
 })
 
 app.get('/datasets/edit', async function(req, res) {
+    await editLookupRequest(req, res, db.datasets)    
+})
 
+app.get('/targets/edit', async function(req, res) {
+    await editLookupRequest(req, res, db.targets)    
+})
+
+async function editLookupRequest(req, res, type) {
     try {
-        assert(req.query.lidvid, 'Expected lidvid argument')
-        assert(req.query.lidvid.startsWith('urn:nasa:pds:'), 'Expected lidvid to start with urn:nasa:pds')
+        assert(req.query.logical_identifier, 'Expected logical_identifier argument')
+        assert(req.query.logical_identifier.startsWith('urn:nasa:pds:'), 'Expected logical_identifier to start with urn:nasa:pds')
     } catch (err) {
         res.status(400).send(err.message)
         return
     }
 
     await db.connect()
-    const result = await db.find({ "logical_identifier": req.query.lidvid }, db.datasets)
+    const result = await db.find({ "logical_identifier": req.query.logical_identifier }, type)
     res.status(200).send( result )
-})
+}
 
 async function httpRequest(baseUrl, params) {
     const options = {

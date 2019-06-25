@@ -5,11 +5,15 @@ const assert = require('assert')
 const {MongoClient} = require('mongodb')
 
 const datasetsCollection = 'datasets'
+const targetsCollection = 'targets'
+const missionsCollection = 'missions'
 
 let db;
 
 module.exports = {
     datasets: datasetsCollection,
+    targets: targetsCollection,
+    missions: missionsCollection,
     connect: async function() {
         if(!db) {
             const client = await MongoClient.connect(url, { 

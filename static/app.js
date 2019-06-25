@@ -13,11 +13,22 @@ app.config(function($stateProvider) {
     })
     $stateProvider.state({
         name: 'datasets.import',
-        url: '/Import',
+        url: '/Import?edit',
         templateUrl: 'states/datasets/import.html',
+        params: { edit: null },
         data: {
             title: 'Load Datasets'
-        }
+        },
+        resolve: {
+            existingDataset: function($http, $stateParams) {
+                if(!!$stateParams.edit) {
+                    return $http.get('./datasets/edit', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data[0] })
+                } else {
+                    return null
+                }
+            }
+        },
+        controller: 'DatasetImportController'
     })
     $stateProvider.state({
         name: 'datasets.load',
@@ -33,6 +44,39 @@ app.config(function($stateProvider) {
         templateUrl: 'states/datasets/manage.html',
         data: {
             title: 'Manage Datasets'
+        }
+    })
+
+    $stateProvider.state({
+        name: 'targets',
+        url: '/Targets',
+        redirectTo: 'targets.manage'
+    })
+    $stateProvider.state({
+        name: 'targets.import',
+        url: '/Import?edit',
+        templateUrl: 'states/targets/import.html',
+        params: { edit: null },
+        data: {
+            title: 'Add Target'
+        },
+        resolve: {
+            existingTarget: function($http, $stateParams) {
+                if(!!$stateParams.edit) {
+                    return $http.get('./targets/edit', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data[0] })
+                } else {
+                    return null
+                }
+            }
+        },
+        controller: 'TargetImportController'
+    })
+    $stateProvider.state({
+        name: 'targets.manage',
+        url: '/Manage',
+        templateUrl: 'states/targets/manage.html',
+        data: {
+            title: 'Manage Targets'
         }
     })
 });
@@ -61,6 +105,8 @@ app.controller('RootController', function($scope, constants, $state) {
                 case 'datasets.load': $state.go('datasets.import'); break;
                 case 'datasets.import': $state.go('datasets.manage'); break;
                 case 'datasets.manage': $state.go('datasets.import'); break;
+                case 'targets.import': $state.go('targets.manage'); break;
+                case 'targets.manage': $state.go('targets.import'); break;
             }
         },
         loading: false,
@@ -97,38 +143,62 @@ app.controller('DatasetLoaderController', function ($scope, $http, constants) {
     };
 });
 
-app.controller('DatasetImportController', function($scope, $http, constants) {
+app.controller('DatasetImportController', function($scope, $http, constants, existingDataset, sanitizer) {
     $scope.allDatasets = function() {
         let themAll = []
         if(!!$scope.model.bundle) { themAll.push($scope.model.bundle) }
         return themAll.concat($scope.model.collections);
     }
 
-    const datasetHasBeenPrepped = function(dataset) {
-        return !!(dataset && dataset.logical_identifier)
+    const templateModel = function() {
+        return {
+            tags: [],
+            publication: {},
+            example: {},
+            related_tools: [],
+            related_data: [],
+            superseded_data: [],
+            download_packages: [],
+        }
     }
 
-    $scope.$watch('view.active', function(newVal) {
-        if(!datasetHasBeenPrepped(newVal)) {
-            prepDataset(newVal)
-        }
-    })
+    const prepDatasetFromEdit = function(dataset) {
+        let obj = { bundle: null, collections: [] }
 
-    const prepDataset = function(dataset) {
-        if(dataset && dataset.constructor === Object) {
+        // put tags back in objects
+        dataset.tags = dataset.tags.map(tag => { return { name: tag} })
+
+        // sort into bundle and collections
+        if(dataset.logical_identifier && dataset.logical_identifier.split(':').length === 7) { // a lidvid with a collection will have 6 colons, thus 7 parts
+            obj.collections.push(dataset)
+        } else {
+            obj.bundle = dataset
+        }
+        return obj;
+    }
+
+    const prepDatasetsFromHarvest = function(datasets) {
+        const prep = dataset => {
+            if(!dataset) { return null }
             const template = templateModel();
             Object.assign(dataset, template);
             dataset.logical_identifier = dataset.lidvid;
             dataset.display_name = dataset.name;
             dataset.display_description = dataset.abstract;
             dataset.browse_url = dataset.browseUrl;
+            delete dataset.lidvid;
+            delete dataset.name;
+            delete dataset.abstract;
+            delete dataset.browseUrl;
+            return dataset
+        }
+        return {
+            bundle: prep(datasets.bundle),
+            collections: datasets.collections ? datasets.collections.map(prep) : []
         }
     }
 
-    $scope.model = {
-        bundle: $scope.state.datasets.bundle,
-        collections: $scope.state.datasets.collections
-    }
+    $scope.model = existingDataset ? prepDatasetFromEdit(existingDataset) : prepDatasetsFromHarvest($scope.state.datasets)
 
     $scope.view = {
         active: $scope.model.bundle ? $scope.model.bundle : $scope.model.collections[0],
@@ -164,14 +234,68 @@ app.controller('DatasetImportController', function($scope, $http, constants) {
     }
 
     $scope.submit = function() {
+        $scope.state.error = null;
+        $scope.state.loading = true;            
+        let postable = {
+            bundle: sanitize($scope.model.bundle),
+            collections: $scope.model.collections.map(c => sanitize(c))
+        }
+        $http.post('./datasets/add', postable).then(function(res) {
+            $scope.state.progress();
+            $scope.state.loading = false;
+        }, function(err) {
+            $scope.state.error = 'There was a problem';
+            $scope.state.loading = false;
+            console.log(err);
+        })
+    }
+
+    const sanitize = function(dataset) {
+        let sanitized = sanitizer(dataset, templateModel)
+        
+        // put tag names into a direct array
+        if(sanitized.tags) {
+            sanitized.tags = sanitized.tags.map(tag => tag.name)
+        }
+
+        return sanitized
+    }
+});
+
+app.controller('DatasetManageController', function($scope, $http, $state) {
+    $http.get('./datasets/status').then(function(res) {
+        $scope.status = res.data;
+    }, function(err) {
+        $scope.state.error = err;
+    })
+
+    $scope.edit = function(lidvid) {
+        $state.go('datasets.import', {edit: lidvid})
+    }
+});
+
+
+app.controller('TargetImportController', function($scope, $http, existingTarget, sanitizer) {
+    
+    const templateModel = function() {
+        console.log(existingTarget)
+        return {
+            tags: [],
+            related_targets: [],
+            missions: [],
+        }
+    }
+    $scope.model = {
+        target: existingTarget ? existingTarget : templateModel()
+    }
+
+    $scope.submit = function() {
         if(validate()) {
             $scope.state.error = null;
             $scope.state.loading = true;            
-            let postable = {
-                bundle: sanitize($scope.model.bundle),
-                collections: $scope.model.collections.map(c => sanitize(c))
-            }
-            $http.post('./datasets/add', postable).then(function(res) {
+            let postable = sanitize($scope.model.target)
+
+            $http.post('./targets/add', postable).then(function(res) {
                 $scope.state.progress();
                 $scope.state.loading = false;
             }, function(err) {
@@ -180,113 +304,73 @@ app.controller('DatasetImportController', function($scope, $http, constants) {
                 console.log(err);
             })
         } else {
-            $scope.state.error = 'Some datasets are invalid';
+            $scope.state.error = 'Target was invalid';
         }
     }
 
     const validate = function() {
-        const isValid = function(dataset) {
-            return datasetHasBeenPrepped(dataset);
-        }
-        return $scope.allDatasets().every(isValid);
+        const isPopulated = (val) => val && val.length > 0
+        return  isPopulated($scope.model.target.logical_identifier) &&
+                isPopulated($scope.model.target.display_name) &&
+                isPopulated($scope.model.target.display_description) &&
+                isPopulated($scope.model.target.image_url) &&
+                isPopulated($scope.model.target.category)
     }
 
-    const sanitize = function(dataset) {
-        const isEmptyObject = obj =>  {
-            if (obj && obj.constructor === Object) {
-                for(var key in obj) {
-                    if(obj.hasOwnProperty(key) && !key.startsWith('$$'))
-                        return false;
-                }
-                return true;
-            }
-            return false;
-        }
-        if(!dataset) { return null }
-
-        let sanitized = templateModel()
-        for (const [key, value] of Object.entries(dataset)) {
-            // put each field into the new sanitized object, unless it's inherited or angular-specific
-            if (dataset.hasOwnProperty(key) && !key.startsWith('$$') && !!value) {
-                if(value.constructor === Array) {
-                    // trim empty objects from the arrays
-                    let trimmed = value.filter(item => !isEmptyObject(item)) 
-                    sanitized[key] = trimmed;
-                } else {
-                    // turn empty objects into nulls
-                    sanitized[key] = isEmptyObject(value) ? null : value;
-                }
-            }
-        }
+    const sanitize = function(targetForm) {
+        let sanitized = sanitizer(targetForm, templateModel)
         
         // put tag names into a direct array
         if(sanitized.tags) {
             sanitized.tags = sanitized.tags.map(tag => tag.name)
         }
 
-        // remove original extracted values
-        delete sanitized.lidvid;
-        delete sanitized.name;
-        delete sanitized.abstract;
-        delete sanitized.browseUrl;
-
         return sanitized
-    }
-    
-    const templateModel = function() {
-        return {
-            tags: [],
-            publication: {},
-            example: {},
-            related_tools: [],
-            related_data: [],
-            superseded_data: [],
-            download_packages: [],
-        }
     }
 });
 
-app.controller('DatasetManageController', function($scope, $http) {
-    $http.get('./datasets/status').then(function(res) {
+app.controller('TargetsManageController', function($scope, $http, $state) {
+    $http.get('./targets/status').then(function(res) {
         $scope.status = res.data;
     }, function(err) {
         $scope.state.error = err;
     })
 
     $scope.edit = function(lidvid) {
-        $http.get('./datasets/edit', { params: { lidvid }}).then(function(res) {
-            $scope.state.datasets = prepDatasets(res.data);
-            $scope.state.progress();
-            $scope.state.loading = false;
-        }, function(err) {
-            $scope.state.error = err;
-        })
-    }
-
-    const prepDatasets = function(sets) {
-        let obj = {
-            bundle: null,
-            collections: []
-        }
-        if(sets && sets.constructor === Array) {
-            for(dataset of sets) {
-                // set the variable normally set by label extractor
-                dataset.lidvid = dataset.logical_identifier;
-
-                // put tags back in objects
-                dataset.tags = dataset.tags.map(tag => { return { name: tag} })
-
-                // sort into bundle and collections
-                if(dataset.logical_identifier && dataset.logical_identifier.split(':').length === 7) { // a lidvid with a collection will have 6 colons, thus 7 parts
-                    obj.collections.push(dataset)
-                } else {
-                    obj.bundle = dataset
-                }
-            }
-        }
-        return obj
+        $state.go('targets.import', {edit: lidvid})
     }
 });
+
+app.constant('sanitizer', function(formObject, templateModel) {
+    const isEmptyObject = obj =>  {
+        if (obj && obj.constructor === Object) {
+            for(var key in obj) {
+                if(obj.hasOwnProperty(key) && !key.startsWith('$$'))
+                    return false;
+            }
+            return true;
+        }
+        return false;
+    }
+    if(!formObject) { return null }
+
+    let sanitized = templateModel()
+    for (const [key, value] of Object.entries(formObject)) {
+        // put each field into the new sanitized object, unless it's inherited or angular-specific
+        if (formObject.hasOwnProperty(key) && !key.startsWith('$$') && !!value) {
+            if(value.constructor === Array) {
+                // trim empty objects from the arrays
+                let trimmed = value.filter(item => !isEmptyObject(item)) 
+                sanitized[key] = trimmed;
+            } else {
+                // turn empty objects into nulls
+                sanitized[key] = isEmptyObject(value) ? null : value;
+            }
+        }
+    }
+    return sanitized;
+})
+
 
 app.controller('FormController', function($scope) {
     $scope.groupRepeater = function(array) {
@@ -315,6 +399,16 @@ app.directive('datasetImportForm', function () {
             dataset: '=',
             type: '<',
             autocomplete: '='
+        },
+        controller: 'FormController'
+    };
+});
+
+app.directive('targetImportForm', function () {
+    return {
+        templateUrl: 'directives/target-import-form.html',
+        scope: {
+            target: '=',
         },
         controller: 'FormController'
     };

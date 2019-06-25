@@ -1,0 +1,42 @@
+<div class="container">
+
+    <form id="target-form">
+        <div class="form-group">
+            <label>LID:</label> <input class="form-control" type="text" ng-model="target.logical_identifier">
+            <label>Display Name: </label><input class="form-control" type="text" ng-model="target.display_name">
+            <label>Display Description: </label><textarea class="form-control" ng-model="target.display_description"></textarea>
+            <label>Image URL: </label><input class="form-control" type="url" ng-model="target.image_url">
+            <label>Category: </label>
+            <select class="form-control" ng-model="target.category">
+                <option>Planet</option>
+                <option>Moon</option>
+                <option>Asteroid</option>
+                <option>Comet</option>
+            </select>
+            
+        </div>
+        
+        <section id="tags" class="repeating-group">
+            <h2>Tags</h2>
+            <div class="form-group empty" ng-repeat="tag in groupRepeater(target.tags)">
+                <input class="form-control" type="text" ng-model="tag.name">
+            </div>
+        </section>
+        
+        <section id="related-targets" class="repeating-group">
+            <h2>Related Targets</h2>
+            <div class="form-group animated" ng-repeat="related in groupRepeater(target.related_targets)">
+                <label>LID: </label><input class="form-control" type="text" ng-model="related.logical_identifier">
+                <label>Relationship: </label><input class="form-control" type="text" ng-model="related.relationship">
+            </div>
+        </section>
+
+        <section id="missions" class="repeating-group">
+            <h2>Missions</h2>
+            <div class="form-group empty" ng-repeat="mission in groupRepeater(target.missions)">
+                <label>LID: </label><input class="form-control" type="text" ng-model="mission.lid">
+            </div>
+        </section>
+
+    </form>
+</div>
