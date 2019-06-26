@@ -3,7 +3,7 @@ const assert = require('assert')
 const request = require('request-promise-native')
 
 // internal modules
-require('./static/helpers.js')
+require('./static/scripts/helpers.js')
 const db = require('./db.js')
 const solrize = require('./solrize.js')
 

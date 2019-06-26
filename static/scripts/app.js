@@ -2,6 +2,11 @@ var app = angular.module('app', ['ui.bootstrap', 'ui.router']);
 
 app.config(function($stateProvider) {
     $stateProvider.state({
+        name: 'root',
+        url: '/',
+        redirectTo: 'datasets.load'
+    })
+    $stateProvider.state({
         name: 'datasets',
         url: '/Datasets',
         redirectTo: 'datasets.load'
@@ -94,7 +99,7 @@ app.controller('RootController', function($scope, constants, $state) {
     };
 
     $scope.constants = constants;
-    $state.go('datasets.load');
+    $state.go('root');
 });
 
 app.directive('loading', function() {
