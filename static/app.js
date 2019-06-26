@@ -165,8 +165,10 @@ app.controller('DatasetImportController', function($scope, $http, constants, exi
     const prepDatasetFromEdit = function(dataset) {
         let obj = { bundle: null, collections: [] }
 
-        // put tags back in objects
-        dataset.tags = dataset.tags.map(tag => { return { name: tag} })
+        // put tags back in objects, if necessary
+        if(dataset.tags && dataset.tags.length > 0 && dataset.tags[0].constructor === String) {
+            dataset.tags = dataset.tags.map(tag => { return { name: tag} })
+        }
 
         // sort into bundle and collections
         if(dataset.logical_identifier && dataset.logical_identifier.split(':').length === 7) { // a lidvid with a collection will have 6 colons, thus 7 parts
@@ -237,8 +239,8 @@ app.controller('DatasetImportController', function($scope, $http, constants, exi
         $scope.state.error = null;
         $scope.state.loading = true;            
         let postable = {
-            bundle: sanitize($scope.model.bundle),
-            collections: $scope.model.collections.map(c => sanitize(c))
+            bundle: sanitizer($scope.model.bundle, templateModel),
+            collections: $scope.model.collections.map(c => sanitizer(c, templateModel))
         }
         $http.post('./datasets/add', postable).then(function(res) {
             $scope.state.progress();
@@ -248,17 +250,6 @@ app.controller('DatasetImportController', function($scope, $http, constants, exi
             $scope.state.loading = false;
             console.log(err);
         })
-    }
-
-    const sanitize = function(dataset) {
-        let sanitized = sanitizer(dataset, templateModel)
-        
-        // put tag names into a direct array
-        if(sanitized.tags) {
-            sanitized.tags = sanitized.tags.map(tag => tag.name)
-        }
-
-        return sanitized
     }
 });
 
@@ -293,7 +284,7 @@ app.controller('TargetImportController', function($scope, $http, existingTarget,
         if(validate()) {
             $scope.state.error = null;
             $scope.state.loading = true;            
-            let postable = sanitize($scope.model.target)
+            let postable = sanitizer($scope.model.target, templateModel)
 
             $http.post('./targets/add', postable).then(function(res) {
                 $scope.state.progress();
@@ -315,17 +306,6 @@ app.controller('TargetImportController', function($scope, $http, existingTarget,
                 isPopulated($scope.model.target.display_description) &&
                 isPopulated($scope.model.target.image_url) &&
                 isPopulated($scope.model.target.category)
-    }
-
-    const sanitize = function(targetForm) {
-        let sanitized = sanitizer(targetForm, templateModel)
-        
-        // put tag names into a direct array
-        if(sanitized.tags) {
-            sanitized.tags = sanitized.tags.map(tag => tag.name)
-        }
-
-        return sanitized
     }
 });
 
