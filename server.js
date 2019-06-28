@@ -169,7 +169,11 @@ const fieldMapper = dataset => { return {
     name: dataset.title,
     lidvid: dataset.lidvid,
     abstract: dataset.description,
-    browseUrl: ''
+    browseUrl: '',
+    target_lid: dataset.target_lid,
+    target_name: dataset.target_name,
+    mission_lid: dataset.mission_lid,
+    instrument_lid: dataset.instrument_lid
 }}
 app.get('/datasets/check/bundle', async function(req, res) {
     let bundleUrl = req.query.url;

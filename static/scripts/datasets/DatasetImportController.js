@@ -35,18 +35,23 @@ export default function($scope, $http, constants, existingDataset, sanitizer) {
     }
 
     const prepDatasetsFromHarvest = function(datasets) {
-        const prep = dataset => {
-            if(!dataset) { return null }
-            const template = templateModel();
-            Object.assign(dataset, template);
-            dataset.logical_identifier = dataset.lidvid;
-            dataset.display_name = dataset.name;
-            dataset.display_description = dataset.abstract;
-            dataset.browse_url = dataset.browseUrl;
-            delete dataset.lidvid;
-            delete dataset.name;
-            delete dataset.abstract;
-            delete dataset.browseUrl;
+        const mapping = {
+            logical_identifier:     'lidvid',
+            display_name:           'name',
+            display_description:    'abstract',
+            browse_url:             'browseUrl',
+            target_lid:             'target_lid',
+            target_name:            'target_name',
+            mission_lid:            'mission_lid',
+            instrument_lid:         'instrument_lid',
+        }
+        const prep = fromHarvest => {
+            if(!fromHarvest) { return null }
+            const dataset = templateModel();
+            Object.keys(mapping).forEach(key => {
+                const harvestKey = mapping[key]
+                dataset[key] = fromHarvest[harvestKey]
+            })
             return dataset
         }
         return {
