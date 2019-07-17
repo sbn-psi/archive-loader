@@ -2,9 +2,9 @@
   "name": "archive-loader",
   "version": "1.0.0",
   "description": "Web server and client application used to load and manage the metadata used by the PDS Registry and Web UI services",
-  "main": "server.js",
+  "main": "server/server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server/server.js"
   },
   "author": "Mike Drum mdrum@psi.edu",
   "license": "ISC",

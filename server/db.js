@@ -7,6 +7,7 @@ const {MongoClient} = require('mongodb')
 const datasetsCollection = 'datasets'
 const targetsCollection = 'targets'
 const missionsCollection = 'missions'
+const instrumentsCollection = 'instruments'
 
 let db;
 
@@ -14,6 +15,7 @@ module.exports = {
     datasets: datasetsCollection,
     targets: targetsCollection,
     missions: missionsCollection,
+    instruments: instrumentsCollection,
     connect: async function() {
         if(!db) {
             const client = await MongoClient.connect(url, { 

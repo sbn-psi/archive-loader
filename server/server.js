@@ -3,7 +3,7 @@ const assert = require('assert')
 const request = require('request-promise-native')
 
 // internal modules
-require('./static/scripts/helpers.js')
+require('../static/scripts/helpers.js')
 const db = require('./db.js')
 const solrize = require('./solrize.js')
 
@@ -66,8 +66,6 @@ app.post('/datasets/add', async function(req, res) {
         toInsert.push(dataset)
     }
 
-    // pull fields out of request for db insert
-
     if(bailed) { return }
 
     // insert and return
@@ -82,7 +80,7 @@ app.post('/datasets/add', async function(req, res) {
 
 })
 
-app.post('/targets/add', async function(req, res) {
+async function processContextObject(req, res, type, fieldList) {
     let bailed = false
     // ensure input
     try {
@@ -94,25 +92,20 @@ app.post('/targets/add', async function(req, res) {
         return
     }
 
-    let target = req.body
+    let object = req.body
 
-    const validateTarget = function(target) {
+    const validate = function(object) {
         const require = function(fieldname) {
             if(fieldname.constructor === Array) {
                 for(field of fieldname) {
                     require(field)
                 }
+            } else {
+                assert(object[fieldname], `Expected ${fieldname} to be present`)
             }
-            assert(target[fieldname], `Expected ${fieldname} to be present`)
         }
         try {
-            require(
-                'logical_identifier',
-                'display_name',
-                'display_description',
-                'image_url',
-                'category',
-                )
+            require(fieldList)
     
         } catch (err) {
             res.status(400).send(err.message)
@@ -120,25 +113,47 @@ app.post('/targets/add', async function(req, res) {
             return
         }
 
-        target._timestamp = new Date()
+        object._timestamp = new Date()
     }
 
-    if(!bailed) {validateTarget(target)}
-
-    // pull fields out of request for db insert
+    if(!bailed) {validate(object)}
 
     if(bailed) { return }
 
     // insert and return
     await db.connect()
     try {
-        const result = await db.insert([target], db.targets)
+        const result = await db.insert([object], type)
         res.status(201).send( result.ops )
     } catch(err) {
         res.status(500).send('Unexpected database error while saving')
         console.log(err);
     }
+}
 
+app.post('/targets/add', async function(req, res) {
+    await processContextObject(req, res, db.targets, [
+        'logical_identifier',
+        'display_name',
+        'display_description',
+        'image_url',
+        'is_major'])
+})
+
+app.post('/missions/add', async function(req, res) {
+    await processContextObject(req, res, db.missions, [
+        'logical_identifier',
+        'display_name',
+        'image_url',
+        'funding_level'])
+})
+
+app.post('/instruments/add', async function(req, res) {
+    await processContextObject(req, res, db.instruments, [
+        'logical_identifier',
+        'display_name',
+        'display_description',
+        'is_prime'])
 })
 
 app.get('/export', async function(req, res) {
@@ -147,22 +162,25 @@ app.get('/export', async function(req, res) {
     res.status(200).send( solrize(result, "dataset") )
 })
 
+async function statusRequest(req, res, type) {
+    await db.connect()
+    const result = await db.find({}, type)
+    res.status(200).send({
+        count: result.length,
+        lids: result.map(item => item.logical_identifier)
+    })
+}
 app.get('/datasets/status', async function(req, res) {
-    await db.connect()
-    const result = await db.find({}, db.datasets)
-    res.status(200).send({
-        count: result.length,
-        lids: result.map(ds => ds.logical_identifier)
-    })
+    await statusRequest(req, res, db.datasets)
 })
-
 app.get('/targets/status', async function(req, res) {
-    await db.connect()
-    const result = await db.find({}, db.targets)
-    res.status(200).send({
-        count: result.length,
-        lids: result.map(ds => ds.logical_identifier)
-    })
+    await statusRequest(req, res, db.targets)
+})
+app.get('/missions/status', async function(req, res) {
+    await statusRequest(req, res, db.missions)
+})
+app.get('/instruments/status', async function(req, res) {
+    await statusRequest(req, res, db.instruments)
 })
 
 const fieldMapper = dataset => { return {
@@ -224,6 +242,12 @@ app.get('/datasets/edit', async function(req, res) {
 
 app.get('/targets/edit', async function(req, res) {
     await editLookupRequest(req, res, db.targets)    
+})
+app.get('/missions/edit', async function(req, res) {
+    await editLookupRequest(req, res, db.missions)    
+})
+app.get('/instruments/edit', async function(req, res) {
+    await editLookupRequest(req, res, db.instruments)    
 })
 
 async function editLookupRequest(req, res, type) {
