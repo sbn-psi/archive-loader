@@ -20,6 +20,8 @@
     <script src="./scripts/shared.js" type="text/javascript"></script>
     <script src="./scripts/datasets/index.js" type="module"></script>
     <script src="./scripts/targets/index.js" type="module"></script>
+    <script src="./scripts/missions/index.js" type="module"></script>
+    <script src="./scripts/instruments/index.js" type="module"></script>
     <title title-container></title>
 </head>
 
@@ -56,13 +58,23 @@
                     </div>
                 </li>
                 <li class="nav-item dropdown" uib-dropdown ui-sref-active="active">
-                    <a class="nav-link dropdown-toggle" uib-dropdown-toggle href="#" id="navbarDropdown" role="button"
+                    <a class="nav-link dropdown-toggle" uib-dropdown-toggle href="#" id="missionsDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         Missions
                     </a>
+                    <div class="dropdown-menu" uib-dropdown-menu aria-labelledby="missionsDropdown">
+                        <a class="dropdown-item" ui-sref="missions.manage">Manage Missions</a>
+                        <a class="dropdown-item" ui-sref="missions.import">Add Mission</a>
+                    </div>
+                </li>
+                <li class="nav-item dropdown" uib-dropdown ui-sref-active="active">
+                    <a class="nav-link dropdown-toggle" uib-dropdown-toggle href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        Instruments
+                    </a>
                     <div class="dropdown-menu" uib-dropdown-menu aria-labelledby="navbarDropdown">
-                        <a class="dropdown-item" >Manage Missions</a>
-                        <a class="dropdown-item" >Add Mission</a>
+                        <a class="dropdown-item" ui-sref="instruments.manage">Manage Instruments</a>
+                        <a class="dropdown-item" ui-sref="instruments.import">Add Instrument</a>
                     </div>
                 </li>
             </ul>

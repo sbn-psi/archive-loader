@@ -1,3 +1,38 @@
+app.config(function($stateProvider) {
+    $stateProvider.state({
+        name: 'targets',
+        url: '/Targets',
+        redirectTo: 'targets.manage'
+    })
+    $stateProvider.state({
+        name: 'targets.import',
+        url: '/Import?edit',
+        templateUrl: 'states/targets/import.html',
+        params: { edit: null },
+        data: {
+            title: 'Add Target'
+        },
+        resolve: {
+            existing: function($http, $stateParams) {
+                if(!!$stateParams.edit) {
+                    return $http.get('./targets/edit', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data[0] })
+                } else {
+                    return null
+                }
+            }
+        },
+        controller: 'TargetImportController'
+    })
+    $stateProvider.state({
+        name: 'targets.manage',
+        url: '/Manage',
+        templateUrl: 'states/targets/manage.html',
+        data: {
+            title: 'Manage Targets'
+        }
+    })
+})
+
 import TargetImportController from './TargetImportController.js';
 import TargetsManageController from './TargetsManageController.js';
 
@@ -13,3 +48,5 @@ app.directive('targetImportForm', function () {
         controller: 'FormController'
     };
 });
+
+
