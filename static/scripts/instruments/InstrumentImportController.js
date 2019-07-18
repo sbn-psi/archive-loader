@@ -1,4 +1,4 @@
-export default function($scope, $http, existing, sanitizer) {
+export default function($scope, $http, existing, sanitizer, lidCheck, isPopulated) {
     
     const templateModel = function() {
         return {}
@@ -26,8 +26,24 @@ export default function($scope, $http, existing, sanitizer) {
         }
     }
 
+    $scope.$watch('model.instrument.logical_identifier', function() {
+        if(!!existing) { return }
+        $scope.state.loading = true;
+        lidCheck($scope.model.instrument.logical_identifier).then(function(doc) {
+            $scope.state.loading = false;
+            const replace = (scopeKey, docKey) => {
+                if(!isPopulated($scope.model.instrument[scopeKey])) { $scope.model.instrument[scopeKey] = doc[docKey][0] }
+            }
+            replace('display_name', 'instrument_name')
+            replace('display_description', 'instrument_description')
+        }, function(err) { 
+            $scope.state.loading = false;
+            // don't care about errors
+        })
+    })
+
+
     const validate = function() {
-        const isPopulated = (val) => val && val.length > 0
         return  isPopulated($scope.model.instrument.logical_identifier) &&
                 isPopulated($scope.model.instrument.display_name) &&
                 isPopulated($scope.model.instrument.display_description)

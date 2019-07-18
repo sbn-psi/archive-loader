@@ -85,6 +85,7 @@
     <ui-view></ui-view>
 
     <div id="alert-frame">
+        <loading ng-if="state.loading"></loading>
         <div uib-alert ng-repeat="alert in state.alerts" ng-class="'alert-' + (alert.type || 'warning')"
             close="closeAlert($index)">{{alert.message}}</div>
         <div uib-alert ng-if="state.error" class="alert-danger" close="state.error = null">{{state.error}}</div>

@@ -261,6 +261,30 @@ async function editLookupRequest(req, res, type) {
     res.status(200).send( result )
 }
 
+app.get('/lookup', async function(req, res) {
+    let lid = req.query.lid;
+    let discovered;
+
+    try {
+        assert(lid, 'Expected lid parameter')
+        discovered = await contextObjectLookupRequest(lid)
+    } catch (err) {
+        res.status(400).send(err.message)
+        return
+    }
+    res.status(200).send(discovered);
+})
+
+async function contextObjectLookupRequest(lid) {
+    let solrResponse = await httpRequest('https://pds.nasa.gov/services/search/search', {
+        wt: 'json',
+        identifier: lid
+    })
+    assert(solrResponse.response.numFound != 0, "Could not find context object with that identifier")
+    assert(solrResponse.response.numFound == 1, "Found more than one context object with that identifier")
+    return solrResponse.response.docs[0]
+}
+
 async function httpRequest(baseUrl, params) {
     const options = {
         uri: baseUrl,

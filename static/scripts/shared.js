@@ -33,6 +33,23 @@ app.constant('sanitizer', function(formObject, templateModel) {
     return sanitized;
 })
 
+app.service('lidCheck', function($http) {
+    return function(lid) {
+        return new Promise(function(resolve, reject) {
+            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:nasa')) {
+                $http.get('./lookup?lid=' + lid).then(function(res) {
+                    resolve(res.data)
+                }, function(err) {
+                    reject(err)
+                })
+            } else {
+                reject('Invalid lid')
+            }
+        })
+    }
+})
+
+app.constant('isPopulated', (val) => val && val.length > 0)
 
 app.controller('FormController', function($scope) {
     $scope.groupRepeater = function(array) {
