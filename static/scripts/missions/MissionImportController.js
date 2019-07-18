@@ -31,7 +31,6 @@ export default function($scope, $http, existing, sanitizer) {
         return  isPopulated($scope.model.mission.logical_identifier) &&
                 isPopulated($scope.model.mission.display_name) &&
                 isPopulated($scope.model.mission.display_description) &&
-                isPopulated($scope.model.mission.image_url) &&
-                isPopulated($scope.model.mission.funding_level)
+                isPopulated($scope.model.mission.image_url)
     }
 }

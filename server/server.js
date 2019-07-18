@@ -136,24 +136,21 @@ app.post('/targets/add', async function(req, res) {
         'logical_identifier',
         'display_name',
         'display_description',
-        'image_url',
-        'is_major'])
+        'image_url'])
 })
 
 app.post('/missions/add', async function(req, res) {
     await processContextObject(req, res, db.missions, [
         'logical_identifier',
         'display_name',
-        'image_url',
-        'funding_level'])
+        'image_url'])
 })
 
 app.post('/instruments/add', async function(req, res) {
     await processContextObject(req, res, db.instruments, [
         'logical_identifier',
         'display_name',
-        'display_description',
-        'is_prime'])
+        'display_description'])
 })
 
 app.get('/export', async function(req, res) {
