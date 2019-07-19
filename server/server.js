@@ -143,7 +143,14 @@ app.post('/missions/add', async function(req, res) {
     await processContextObject(req, res, db.missions, [
         'logical_identifier',
         'display_name',
-        'image_url'])
+        'display_description'])
+})
+
+app.post('/spacecraft/add', async function(req, res) {
+    await processContextObject(req, res, db.spacecraft, [
+        'logical_identifier',
+        'display_name',
+        'display_description'])
 })
 
 app.post('/instruments/add', async function(req, res) {
@@ -175,6 +182,9 @@ app.get('/targets/status', async function(req, res) {
 })
 app.get('/missions/status', async function(req, res) {
     await statusRequest(req, res, db.missions)
+})
+app.get('/spacecraft/status', async function(req, res) {
+    await statusRequest(req, res, db.spacecraft)
 })
 app.get('/instruments/status', async function(req, res) {
     await statusRequest(req, res, db.instruments)
@@ -243,6 +253,9 @@ app.get('/targets/edit', async function(req, res) {
 app.get('/missions/edit', async function(req, res) {
     await editLookupRequest(req, res, db.missions)    
 })
+app.get('/spacecraft/edit', async function(req, res) {
+    await editLookupRequest(req, res, db.spacecraft)    
+})
 app.get('/instruments/edit', async function(req, res) {
     await editLookupRequest(req, res, db.instruments)    
 })
@@ -260,7 +273,6 @@ async function editLookupRequest(req, res, type) {
     const result = await db.find({ "logical_identifier": req.query.logical_identifier }, type)
     res.status(200).send( result )
 }
-
 app.get('/lookup', async function(req, res) {
     let lid = req.query.lid;
     let discovered;

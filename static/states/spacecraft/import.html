@@ -1,0 +1,14 @@
+<div>
+    <div class="row">
+        <div class="col tab-container">
+            <spacecraft-import-form spacecraft="model.spacecraft"></spacecraft-import-form>
+        </div>
+        <div class="col">
+            (Preview WIP)
+        </div>
+    </div>
+    <div class="row d-flex justify-content-center">
+        <input class="btn btn-primary" type="submit" value="Submit" ng-click="submit()" ng-if="!state.loading">
+        <loading ng-if="state.loading"></loading>
+    </div>
+</div>

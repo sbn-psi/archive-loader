@@ -12,6 +12,8 @@ app.controller('RootController', function($scope, constants, $state) {
                 case 'targets.manage': $state.go('targets.import'); break;
                 case 'missions.import': $state.go('missions.manage'); break;
                 case 'missions.manage': $state.go('missions.import'); break;
+                case 'spacecraft.import': $state.go('spacecraft.manage'); break;
+                case 'spacecraft.manage': $state.go('spacecraft.import'); break;
                 case 'instruments.import': $state.go('instruments.manage'); break;
                 case 'instruments.manage': $state.go('instruments.import'); break;
             }
