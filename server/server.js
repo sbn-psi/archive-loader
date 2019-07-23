@@ -160,12 +160,6 @@ app.post('/instruments/add', async function(req, res) {
         'display_description'])
 })
 
-app.get('/export', async function(req, res) {
-    await db.connect()
-    const result = await db.find({}, db.datasets)
-    res.status(200).send( solrize(result, "dataset") )
-})
-
 async function statusRequest(req, res, type) {
     await db.connect()
     const result = await db.find({}, type)
@@ -305,3 +299,32 @@ async function httpRequest(baseUrl, params) {
     };
     return await request(options)
 }
+
+
+
+
+app.get('/datasets/export', async function(req, res) {
+    await db.connect()
+    const result = await db.find({}, db.datasets)
+    res.status(200).send( solrize(result, "dataset") )
+})
+app.get('/targets/export', async function(req, res) {
+    await db.connect()
+    const result = await db.find({}, db.targets)
+    res.status(200).send( result )
+})
+app.get('/instruments/export', async function(req, res) {
+    await db.connect()
+    const result = await db.find({}, db.instruments)
+    res.status(200).send( result )
+})
+app.get('/missions/export', async function(req, res) {
+    await db.connect()
+    const result = await db.find({}, db.missions)
+    res.status(200).send( result )
+})
+app.get('/spacecraft/export', async function(req, res) {
+    await db.connect()
+    const result = await db.find({}, db.spacecraft)
+    res.status(200).send( result )
+})
