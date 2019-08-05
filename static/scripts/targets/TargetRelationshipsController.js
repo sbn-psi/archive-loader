@@ -48,6 +48,7 @@ export default function($scope, $http, $state) {
         $http.post('./target-relationships/add', model).then(function(res) {
             refresh()
             $scope.state.mode = INITIAL;
+            $scope.state.relationship = null
         }, function(err) {
             $scope.state.error = err.data;
             console.log(err);
