@@ -1,0 +1,43 @@
+<div ng-controller="TargetRelationshipsController">
+    <loading ng-if="targets === undefined"></loading>
+
+    <div ng-if="state.mode === 'INITIAL'">
+        <ul>
+            <li ng-repeat="target in targets track by $index"><strong>{{target.name}} </strong>
+                <div ng-if="childOf(target).length > 0">
+                    Child of:
+                    <ul>
+                        <li ng-repeat="t in childOf(target)">{{t}}</li>
+                    </ul>
+                </div>
+                <div ng-if="parentOf(target).length > 0">
+                    Parent of:
+                    <ul>
+                        <li ng-repeat="t in parentOf(target)">{{t}}</li>
+                    </ul>
+                </div>
+                <div ng-if="associatedTo(target).length > 0">
+                    Associated to:
+                    <ul>
+                        <li ng-repeat="t in associatedTo(target)">{{t}}</li>
+                    </ul>
+                </div>
+                <button class="btn btn-link" ng-click="select(target)">Add Relationship</button>
+            </li>
+        </ul>
+    </div>
+    <div ng-if="state.mode === 'SPECIFYING' || state.mode === 'RELATING'">
+        <h2>{{state.selectedTarget.name}}</h2>
+        <p>is...</p>
+        <select ng-model="state.relationship">
+            <option value="parentOf">a parent of</option>
+            <option value="childOf">a child of</option>
+            <option value="associated">associated to</option>
+        </select>
+        <div ng-if="state.mode === 'RELATING'">
+            <ul>
+                <li ng-repeat="target in targets track by $index"><button class="btn btn-link" ng-click="relate(target)">{{target.name}} </button></li>
+            </ul>
+        </div>
+    </div>
+</div>

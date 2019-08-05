@@ -160,6 +160,10 @@ app.post('/instruments/add', async function(req, res) {
         'display_description'])
 })
 
+app.post('/target-relationships/add', async function(req, res) {
+    await processContextObject(req, res, db.targetRelationships, [])
+})
+
 async function statusRequest(req, res, type) {
     await db.connect()
     const result = await db.find({}, type)
@@ -182,6 +186,16 @@ app.get('/spacecraft/status', async function(req, res) {
 })
 app.get('/instruments/status', async function(req, res) {
     await statusRequest(req, res, db.instruments)
+})
+
+app.get('/target-relationships/status', async function(req, res) {
+    await db.connect()
+    const relationships = await db.find({}, db.targetRelationships)
+    const targets = await db.find({}, db.targets)
+    res.status(200).send({
+        targets: targets.map(item => { return { lid: item.logical_identifier, name: item.display_name } }),
+        relationships
+    })
 })
 
 const fieldMapper = dataset => { return {

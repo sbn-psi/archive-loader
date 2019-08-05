@@ -31,13 +31,23 @@ app.config(function($stateProvider) {
             title: 'Manage Targets'
         }
     })
+    $stateProvider.state({
+        name: 'targets.relate',
+        url: '/Relate',
+        templateUrl: 'states/targets/relate.html',
+        data: {
+            title: 'Relate Targets'
+        }
+    })
 })
 
 import TargetImportController from './TargetImportController.js';
 import TargetsManageController from './TargetsManageController.js';
+import TargetRelationshipsController from './TargetRelationshipsController.js';
 
 app.controller('TargetImportController', TargetImportController);
 app.controller('TargetsManageController', TargetsManageController);
+app.controller('TargetRelationshipsController', TargetRelationshipsController);
 
 app.directive('targetImportForm', function () {
     return {

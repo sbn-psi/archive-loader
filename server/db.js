@@ -9,6 +9,7 @@ const targetsCollection = 'targets'
 const missionsCollection = 'missions'
 const spacecraftCollection = 'spacecraft'
 const instrumentsCollection = 'instruments'
+const targetRelationshipsCollection = 'targetRelationships'
 
 let db;
 
@@ -18,6 +19,7 @@ module.exports = {
     missions: missionsCollection,
     spacecraft: spacecraftCollection,
     instruments: instrumentsCollection,
+    targetRelationships: targetRelationshipsCollection,
     connect: async function() {
         if(!db) {
             const client = await MongoClient.connect(url, { 
@@ -36,7 +38,11 @@ module.exports = {
 
         for(doc of documents) {
             doc._isActive = true;
-            bulkOperation.find({logical_identifier: doc.logical_identifier}).upsert().replaceOne(doc)
+            if(!!doc.logical_identifier) {
+                bulkOperation.find({logical_identifier: doc.logical_identifier}).upsert().replaceOne(doc)
+            } else {
+                bulkOperation.insert(doc)
+            }
         }
         var result = await bulkOperation.execute();
         assert(result.result.ok)
