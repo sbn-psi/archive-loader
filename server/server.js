@@ -342,3 +342,8 @@ app.get('/spacecraft/export', async function(req, res) {
     const result = await db.find({}, db.spacecraft)
     res.status(200).send( result )
 })
+app.get('/target-relationships/export', async function(req, res) {
+    await db.connect()
+    const result = await db.find({}, db.targetRelationships)
+    res.status(200).send( result )
+})
