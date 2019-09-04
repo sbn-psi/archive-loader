@@ -20,5 +20,17 @@ services:
       - "27017:27017"
     volumes:
       - 'archiveloader-data:/data/db'
+  minio:
+    container_name: archiveloader-minio
+    image: minio/minio
+    restart: always
+    ports:
+      - "8999:9000"
+    volumes:
+      - 'archiveloader-images:/data'
+    command: server /data
+    env_file:
+      - ./services.env
 volumes: 
   archiveloader-data:
+  archiveloader-images:
