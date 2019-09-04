@@ -13,53 +13,20 @@ if(!process.env.MINIO_ACCESS_KEY) {
     require('dotenv').config({ path: 'services.env' })
 }
 
-// express setup
+// express, minio setup
+console.log('connecting to file server...')
+require('./minio.js').bootstrap().then(expressSetup)
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
-app.use(bodyParser.json())
-app.use(express.static('static'))
-app.listen(8989)
-console.log('running on port 8989...')
 
-// minio setup
-const minio = require('express-middleware-minio')
-const middleware = minio.middleware()
-// Upload a file
-app.post('/image/upload', middleware({op: minio.Ops.post}), (req, res) => {
-    if (req.minio.error) {
-        console.log(req.minio)
-      res.status(400).json({ error: req.minio.error })
-    } else {
-      res.send({ filename: req.minio.post.filename })
-    }
-})
-// retrieve a file
-
-// const Minio = require('minio')
-// const bucket = 'images'
-// let imagesAvailable = false
-// let minioClient = new Minio.Client({
-//     endPoint: 'localhost',
-//     port: 8999,
-//     useSSL: false,
-//     accessKey: 'admin',//process.env.MINIO_ACCESS_KEY,
-//     secretKey: 'admin6969'//process.env.MINIO_SECRET_KEY
-// })
-// minioClient.bucketExists(bucket, function(err, exists) {
-//     let errorCallback = () => { imagesAvailable = false; console.log(err) }
-//     if(err) errorCallback()
-//     else if(!exists) {
-//         console.log(`bucket ${bucket} didn't exist, creating`)
-//         minioClient.makeBucket(bucket).then(() => { imagesAvailable = true}, errorCallback)
-//     } else {
-//         imagesAvailable = true
-//     }
-// })
-
-// app.get('/images', async function(req, res) {
-//     res.status(200).send(`available: ${imagesAvailable}`)
-// })
+function expressSetup(minioHandler) {
+    app.use(bodyParser.json())
+    app.use('/image/upload', minioHandler)
+    app.use(express.static('static'))
+    app.listen(8989)
+    console.log('running on port 8989...')
+}
 
 const HARVESTWRAPPER = (process.env.HARVEST ? process.env.HARVEST : 'http://localhost:3009') + '/extract'
 
