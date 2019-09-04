@@ -54,6 +54,7 @@ app.directive('targetImportForm', function () {
         templateUrl: 'directives/target-import-form.html',
         scope: {
             target: '=',
+            error: '='
         },
         controller: 'FormController'
     };

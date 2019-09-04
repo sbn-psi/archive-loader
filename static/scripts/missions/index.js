@@ -44,6 +44,7 @@ app.directive('missionImportForm', function () {
         templateUrl: 'directives/mission-import-form.html',
         scope: {
             mission: '=',
+            error: '='
         },
         controller: 'FormController'
     };

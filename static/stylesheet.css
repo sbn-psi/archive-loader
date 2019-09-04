@@ -1,18 +1,19 @@
 .repeating-group .form-group {
-    margin-left: 20px;
-    margin-right: 20px;
+  margin-left: 20px;
+  margin-right: 20px;
 }
+
 .repeating-group .form-group:not(:last-child) {
-    padding-bottom: 12px;
-    border-bottom: 1px solid lightgray;
+  padding-bottom: 12px;
+  border-bottom: 1px solid lightgray;
 }
 
 body {
-    padding: 80px 0;
+  padding: 80px 0;
 }
 
 #primary-input {
-    padding: 50px;
+  padding: 50px;
 }
 
 #alert-frame {
@@ -21,43 +22,52 @@ body {
   bottom: 0px;
 }
 
+.thumbnail {
+  max-height: 25px;
+}
+
 ui-view {
   padding: 20px;
 }
 
 .lds-ring {
-    display: inline-block;
-    position: relative;
-    width: 64px;
-    height: 64px;
+  display: inline-block;
+  position: relative;
+  width: 64px;
+  height: 64px;
+}
+
+.lds-ring div {
+  box-sizing: border-box;
+  display: block;
+  position: absolute;
+  width: 51px;
+  height: 51px;
+  margin: 6px;
+  border: 6px solid #cef;
+  border-radius: 50%;
+  animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
+  border-color: #cef transparent transparent transparent;
+}
+
+.lds-ring div:nth-child(1) {
+  animation-delay: -0.45s;
+}
+
+.lds-ring div:nth-child(2) {
+  animation-delay: -0.3s;
+}
+
+.lds-ring div:nth-child(3) {
+  animation-delay: -0.15s;
+}
+
+@keyframes lds-ring {
+  0% {
+    transform: rotate(0deg);
   }
-  .lds-ring div {
-    box-sizing: border-box;
-    display: block;
-    position: absolute;
-    width: 51px;
-    height: 51px;
-    margin: 6px;
-    border: 6px solid #cef;
-    border-radius: 50%;
-    animation: lds-ring 1.2s cubic-bezier(0.5, 0, 0.5, 1) infinite;
-    border-color: #cef transparent transparent transparent;
+
+  100% {
+    transform: rotate(360deg);
   }
-  .lds-ring div:nth-child(1) {
-    animation-delay: -0.45s;
-  }
-  .lds-ring div:nth-child(2) {
-    animation-delay: -0.3s;
-  }
-  .lds-ring div:nth-child(3) {
-    animation-delay: -0.15s;
-  }
-  @keyframes lds-ring {
-    0% {
-      transform: rotate(0deg);
-    }
-    100% {
-      transform: rotate(360deg);
-    }
-  }
-  
+}

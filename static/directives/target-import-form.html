@@ -5,7 +5,14 @@
             <label>LID:</label> <input class="form-control" type="text" ng-model="target.logical_identifier">
             <label>Display Name: </label><input class="form-control" type="text" ng-model="target.display_name">
             <label>Display Description: </label><textarea class="form-control" ng-model="target.display_description"></textarea>
-            <label>Image URL: </label><input class="form-control" type="url" ng-model="target.image_url">
+            <label>Image: </label>
+                <div>
+                    <button type="file" ngf-select="upload($file, $invalidFiles, uploadWatcher(target, 'image_url'))"
+                        accept="image/*" ngf-max-size="3MB">Select File</button>
+                    <loading class="thumbnail" ng-if="progress.image_url < 100"></loading>
+                    <img ng-if="target.image_url" class="thumbnail" ng-src="{{target.image_url}}" />
+                    <input hidden class="form-control" type="url" ng-model="target.image_url">
+                </div>
             <label>Is Major: </label><input class="form-control" type="checkbox" ng-model="target.is_major" id="is_major">
             <hr/>
             <label>Supplemental HTML 1</label><text-angular ng-model="target.html1"></text-angular>
@@ -13,13 +20,5 @@
             <label>Supplemental HTML 2</label><text-angular ng-model="target.html2"></text-angular>
         </div>
         
-        <!-- <section id="related-targets" class="repeating-group">
-            <h2>Related Targets</h2>
-            <div class="form-group animated" ng-repeat="related in groupRepeater(target.related_targets)">
-                <label>LID: </label><input class="form-control" type="text" ng-model="related.logical_identifier">
-                <label>Relationship: </label><input class="form-control" type="text" ng-model="related.relationship">
-            </div>
-        </section> -->
-
     </form>
 </div>

@@ -44,6 +44,7 @@ app.directive('spacecraftImportForm', function () {
         templateUrl: 'directives/spacecraft-import-form.html',
         scope: {
             spacecraft: '=',
+            error: '='
         },
         controller: 'FormController'
     };

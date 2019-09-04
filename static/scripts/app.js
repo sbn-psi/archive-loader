@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ui.bootstrap', 'ui.router', 'textAngular']);
+var app = angular.module('app', ['ui.bootstrap', 'ui.router', 'textAngular', 'ngFileUpload']);
 
 app.controller('RootController', function($scope, constants, $state) {
     $scope.state = {

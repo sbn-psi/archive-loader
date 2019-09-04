@@ -4,7 +4,14 @@
             <label>LID:</label> <input class="form-control" type="text" ng-model="spacecraft.logical_identifier">
             <label>Display Name: </label><input class="form-control" type="text" ng-model="spacecraft.display_name">
             <label>Display Description: </label><textarea class="form-control" ng-model="spacecraft.display_description"></textarea>
-            <label>Spacecraft Image URL: </label><input class="form-control" type="url" ng-model="spacecraft.image_url">
+            <label>Spacecraft Image: </label>
+                <div>
+                    <button type="file" ngf-select="upload($file, $invalidFiles, uploadWatcher(spacecraft, 'image_url'))"
+                        accept="image/*" ngf-max-size="3MB">Select File</button>
+                    <loading class="thumbnail" ng-if="progress.image_url < 100"></loading>
+                    <img ng-if="spacecraft.image_url" class="thumbnail" ng-src="{{spacecraft.image_url}}" />
+                    <input hidden class="form-control" type="url" ng-model="spacecraft.image_url">
+                </div>
             <hr/>
             <label>Supplemental HTML 1</label><text-angular ng-model="spacecraft.html1"></text-angular>
             <hr/>
