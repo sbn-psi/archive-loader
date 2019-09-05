@@ -19,9 +19,9 @@ require('./minio.js').bootstrap().then(expressSetup)
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
+app.use(bodyParser.json())
 
 function expressSetup(minioHandler) {
-    app.use(bodyParser.json())
     app.use('/image/upload', minioHandler)
     app.use(express.static('static'))
     app.listen(8989)
