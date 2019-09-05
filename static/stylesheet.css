@@ -22,8 +22,14 @@ body {
   bottom: 0px;
 }
 
+.widget {
+  min-height: 50px;
+  display: flex;
+  flex-direction: row;
+}
 .thumbnail {
-  max-height: 25px;
+  max-height: 50px;
+  margin: 0 10px;
 }
 
 ui-view {
