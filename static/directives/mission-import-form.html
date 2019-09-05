@@ -12,11 +12,7 @@
         <div class="form-group">
             <label>Mission Badge Image: </label>
             <div>
-                <button type="file" ngf-select="upload($file, $invalidFiles, uploadWatcher(mission, 'image_url'))"
-                    accept="image/*" ngf-max-size="3MB">Select File</button>
-                <loading class="thumbnail" ng-if="progress.image_url < 100"></loading>
-                <img ng-if="mission.image_url" class="thumbnail" ng-src="{{mission.image_url}}" />
-                <input hidden class="form-control" type="url" ng-model="mission.image_url">
+                <image-upload model="mission.image_url" error="error"/>
             </div>
         </div>
         <div class="form-group">

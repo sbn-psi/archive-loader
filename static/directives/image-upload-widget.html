@@ -1,0 +1,7 @@
+<div class="container">
+    <button type="file" ngf-select="upload($file, $invalidFiles, uploadWatcher)"
+        accept="image/*" ngf-max-size="3MB">Select File</button>
+    <loading class="thumbnail" ng-if="progress.image_url < 100"></loading>
+    <img ng-if="model" class="thumbnail" ng-src="{{model}}" />
+    <input hidden class="form-control" type="url" ng-model="model">
+</div>

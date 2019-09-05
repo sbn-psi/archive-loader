@@ -60,40 +60,6 @@ app.controller('FormController', function($scope, Upload) {
         return array;
     }
 
-    $scope.upload = function (file, invalid, watcher) {
-        if(!!invalid && invalid.length > 0) {
-            console.log(invalid)
-            watcher('Invalid file: Max size of 3MB')
-        }
-        if(!!file) {
-            Upload.upload({
-                url: './image/upload',
-                data: {file: file}
-            }).then(function (resp) {
-                watcher(null, null, resp.data.url)
-            }, function (resp) {
-                watcher(resp)
-            }, function (evt) {
-                var progressPercentage = parseInt(100.0 * evt.loaded / evt.total);
-                watcher(null, progressPercentage)
-            });
-        }
-    };
-
-    $scope.uploadWatcher = function(model, key) {
-        return function(error, progress, finalUrl) {
-            if(!!error) {
-                $scope.error = error
-            }
-            if(!!progress) {
-                $scope.progress[key] = progress
-            }
-            if(!!finalUrl) {
-                model[key] = finalUrl
-            }
-        }
-    }
-
     const isEmptyObject = obj =>  {
         if (obj.constructor === Object) {
             for(var key in obj) {
