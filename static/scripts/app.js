@@ -27,4 +27,40 @@ app.controller('RootController', function($scope, constants, $state) {
     $state.go('root');
 });
 
-
+// provide custom image uploader
+app.config(function($provide) {
+    $provide.decorator('taOptions', ['taRegisterTool', 'taSelection', '$delegate', '$uibModal', function(taRegisterTool, taSelection, taOptions, $uibModal) { // $delegate is the taOptions we are decorating
+        taRegisterTool('uploadImage', {
+            iconclass: "fa fa-image",
+            action: function() {
+                var self = this
+                $uibModal.open({
+                    animation: true,
+                    ariaLabelledBy: 'modal-title',
+                    ariaDescribedBy: 'modal-body',
+                    templateUrl: './directives/image-upload-dialog.html',
+                    controller: function($scope, $uibModalInstance) {
+                        $scope.model = {}
+                        $scope.ok = () => $uibModalInstance.close($scope.model)
+                        $scope.cancel = () => $uibModalInstance.dismiss('cancel')
+                    }
+                }).result.then(function(imageOptions) {
+                    if(imageOptions && imageOptions.url) {
+                        if (taSelection.getSelectionElement().tagName && taSelection.getSelectionElement().tagName.toLowerCase() === 'a') {
+                            // due to differences in implementation between FireFox and Chrome, we must move the
+                            // insertion point past the <a> element, otherwise FireFox inserts inside the <a>
+                            // With this change, both FireFox and Chrome behave the same way!
+                            taSelection.setSelectionAfterElement(taSelection.getSelectionElement());
+                        }
+                        var embed = `<img src="${imageOptions.url}"${imageOptions.width ? ' width="' + imageOptions.width + '"' : ''}${imageOptions.height ? ' height="' + imageOptions.height + '"' : ''}/>`
+                        self.$editor().wrapSelection('insertHTML', embed, true);
+                    }
+                }, (cancel) => {})
+            }
+        });
+        // replace the standard image button
+        let toolbar = taOptions.toolbar[3]
+        toolbar.splice(toolbar.indexOf('insertImage'), 1, 'uploadImage');
+        return taOptions;
+    }])
+})
