@@ -35,14 +35,14 @@
 
 <body class="container" ng-controller="RootController">
 
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light bg-light" ng-init="isNavCollapsed = true">
         <a class="navbar-brand" ui-sref="root">Archive Loader</a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+        <button class="navbar-toggler" type="button" ng-click="isNavCollapsed = !isNavCollapsed" 
             aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
 
-        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <div class="collapse navbar-collapse" uib-collapse="isNavCollapsed" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item dropdown" uib-dropdown ui-sref-active="active">
                     <a class="nav-link dropdown-toggle" uib-dropdown-toggle href="#" id="datasetsDropdown" role="button"
