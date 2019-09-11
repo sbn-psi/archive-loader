@@ -19,6 +19,9 @@ app.config(function($stateProvider) {
                 } else {
                     return null
                 }
+            },
+            tags: function($http) {
+                return $http.get('./instruments/tags').then(result => result.data)
             }
         },
         controller: 'InstrumentImportController'
@@ -44,6 +47,7 @@ app.directive('instrumentImportForm', function () {
         templateUrl: 'directives/instrument-import-form.html',
         scope: {
             instrument: '=',
+            tags: '='
         },
         controller: 'FormController'
     };

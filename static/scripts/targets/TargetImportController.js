@@ -1,12 +1,14 @@
-export default function($scope, $http, existing, sanitizer, lidCheck, isPopulated) {
+export default function($scope, $http, existing, tags, sanitizer, prepForForm, lidCheck, isPopulated) {
+    $scope.tags = tags
     
     const templateModel = function() {
-        return {}
+        return {
+            tags: [],
+        }
     }
     $scope.model = {
-        target: existing ? existing : templateModel()
+        target: existing ? prepForForm(existing, templateModel) : templateModel()
     }
-
     $scope.submit = function() {
         if(validate()) {
             $scope.state.error = null;
@@ -26,6 +28,7 @@ export default function($scope, $http, existing, sanitizer, lidCheck, isPopulate
         }
     }
 
+    
     $scope.$watch('model.target.logical_identifier', function() {
         if(!!existing) { return }
         $scope.state.loading = true;

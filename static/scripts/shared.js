@@ -1,19 +1,21 @@
+const isEmptyObject = obj =>  {
+    if (obj.constructor === Object) {
+        for(var key in obj) {
+            if(obj.hasOwnProperty(key) && !key.startsWith('$$') && !!obj[key]) {
+                return false;
+            }
+        }
+        return true;
+    }
+    return false;
+}
+
 app.constant('constants', {
     bundleType: 'Bundle',
     collectionType: 'Collection'
 });
 
 app.constant('sanitizer', function(formObject, templateModel) {
-    const isEmptyObject = obj =>  {
-        if (obj && obj.constructor === Object) {
-            for(var key in obj) {
-                if(obj.hasOwnProperty(key) && !key.startsWith('$$'))
-                    return false;
-            }
-            return true;
-        }
-        return false;
-    }
     if(!formObject) { return null }
 
     let sanitized = templateModel()
@@ -30,7 +32,29 @@ app.constant('sanitizer', function(formObject, templateModel) {
             }
         }
     }
+
+    // clean up tags, specifically
+    if(!!sanitized.tags) { sanitized.tags = sanitized.tags.map(tag => tag.name)}
+
     return sanitized;
+})
+
+app.constant('prepForForm', function(model, templateFn) {
+    if(!model) { return null }
+
+    let template = templateFn()
+    let prepped = Object.assign({}, model)
+
+    Object.keys(template).forEach(key =>  {
+        if(prepped[key] === undefined) {
+            prepped[key] = template[key]
+        }
+    })
+
+    // prep tags, specifically
+    if(!!prepped.tags) { prepped.tags = prepped.tags.map(tag => { return {name: tag}})}
+
+    return prepped;
 })
 
 app.service('lidCheck', function($http) {
@@ -51,23 +75,14 @@ app.service('lidCheck', function($http) {
 
 app.constant('isPopulated', (val) => val && val.length > 0)
 
-app.controller('FormController', function($scope, Upload) {
+app.controller('FormController', function($scope) {
     $scope.progress = {}
     $scope.groupRepeater = function(array) {
         if(array.length === 0 || !isEmptyObject(array.last())) {
             array.push({})
         }
-        return array;
+        return array.filter((val, index) => { return index === array.length-1 || !isEmptyObject(val)})
     }
 
-    const isEmptyObject = obj =>  {
-        if (obj.constructor === Object) {
-            for(var key in obj) {
-                if(obj.hasOwnProperty(key) && !key.startsWith('$$'))
-                    return false;
-            }
-            return true;
-        }
-        return false;
-    }
+    
 })

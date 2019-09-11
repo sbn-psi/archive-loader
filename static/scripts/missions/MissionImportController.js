@@ -1,10 +1,14 @@
-export default function($scope, $http, existing, sanitizer, lidCheck, isPopulated) {
+export default function($scope, $http, existing, tags, sanitizer, prepForForm, lidCheck, isPopulated) {
+    $scope.tags = tags
     
     const templateModel = function() {
-        return {}
+        return {
+            tags: [],
+        }
     }
+    
     $scope.model = {
-        mission: existing ? existing : templateModel()
+        mission: existing ? prepForForm(existing, templateModel) : templateModel()
     }
 
     $scope.submit = function() {

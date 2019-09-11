@@ -1,4 +1,4 @@
-export default function($scope, $http, constants, existingDataset, sanitizer) {
+export default function($scope, $http, constants, existingDataset, sanitizer, prepForForm) {
     $scope.allDatasets = function() {
         let themAll = []
         if(!!$scope.model.bundle) { themAll.push($scope.model.bundle) }
@@ -20,10 +20,7 @@ export default function($scope, $http, constants, existingDataset, sanitizer) {
     const prepDatasetFromEdit = function(dataset) {
         let obj = { bundle: null, collections: [] }
 
-        // put tags back in objects, if necessary
-        if(dataset.tags && dataset.tags.length > 0 && dataset.tags[0].constructor === String) {
-            dataset.tags = dataset.tags.map(tag => { return { name: tag} })
-        }
+        dataset = prepForForm(dataset, templateModel)
 
         // sort into bundle and collections
         if(dataset.logical_identifier && dataset.logical_identifier.split(':').length === 7) { // a lidvid with a collection will have 6 colons, thus 7 parts

@@ -1,4 +1,9 @@
-.repeating-group .form-group {
+form section {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+form section .form-group {
   margin-left: 20px;
   margin-right: 20px;
 }

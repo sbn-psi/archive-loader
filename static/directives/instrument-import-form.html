@@ -12,14 +12,23 @@
         <div class="form-check">
             <input class="form-check-input" type="checkbox" ng-model="instrument.is_prime" id="is_prime"><label class="form-check-label">Is Prime</label>
         </div>
-        <hr/>
-        <div class="form-group">
-            <label>Supplemental HTML 1</label><text-angular ng-model="instrument.html1"></text-angular>
-        </div>
-        <hr/>
-        <div class="form-group">
-            <label>Supplemental HTML 2</label><text-angular ng-model="instrument.html2"></text-angular>
-        </div>
+        <section class="repeating-group">
+            <h2>Tags</h2>
+            <div class="form-group empty" ng-repeat="tag in groupRepeater(instrument.tags)">
+                <input class="form-control" type="text" ng-model="tag.name" uib-typeahead="val for val in tags | filter: $viewValue | limitTo: 8">
+            </div>
+        </section>
+    
+        <section>
+            <h2>Additional Content</h2>
+            <div class="form-group">
+                <label>Supplemental HTML - Top</label><text-angular ng-model="instrument.html1"></text-angular>
+            </div>
+            <hr/>
+            <div class="form-group">
+                <label>Supplemental HTML - Bottom</label><text-angular ng-model="instrument.html2"></text-angular>
+            </div>
+        </section>
         
     </form>
 </div>

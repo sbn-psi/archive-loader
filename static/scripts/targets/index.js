@@ -19,6 +19,9 @@ app.config(function($stateProvider) {
                 } else {
                     return null
                 }
+            },
+            tags: function($http) {
+                return $http.get('./targets/tags').then(result => result.data)
             }
         },
         controller: 'TargetImportController'
@@ -54,6 +57,7 @@ app.directive('targetImportForm', function () {
         templateUrl: 'directives/target-import-form.html',
         scope: {
             target: '=',
+            tags: '=',
             error: '='
         },
         controller: 'FormController'

@@ -131,10 +131,21 @@ async function processContextObject(req, res, type, fieldList) {
     if(!bailed) {validate(object)}
 
     if(bailed) { return }
+    await db.connect()
+
+    // pull out any new tags
+    let associatedTags = object.tags
+    let allTags = await db.find({ "type": type }, db.tags)
+    let newTags = []
+    for (associatedTag of associatedTags) {
+        if(!allTags.find(tag => tag.name === associatedTag)) {
+            newTags.push({name: associatedTag, type: type})
+        }
+    }
 
     // insert and return
-    await db.connect()
     try {
+        if(newTags.length > 0) { await db.insert(newTags, db.tags)}
         const result = await db.insert([object], type)
         res.status(201).send( result.ops )
     } catch(err) {
@@ -327,6 +338,24 @@ async function httpRequest(baseUrl, params) {
 }
 
 
+app.get('/targets/tags', async function(req, res) {
+    await tagLookupRequest(req, res, db.targets)    
+})
+app.get('/missions/tags', async function(req, res) {
+    await tagLookupRequest(req, res, db.missions)    
+})
+app.get('/spacecraft/tags', async function(req, res) {
+    await tagLookupRequest(req, res, db.spacecraft)    
+})
+app.get('/instruments/tags', async function(req, res) {
+    await tagLookupRequest(req, res, db.instruments)    
+})
+
+async function tagLookupRequest(req, res, type) {
+    await db.connect()
+    const result = await db.find({ "type": type }, db.tags)
+    res.status(200).send( result.map(tag => tag.name) )
+}
 
 
 app.get('/datasets/export', async function(req, res) {

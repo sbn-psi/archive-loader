@@ -20,9 +20,9 @@
             <label>PDS3 Version URL: </label><input class="form-control" type="url" ng-model="dataset.pds3_version_url" uib-typeahead="val for val in autocomplete('pds3_version_url', $viewValue)">
         </div>
         <section id="related-tools" class="repeating-group">
-            <h2>Tags</h2>
+            <h2>Types</h2>
             <div class="form-group empty" ng-repeat="tag in groupRepeater(dataset.tags)">
-                <input class="form-control" type="text" ng-model="tag.name" uib-typeahead="val for val in autocomplete('name', $viewValue, 'tags')">
+                <input class="form-control" type="text" ng-model="tag.name" uib-typeahead="val for val in tags | filter: $viewValue | limitTo: 8">
             </div>
         </section>
 

@@ -19,6 +19,9 @@ app.config(function($stateProvider) {
                 } else {
                     return null
                 }
+            },
+            tags: function($http) {
+                return $http.get('./spacecraft/tags').then(result => result.data)
             }
         },
         controller: 'SpacecraftImportController'
@@ -44,6 +47,7 @@ app.directive('spacecraftImportForm', function () {
         templateUrl: 'directives/spacecraft-import-form.html',
         scope: {
             spacecraft: '=',
+            tags: '=',
             error: '='
         },
         controller: 'FormController'

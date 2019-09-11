@@ -19,6 +19,9 @@ app.config(function($stateProvider) {
                 } else {
                     return null
                 }
+            },
+            tags: function($http) {
+                return $http.get('./missions/tags').then(result => result.data)
             }
         },
         controller: 'MissionImportController'
@@ -44,6 +47,7 @@ app.directive('missionImportForm', function () {
         templateUrl: 'directives/mission-import-form.html',
         scope: {
             mission: '=',
+            tags: '=',
             error: '='
         },
         controller: 'FormController'

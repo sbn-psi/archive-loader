@@ -10,6 +10,7 @@ const missionsCollection = 'missions'
 const spacecraftCollection = 'spacecraft'
 const instrumentsCollection = 'instruments'
 const targetRelationshipsCollection = 'targetRelationships'
+const tagsCollection = 'tags'
 
 let db;
 
@@ -20,6 +21,7 @@ module.exports = {
     spacecraft: spacecraftCollection,
     instruments: instrumentsCollection,
     targetRelationships: targetRelationshipsCollection,
+    tags: tagsCollection,
     connect: async function() {
         if(!db) {
             const client = await MongoClient.connect(url, { 
