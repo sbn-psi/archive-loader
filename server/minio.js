@@ -62,13 +62,17 @@ let readPolicy = (bucket, directory) => `{
 
 async function bootstrap() {
     const bucket = process.env.MINIO_BUCKET
-    let minioClient = new Minio.Client({
+    let config = {
         endPoint: process.env.MINIO_ENDPOINT,
         port: parseInt(process.env.MINIO_PORT),
         useSSL: false,
         accessKey: process.env.MINIO_ACCESS_KEY,
         secretKey: process.env.MINIO_SECRET_KEY
-    })
+    }
+    if(!!process.env.MINIO_PORT) {
+        config.port = parseInt(process.env.MINIO_PORT)
+    }
+    let minioClient = new Minio.Client(config)
 
     return new Promise((resolve, reject) => {
         let setPolicy = () => {
@@ -93,7 +97,7 @@ async function bootstrap() {
 }
 
 function uploadHandler(req, res) {
-    let imageBaseUrl = `http://${process.env.MINIO_ENDPOINT}:${process.env.MINIO_PORT}/${process.env.MINIO_BUCKET}/${process.env.MINIO_UPLOADS_FOLDER_NAME}/`
+    let imageBaseUrl = `http://${process.env.MINIO_ENDPOINT}${process.env.MINIO_PORT ? ':' + process.env.MINIO_PORT : ''}/${process.env.MINIO_BUCKET}/${process.env.MINIO_UPLOADS_FOLDER_NAME}/`
     middleware({op: minioExpress.Ops.post})(req, res, () => {
         if (req.minio.error) {
             res.status(400).json({ error: req.minio.error })
