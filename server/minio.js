@@ -64,7 +64,7 @@ async function bootstrap() {
     const bucket = process.env.MINIO_BUCKET
     let config = {
         endPoint: process.env.MINIO_ENDPOINT,
-        useSSL: false,
+        useSSL: true,
         accessKey: process.env.MINIO_ACCESS_KEY,
         secretKey: process.env.MINIO_SECRET_KEY
     }
@@ -89,7 +89,9 @@ async function bootstrap() {
             if(!exists) {
                 console.log(`bucket ${bucket} didn't exist, creating`)
                 minioClient.makeBucket(bucket).then(setPolicy, reject)
-            } else setPolicy()
+            } else {
+                setPolicy()
+            }
             
         })
     })
