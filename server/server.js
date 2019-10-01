@@ -1,11 +1,12 @@
 // external modules
 const assert = require('assert')
-const request = require('request-promise-native')
 
 // internal modules
 require('../static/scripts/helpers.js')
 const db = require('./db.js')
 const solrize = require('./solrize.js')
+const httpRequest = require('./httpRequest.js')
+const registry = require('./registry.js')
 
 // env setup
 if(!process.env.MINIO_ACCESS_KEY) {
@@ -304,6 +305,9 @@ async function editLookupRequest(req, res, type) {
     const result = await db.find({ "logical_identifier": req.query.logical_identifier }, type)
     res.status(200).send( result )
 }
+
+const {contextObjectLookupRequest, lookupRelated} = registry
+
 app.get('/lookup', async function(req, res) {
     let lid = req.query.lid;
     let discovered;
@@ -318,23 +322,32 @@ app.get('/lookup', async function(req, res) {
     res.status(200).send(discovered);
 })
 
-async function contextObjectLookupRequest(lid) {
-    let solrResponse = await httpRequest('https://pds.nasa.gov/services/search/search', {
-        wt: 'json',
-        identifier: lid
-    })
-    assert(solrResponse.response.numFound != 0, "Could not find context object with that identifier")
-    assert(solrResponse.response.numFound == 1, "Found more than one context object with that identifier")
-    return solrResponse.response.docs[0]
-}
-
-async function httpRequest(baseUrl, params) {
-    const options = {
-        uri: baseUrl,
-        json: true,
-        qs: params
-    };
-    return await request(options)
+app.get('/related/targets/', async function(req, res) {
+    related(registry.type.target, req, res)
+})
+app.get('/related/spacecraft/', async function(req, res) {
+    related(registry.type.spacecraft, req, res)
+})
+app.get('/related/missions/', async function(req, res) {
+    related(registry.type.mission, req, res)
+})
+app.get('/related/instruments/', async function(req, res) {
+    related(registry.type.instrument, req, res)
+})
+async function related(desiredType, req, res) {
+    let discovered
+    try {
+        // assert(req.query.length > 0, 'Expected a query parameter "spacecraft", "mission", "instrument", or "type"')
+        let type = Object.keys(req.query).first()
+        assert(type, 'Expected a query parameter "spacecraft", "mission", "instrument", or "target"')
+        let lid = req.query[type]
+        
+        discovered = await lookupRelated(type, desiredType, lid)
+    } catch (err) {
+        res.status(400).send(err.message)
+        return
+    }
+    res.status(200).send(discovered)
 }
 
 
