@@ -22,6 +22,12 @@ app.config(function($stateProvider) {
             },
             tags: function($http) {
                 return $http.get('./spacecraft/tags').then(result => result.data)
+            },
+            instrumentRelationships: function($http) {
+                return $http.get('./relationship-types/instrument').then(result => result.data)
+            },
+            targetRelationships: function($http) {
+                return $http.get('./relationship-types/target').then(result => result.data)
             }
         },
         controller: 'SpacecraftImportController'

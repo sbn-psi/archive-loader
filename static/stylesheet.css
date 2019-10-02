@@ -41,6 +41,10 @@ ui-view {
   padding: 20px;
 }
 
+.capitalize {
+  text-transform: capitalize;
+}
+
 .lds-ring {
   display: inline-block;
   position: relative;

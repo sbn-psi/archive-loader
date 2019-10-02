@@ -73,6 +73,22 @@ app.service('lidCheck', function($http) {
     }
 })
 
+app.service('relatedLookup', function($http) {
+    return function(from, to, lid) {
+        return new Promise(function(resolve, reject) {
+            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:nasa')) {
+                $http.get(`./related/${to}?${from}=${lid}`).then(function(res) {
+                    resolve(res.data)
+                }, function(err) {
+                    reject(err)
+                })
+            } else {
+                reject('Invalid lid')
+            }
+        })
+    }
+})
+
 app.constant('isPopulated', (val) => val && val.length > 0)
 
 app.controller('FormController', function($scope) {
@@ -86,3 +102,9 @@ app.controller('FormController', function($scope) {
 
     
 })
+
+app.filter('pluralizeDumb', function() {
+    return function(input) {
+      return (angular.isString(input) && !input.endsWith('s')) ? `${input}s` : input;
+    }
+});

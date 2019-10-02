@@ -64,3 +64,40 @@ app.directive('imageUpload', function() {
         }
     }   
 });
+
+app.directive('relationshipSelector', function() {
+    return {
+        templateUrl: './directives/relationship-selector.html',
+        scope: {
+            from: '@',
+            to: '@',
+            model: '=',
+            lid: '<',
+            relationshipTypes: '<'
+        },
+        controller: function($scope, relatedLookup) {
+            if(!$scope.model) { $scope.model = []}
+
+            $scope.$watch('lid', function(lid) {
+                if(!!lid && lid.startsWith('urn:nasa')) {
+                    relatedLookup($scope.from, $scope.to, lid).then(function(lids) {
+                        mergeIntoModel(lids.map(related => { return { lid: related }}))
+                    }, function(err) { 
+                        console.log(err)
+                        // don't care about errors
+                    })
+                }
+            })
+
+            function mergeIntoModel(toMerge) {
+                toMerge.forEach(obj => { 
+                    if(!$scope.model.some(orig => orig.lid === obj.lid)) {
+                        $scope.model.push(obj)
+                    }
+                })
+                $scope.$digest()
+            }
+            
+        }
+    }   
+});

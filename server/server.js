@@ -322,16 +322,16 @@ app.get('/lookup', async function(req, res) {
     res.status(200).send(discovered);
 })
 
-app.get('/related/targets/', async function(req, res) {
+app.get('/related/target/', async function(req, res) {
     related(registry.type.target, req, res)
 })
 app.get('/related/spacecraft/', async function(req, res) {
     related(registry.type.spacecraft, req, res)
 })
-app.get('/related/missions/', async function(req, res) {
+app.get('/related/mission/', async function(req, res) {
     related(registry.type.mission, req, res)
 })
-app.get('/related/instruments/', async function(req, res) {
+app.get('/related/instrument/', async function(req, res) {
     related(registry.type.instrument, req, res)
 })
 async function related(desiredType, req, res) {
@@ -349,7 +349,27 @@ async function related(desiredType, req, res) {
     }
     res.status(200).send(discovered)
 }
-
+app.get('/relationship-types/target', async function(req, res) {
+    //TODO: build this dynamically
+    res.status(200).send([
+        'Primary',
+        'Secondary',
+        'Minor',
+        'Serendipitous',
+        'Calibration',
+        'Ad Hoc',
+        'Spurious'
+    ])
+})
+app.get('/relationship-types/instrument', async function(req, res) {
+    //TODO: build this dynamically
+    res.status(200).send([
+        'Science',
+        'Support',
+        'Derived',
+        'Ancillary'
+    ])
+})
 
 app.get('/targets/tags', async function(req, res) {
     await tagLookupRequest(req, res, db.targets)    

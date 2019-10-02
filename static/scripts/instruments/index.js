@@ -22,6 +22,9 @@ app.config(function($stateProvider) {
             },
             tags: function($http) {
                 return $http.get('./instruments/tags').then(result => result.data)
+            },
+            instrumentRelationships: function($http) {
+                return $http.get('./relationship-types/instrument').then(result => result.data)
             }
         },
         controller: 'InstrumentImportController'

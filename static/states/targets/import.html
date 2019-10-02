@@ -4,6 +4,11 @@
             <target-import-form target="model.target" error="state.error" tags="tags"></target-import-form>
         </div>
     </div>
+    <div class="row">
+        <div class="col tab-container">
+            <relationship-selector from="target" to="spacecraft" model="model.spacecraft" lid="model.target.logical_identifier" relationship-types="targetRelationships"></relationship-selector>
+        </div>
+    </div>
     <div class="row d-flex justify-content-center">
         <input class="btn btn-primary" type="submit" value="Submit" ng-click="submit()" ng-if="!state.loading">
         <loading ng-if="state.loading"></loading>

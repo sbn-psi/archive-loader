@@ -22,6 +22,9 @@ app.config(function($stateProvider) {
             },
             tags: function($http) {
                 return $http.get('./targets/tags').then(result => result.data)
+            },
+            targetRelationships: function($http) {
+                return $http.get('./relationship-types/target').then(result => result.data)
             }
         },
         controller: 'TargetImportController'

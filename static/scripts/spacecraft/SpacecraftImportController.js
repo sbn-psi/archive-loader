@@ -1,5 +1,7 @@
-export default function($scope, $http, existing, tags, sanitizer, prepForForm, lidCheck, isPopulated) {
+export default function($scope, $http, existing, tags, sanitizer, prepForForm, lidCheck, isPopulated, targetRelationships, instrumentRelationships) {
     $scope.tags = tags
+    $scope.targetRelationships = targetRelationships
+    $scope.instrumentRelationships = instrumentRelationships
     
     const templateModel = function() {
         return {
