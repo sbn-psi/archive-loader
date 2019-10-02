@@ -51,7 +51,8 @@ async function foreignReferences(sourceType, desiredType, lid) {
 
 async function ownedReferneces(sourceType, desiredType, lid) {
     let doc = await contextObjectLookupRequest(lid)
-    return doc[referenceField[desiredType]]
+    let owned = doc[referenceField[desiredType]]
+    return owned ? owned : []
 }
 
 module.exports = {
