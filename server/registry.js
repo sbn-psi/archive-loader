@@ -41,20 +41,16 @@ async function lookupRelated(sourceType, desiredType, lid) {
     return result.map(identifier => new LogicalIdentifier(identifier).lid)
 }
 async function foreignReferences(sourceType, desiredType, lid) {
-    console.log('starting foreign')
     let solrResponse = await httpRequest(registryUrl, {
         wt: 'json',
         q: `${referenceField[sourceType]}:${new LogicalIdentifier(lid).escapedLid}\\:\\:* AND data_class:"${relatedTypeVal[desiredType]}"`,
         fl: 'identifier'
     })
-    console.log('finished foreign ' + solrResponse.response.docs.length)
     return solrResponse.response.docs.map(doc => doc.identifier)
 }
 
 async function ownedReferneces(sourceType, desiredType, lid) {
-    console.log('starting owned')
     let doc = await contextObjectLookupRequest(lid)
-    console.log('finished owned ' + doc.length)
     return doc[referenceField[desiredType]]
 }
 
