@@ -64,7 +64,7 @@ async function bootstrap() {
     const bucket = process.env.MINIO_BUCKET
     let config = {
         endPoint: process.env.MINIO_ENDPOINT,
-        useSSL: true,
+        useSSL: process.env.MINIO_SECURITY === 'true',
         accessKey: process.env.MINIO_ACCESS_KEY,
         secretKey: process.env.MINIO_SECRET_KEY
     }
@@ -98,7 +98,7 @@ async function bootstrap() {
 }
 
 function uploadHandler(req, res) {
-    let imageBaseUrl = `https://${process.env.MINIO_ENDPOINT}${process.env.MINIO_PORT ? ':' + process.env.MINIO_PORT : ''}/${process.env.MINIO_BUCKET}/${process.env.MINIO_UPLOADS_FOLDER_NAME}/`
+    let imageBaseUrl = `${process.env.MINIO_SECURITY === 'true' ? 'https' : 'http'}://${process.env.MINIO_ENDPOINT}${process.env.MINIO_PORT ? ':' + process.env.MINIO_PORT : ''}/${process.env.MINIO_BUCKET}/${process.env.MINIO_UPLOADS_FOLDER_NAME}/`
     middleware({op: minioExpress.Ops.post})(req, res, () => {
         if (req.minio.error) {
             res.status(400).json({ error: req.minio.error })

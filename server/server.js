@@ -15,7 +15,7 @@ if(!process.env.MINIO_ACCESS_KEY) {
 
 // express, minio setup
 console.log('connecting to file server...')
-require('./minio.js').bootstrap().then(expressSetup)
+require('./minio.js').bootstrap().then(expressSetup, console.log)
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
