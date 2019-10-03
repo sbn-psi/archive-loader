@@ -4,7 +4,9 @@
   "description": "Web server and client application used to load and manage the metadata used by the PDS Registry and Web UI services",
   "main": "server/server.js",
   "scripts": {
-    "start": "node server/server.js"
+    "start": "node server/server.js",
+    "minio-dev": "docker run -p 8999:9000 -e \"MINIO_ACCESS_KEY=development_access\" -e \"MINIO_SECRET_KEY=development_secret\" -v archiveloader-images:/data minio/minio server /data",
+    "mongo-dev": "mongod --dbpath=data"
   },
   "author": "Mike Drum mdrum@psi.edu",
   "license": "ISC",
