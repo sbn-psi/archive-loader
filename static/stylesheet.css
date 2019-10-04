@@ -86,3 +86,16 @@ ui-view {
     transform: rotate(360deg);
   }
 }
+.relationshipTypes {
+    display: flex;
+    flex-direction: column;
+}
+.relationshipType {
+    margin: 0.25em 0;
+    padding: 0.5em;
+    background: black;
+    border-radius: 0.3em;
+    cursor: pointer;
+    color: white;
+    align-self: flex-start;
+}

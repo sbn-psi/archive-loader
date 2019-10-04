@@ -1,0 +1,7 @@
+<h4>Manage Relationships Form</h4>
+
+<div class="relationshipTypes" ui-sortable="sortableOptions" ng-model="relationshipTypes">
+    <div class="relationshipType" ng-repeat="type in relationshipTypes track by type.id">{{ type.name }}</div>
+</div>
+
+<button type="submit" ng-click="saveRelationships(relationshipTypes)">Save</button>
