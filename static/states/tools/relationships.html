@@ -1,7 +1,11 @@
 <h4>Manage Relationships Form</h4>
 
-<div class="relationshipTypes" ui-sortable="sortableOptions" ng-model="relationshipTypes">
-    <div class="relationshipType" ng-repeat="type in relationshipTypes track by $index">{{ type.name }}</div>
-</div>
+<form>
+    <div class="form-group" ui-sortable ng-model="relationshipTypes">
+        <div ng-repeat="type in relationshipTypes track by $index" class="form-row">
+            <p class="form-control relationship-type" ng-class="{'active':$index <= 2}">{{ $index + 1 }}. {{ type.name }}</p>
+        </div>
+    </div>
+</form>
 
-<button type="submit" ng-click="saveRelationships(relationshipTypes)">Save</button>
+<input class="btn btn-primary" type="submit" value="Save" ng-click="saveRelationships(relationshipTypes)">
