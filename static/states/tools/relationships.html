@@ -1,11 +1,24 @@
 <h4>Manage Relationships Form</h4>
 
 <form>
-    <div class="form-group" ui-sortable ng-model="relationshipTypes">
-        <div ng-repeat="type in relationshipTypes track by $index" class="form-row">
-            <p class="form-control relationship-type" ng-class="{'active':$index <= 2}">{{ $index + 1 }}. {{ type.name }}</p>
+    <div class="form-group" ui-sortable ng-model="relationships.types">
+        <div ng-repeat="type in relationships.types track by $index" class="form-row">
+            <div class="col">
+                <span class="rownowrap"><h3>{{ $index + 1 }}. </h3><p class="form-control relationship-type" ng-class="{'active':$index <= 2}">{{ type.name }}</p></span>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col">
+                <span class="rownowrap">
+                    <h3>{{ relationships.types.length + 1}}. </h3>
+                    <input type="text" ng-model="relationships.newType" style="width:100%;padding-left:0.8em;">
+                </span>
+            </div>
+            <div class="col">
+                <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.addRelationship()">
+            </div>
         </div>
     </div>
 </form>
 
-<input class="btn btn-primary" type="submit" value="Save" ng-click="saveRelationships(relationshipTypes)">
+<input class="btn btn-primary" type="submit" value="Save" ng-click="relationships.saveState()">

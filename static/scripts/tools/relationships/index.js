@@ -17,14 +17,26 @@ app.config(function($stateProvider) {
             }
         },
         controller: function ManageRelationshipsController($scope, $http, types) {
-            $scope.relationshipTypes = types
-            
-            $scope.saveRelationships = function(rels) {
-                const newrels = rels.sort((rel1,rel2) => rel1.order > rel2.order).map((rel,idx) => {
-                    rel.order = idx + 1
-                    return rel
-                })
-                $http.post('/relationship-types/target',newrels)
+            $scope.relationships = {
+                types: types,
+                saveState: function() {
+                    const rels = $scope.relationships.types
+                    const newrels = rels.sort((rel1,rel2) => rel1.order > rel2.order).map((rel,idx) => {
+                        rel.order = idx + 1
+                        return rel
+                    })
+                    $http.post('/relationship-types/target',newrels)
+                },
+                addRelationship: function() {
+                    const newRelationship = {
+                        id: $scope.relationships.types.length,
+                        name: $scope.relationships.newType,
+                        order: $scope.relationships.types.length + 1,
+                    }
+                    $scope.relationships.types.push(newRelationship)
+                    $scope.relationships.saveState()
+                    $scope.relationships.newType = ''
+                }
             }
         }
     })

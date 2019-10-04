@@ -93,3 +93,7 @@ ui-view {
 .relationship-type.active {
     background: #cef !important;
 }
+.rownowrap {
+    display: flex;
+    flex-flow: row nowrap;
+}
