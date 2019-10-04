@@ -13,20 +13,19 @@ app.config(function($stateProvider) {
         },
         resolve: {
             types: function($http) {
-                return $http.get('/relationship-types/target').then(res => res.data);
+                return $http.get('/relationship-types/target').then(res => res.data)
             }
         },
-        controller: function ManageRelationshipsController($scope, types) {
-            $scope.relationshipTypes = types;
+        controller: function ManageRelationshipsController($scope, $http, types) {
+            $scope.relationshipTypes = types
             
             $scope.saveRelationships = function(rels) {
                 const newrels = rels.sort((rel1,rel2) => rel1.order > rel2.order).map((rel,idx) => {
-                    rel.order = idx + 1;
-                    return rel;
-                });
-                console.log(newrels);
-                // TODO: UPDATE TARGET RELATIONSHIPS
-            };
+                    rel.order = idx + 1
+                    return rel
+                })
+                $http.post('/relationship-types/target',newrels)
+            }
         }
     })
 })

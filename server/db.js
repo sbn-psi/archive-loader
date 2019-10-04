@@ -42,6 +42,8 @@ module.exports = {
             doc._isActive = true;
             if(!!doc.logical_identifier) {
                 bulkOperation.find({logical_identifier: doc.logical_identifier}).upsert().replaceOne(doc)
+            } else if (!!doc.id || doc.id === 0) {
+                bulkOperation.find({id:doc.id}).upsert(true).replaceOne(doc)
             } else {
                 bulkOperation.insert(doc)
             }
