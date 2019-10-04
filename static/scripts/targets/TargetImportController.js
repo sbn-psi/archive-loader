@@ -1,22 +1,46 @@
 export default function($scope, $http, existing, tags, sanitizer, prepForForm, lidCheck, isPopulated, targetRelationships) {
-    $scope.tags = tags
-    $scope.targetRelationships = targetRelationships
-    
-    const templateModel = function() {
-        return {
-            tags: [],
+    let config = {
+        modelName: 'target',
+        requiredFields: ['logical_identifier', 'display_name', 'display_description', 'image_url'],
+        primaryPostEndpoint: './targets/add',
+        submitError: 'Target was invalid',
+        lookupReplacements: [
+            {
+                formField: 'display_name',
+                registryField: 'target_name'
+            },
+            {
+                formField: 'display_description',
+                registryField: 'target_description'
+            },
+        ],
+        relationshipModelNames: ['spacecraft'],
+        relationshipTransformer: function(relationship) {
+            return {
+                target: $scope.model.target.logical_identifier,
+                instrument_host: relationship.lid,
+                group: relationship.type
+            }
         }
     }
-    $scope.model = {
-        target: existing ? prepForForm(existing, templateModel) : templateModel()
-    }
-    $scope.submit = function() {
+    Object.assign($scope.config, config)
+    
+
+    $scope.lol = function() {
         if(validate()) {
             $scope.state.error = null;
             $scope.state.loading = true;            
-            let postable = sanitizer($scope.model.target, templateModel)
+            let postableTarget = sanitizer($scope.model.target, templateModel)
+            let targetPost = $http.post('./targets/add', postableTarget)
 
-            $http.post('./targets/add', postable).then(function(res) {
+            let postableRelationships = $scope.model.spacecraft.map(rel => { return {
+                target: postableTarget.logical_identifier,
+                instrument_host: rel.lid,
+                group: rel.type
+            }})
+            let relationshipsPost = $http.post('./relationships/add', postableRelationships)
+
+            Promise.all([targetPost, relationshipsPost]).then(function(res) {
                 $scope.state.progress();
                 $scope.state.loading = false;
             }, function(err) {
@@ -27,29 +51,5 @@ export default function($scope, $http, existing, tags, sanitizer, prepForForm, l
         } else {
             $scope.state.error = 'Target was invalid';
         }
-    }
-
-    
-    $scope.$watch('model.target.logical_identifier', function() {
-        if(!!existing) { return }
-        $scope.state.loading = true;
-        lidCheck($scope.model.target.logical_identifier).then(function(doc) {
-            $scope.state.loading = false;
-            const replace = (scopeKey, docKey) => {
-                if(!isPopulated($scope.model.target[scopeKey])) { $scope.model.target[scopeKey] = doc[docKey][0] }
-            }
-            replace('display_name', 'target_name')
-            replace('display_description', 'target_description')
-        }, function(err) { 
-            $scope.state.loading = false;
-            // don't care about errors
-        })
-    })
-
-    const validate = function() {
-        return  isPopulated($scope.model.target.logical_identifier) &&
-                isPopulated($scope.model.target.display_name) &&
-                isPopulated($scope.model.target.display_description) &&
-                isPopulated($scope.model.target.image_url)
     }
 }

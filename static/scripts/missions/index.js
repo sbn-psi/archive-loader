@@ -22,9 +22,11 @@ app.config(function($stateProvider) {
             },
             tags: function($http) {
                 return $http.get('./missions/tags').then(result => result.data)
-            }
+            },
+            targetRelationships: () => null, 
+            instrumentRelationships: () => null
         },
-        controller: 'MissionImportController'
+        controller: 'ContextObjectImportController'
     })
     $stateProvider.state({
         name: 'missions.manage',

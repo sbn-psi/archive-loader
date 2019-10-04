@@ -30,7 +30,7 @@ app.config(function($stateProvider) {
                 return $http.get('./relationship-types/target').then(result => result.data)
             }
         },
-        controller: 'SpacecraftImportController'
+        controller: 'ContextObjectImportController'
     })
     $stateProvider.state({
         name: 'spacecraft.manage',

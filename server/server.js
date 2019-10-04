@@ -209,6 +209,7 @@ app.post('/relationships/add', async function(req, res) {
         }
         try {
             assert(fieldsPresent === 2, `Expected ${JSON.stringify(doc)} to contain exactly two of [${possibleFields.join(', ')}]`)
+            assert(doc.group, `Expected group to be specified on ${JSON.stringify(doc)}`)
         } catch (err) {
             res.status(400).send(err.message)
             bailed = true

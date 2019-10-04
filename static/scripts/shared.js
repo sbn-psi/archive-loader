@@ -99,8 +99,71 @@ app.controller('FormController', function($scope) {
         }
         return array.filter((val, index) => { return index === array.length-1 || !isEmptyObject(val)})
     }
+})
 
+app.controller('ContextObjectImportController', function($scope, $http, sanitizer, prepForForm, lidCheck, isPopulated, existing, tags, targetRelationships, instrumentRelationships) {
+    $scope.tags = tags
+    $scope.targetRelationships = targetRelationships
+    $scope.instrumentRelationships = instrumentRelationships
     
+    $scope.config = {}
+
+    const validate = function() {
+        return $scope.config.requiredFields.every(field => isPopulated($scope.model[$scope.config.modelName][field]))
+    }
+
+    const templateModel = function() {
+        return {
+            tags: [],
+        }
+    }
+
+    $scope.submit = function() {
+        if(validate()) {
+            $scope.state.error = null;
+            $scope.state.loading = true;  
+            
+            let postablePrimary = sanitizer($scope.model[$scope.config.modelName], templateModel)
+            let primaryPost = $http.post($scope.config.primaryPostEndpoint, postablePrimary)
+
+            let postableRelationships = []
+            $scope.config.relationshipModelNames.forEach(relName => {
+                postableRelationships = postableRelationships.concat($scope.model[relName].map(rel => $scope.config.relationshipTransformer(rel, relName)))
+            })
+            let relationshipsPost = $http.post('./relationships/add', postableRelationships)
+
+            Promise.all([primaryPost, relationshipsPost]).then(function(res) {
+                $scope.state.progress();
+                $scope.state.loading = false;
+            }, function(err) {
+                $scope.state.error = err.data;
+                $scope.state.loading = false;
+                console.log(err);
+            })
+        } else {
+            $scope.state.error = $scope.config.submitError;
+        }
+    }
+
+    $scope.$watch('config.modelName', function(modelName) {
+        $scope.model = {
+            [modelName]: existing ? prepForForm(existing, templateModel) : templateModel()
+        }
+        $scope.$watch(`model.${modelName}.logical_identifier`, function(lid) {
+            if(!!existing) { return }
+            $scope.state.loading = true;
+            lidCheck(lid).then(function(doc) {
+                $scope.state.loading = false;
+                const replace = (scopeKey, docKey) => {
+                    if(!isPopulated($scope.model[$scope.config.modelName][scopeKey])) { $scope.model[$scope.config.modelName][scopeKey] = doc[docKey][0] }
+                }
+                $scope.config.lookupReplacements.forEach(replacement => replace(replacement.formField, replacement.registryField))
+            }, function(err) { 
+                $scope.state.loading = false;
+                // don't care about errors
+            })
+        })
+    })
 })
 
 app.filter('pluralizeDumb', function() {

@@ -27,7 +27,7 @@ app.config(function($stateProvider) {
                 return $http.get('./relationship-types/target').then(result => result.data)
             }
         },
-        controller: 'TargetImportController'
+        controller: 'ContextObjectImportController'
     })
     $stateProvider.state({
         name: 'targets.manage',
