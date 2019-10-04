@@ -11,7 +11,9 @@ const spacecraftCollection = 'spacecraft'
 const instrumentsCollection = 'instruments'
 const targetRelationshipsCollection = 'targetRelationships'
 const tagsCollection = 'tags'
+const objectRelationshipsCollection = 'objectRelationships'
 
+const objectKeys = ['instrument_host', 'target', 'instrument']
 let db;
 
 module.exports = {
@@ -22,6 +24,7 @@ module.exports = {
     instruments: instrumentsCollection,
     targetRelationships: targetRelationshipsCollection,
     tags: tagsCollection,
+    objectRelationships: objectRelationshipsCollection,
     connect: async function() {
         if(!db) {
             const client = await MongoClient.connect(url, { 
@@ -71,5 +74,22 @@ module.exports = {
         // do a soft delete
         const result = await collection.updateOne({ '_id': id }, { $set: { _isActive: false }});
         return result;
+    },
+    insertRelationships: async function(documents) {
+        assert(documents.constructor === Array, "First argument must be an array of documents to insert")
+        const collection = db.collection(objectRelationshipsCollection)
+        const bulkOperation = collection.initializeUnorderedBulkOp()
+
+        for(doc of documents) {
+            doc._isActive = true;
+            bulkOperation.find({
+                target: doc.target,
+                instrument_host: doc.instrument_host,
+                instrument: doc.instrument,
+            }).upsert().replaceOne(doc)
+        }
+        var result = await bulkOperation.execute();
+        assert(result.result.ok)
+        return result
     }
 }
