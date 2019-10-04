@@ -352,13 +352,35 @@ async function related(desiredType, req, res) {
 app.get('/relationship-types/target', async function(req, res) {
     //TODO: build this dynamically
     res.status(200).send([
-        'Primary',
-        'Secondary',
-        'Minor',
-        'Serendipitous',
-        'Calibration',
-        'Ad Hoc',
-        'Spurious'
+        {
+            id: 0,
+            order: 1,
+            name: 'Primary',
+        },{
+            id: 1,
+            order: 2,
+            name: 'Secondary',
+        },{
+            id: 2,
+            order: 3,
+            name: 'Minor',
+        },{
+            id: 3,
+            order: 4,
+            name: 'Serendipitous',
+        },{
+            id: 4,
+            order: 5,
+            name: 'Calibration',
+        },{
+            id: 5,
+            order: 6,
+            name: 'Ad Hoc',
+        }, {
+            id: 6,
+            order: 7,
+            name: 'Spurious',
+        },
     ])
 })
 app.get('/relationship-types/instrument', async function(req, res) {
