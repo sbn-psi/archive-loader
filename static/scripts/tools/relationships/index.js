@@ -34,7 +34,11 @@ app.config(function($stateProvider) {
                     }
                     $scope.relationships.types.push(newRelationship)
                     $scope.relationships.newType = ''
-                }
+                },
+                removeRelationship: function(id) {
+                    // TODO: finish this feature
+                    console.log('remove ' + id)
+                },
             }
             $scope.$watch('relationships.types',$scope.relationships.saveState,true)
         }
