@@ -6,6 +6,9 @@
             <div class="col">
                 <span class="rownowrap"><h3>{{ $index + 1 }}. </h3><p class="form-control relationship-type" ng-class="{'active':$index <= 2}">{{ type.name }}</p></span>
             </div>
+            <div class="col">
+                <input type="submit" class="btn btn-danger" value="Remove" ng-click="relationships.removeRelationship(type.id)">
+            </div>
         </div>
         <div class="form-row">
             <div class="col">
@@ -15,10 +18,8 @@
                 </span>
             </div>
             <div class="col">
-                <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.addRelationship()">
+                <input type="submit" value="Add" class="btn btn-secondary" ng-click="relationships.addRelationship()">
             </div>
         </div>
     </div>
 </form>
-
-<input class="btn btn-primary" type="submit" value="Save" ng-click="relationships.saveState()">
