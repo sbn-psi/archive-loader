@@ -29,15 +29,14 @@ app.config(function($stateProvider) {
                 },
                 addRelationship: function() {
                     const newRelationship = {
-                        id: $scope.relationships.types.length,
                         name: $scope.relationships.newType,
                         order: $scope.relationships.types.length + 1,
                     }
                     $scope.relationships.types.push(newRelationship)
-                    $scope.relationships.saveState()
                     $scope.relationships.newType = ''
                 }
             }
+            $scope.$watch('relationships.types',$scope.relationships.saveState,true)
         }
     })
 })
