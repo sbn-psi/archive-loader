@@ -373,7 +373,6 @@ app.post('/relationship-types/target/remove', async function(req, res) {
 app.post('/relationship-types/instrument', async function(req, res) {
     const toInsert = req.body
     await db.connect()
-    console.log(req.body);
     const result = await db.insert(toInsert.map(doc => {
         if (!doc.relationshipId) doc.relationshipId = uuid4()
         return doc
