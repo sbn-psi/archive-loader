@@ -19,13 +19,15 @@ app.config(function($stateProvider) {
         controller: function ManageRelationshipsController($scope, $http, types) {
             $scope.relationships = {
                 types: types,
+                savingState: false,
                 saveState: function() {
+                    $scope.relationships.savingState = true;
                     const rels = $scope.relationships.types
                     const newrels = rels.sort((rel1,rel2) => rel1.order > rel2.order).map((rel,idx) => {
                         rel.order = idx + 1
                         return rel
                     })
-                    $http.post('/relationship-types/target',newrels)
+                    setTimeout($http.post('/relationship-types/target',newrels).finally(() => $scope.relationships.savingState = false), 500)
                 },
                 addRelationship: function() {
                     const newRelationship = {
