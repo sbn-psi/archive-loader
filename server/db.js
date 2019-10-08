@@ -68,10 +68,11 @@ module.exports = {
                 }, {});
         })
     },
-    deleteOne: async function(id, type) {
+    deleteOne: async function(doc, type) {
         const collection = db.collection(type);
+        const toUpdate = (doc.relationshipId) ? { 'relationshipId': doc.relationshipId } : { '_id': doc.id };
         // do a soft delete
-        const result = await collection.updateOne({ '_id': id }, { $set: { _isActive: false }});
+        const result = await collection.updateOne(toUpdate, { $set: { _isActive: false }});
         return result;
     }
 }
