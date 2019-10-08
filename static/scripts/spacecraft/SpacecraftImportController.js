@@ -19,7 +19,7 @@ export default function($scope) {
             return {
                 instrument_host: $scope.model.spacecraft.logical_identifier,
                 [domain]: relationship.lid,
-                group: relationship.type
+                relationshipId: relationship.relationshipId
             }
         }
     }

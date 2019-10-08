@@ -19,7 +19,7 @@ export default function($scope) {
             return {
                 target: $scope.model.target.logical_identifier,
                 instrument_host: relationship.lid,
-                group: relationship.type
+                relationshipId: relationship.relationshipId
             }
         }
     }
