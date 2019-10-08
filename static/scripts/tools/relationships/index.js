@@ -34,7 +34,7 @@ app.config(function($stateProvider) {
                                 $scope.relationships.savingState = false;
                             })
                         })
-                    }, 500)
+                    }, 800)
                 },
                 addRelationship: function() {
                     const newRelationship = {
@@ -44,9 +44,16 @@ app.config(function($stateProvider) {
                     $scope.relationships.types.push(newRelationship)
                     $scope.relationships.newType = ''
                 },
-                removeRelationship: function(id) {
-                    // TODO: finish this feature
-                    console.log('remove ' + id)
+                removeRelationship: function(doc) {
+                    $scope.relationships.removing = doc.relationshipId;
+                    setTimeout(() => {
+                        $http.post('/relationship-types/target/remove',doc).then(res => {
+                            getTargetRelationships($http).then(res => {
+                                $scope.relationships.types = res
+                                $scope.relationships.removing = null;
+                            })
+                        })
+                    },800)
                 },
             }
             $scope.$watch('relationships.types',$scope.relationships.saveState,true)

@@ -1,6 +1,6 @@
 <div class="row">
     <div class="col">
-        <h4>Targets <span ng-show="relationships.savingState" class="spinner-border text-primary m-1"></span></h4>
+        <h4>Targets <span ng-show="relationships.savingState" class="spinner-border text-primary spinner-border-sm"></span></h4>
         <form>
             <div class="form-group" ui-sortable ng-model="relationships.types">
                 <div ng-repeat="type in relationships.types track by $index" class="form-row">
@@ -8,7 +8,13 @@
                         <span class="rownowrap"><p class="form-control relationship-type" ng-class="{'text-primary':$index <= 2,'text-secondary':$index > 2}">{{ type.name }}</p></span>
                     </div>
                     <div class="col">
-                        <input type="submit" class="btn btn-danger" value="Remove" ng-click="relationships.removeRelationship(type.id)">
+                        <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
+                            Remove
+                        </button>
+                        <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
+                            <span class="spinner-border spinner-border-sm"></span>
+                            Removing...
+                        </button>
                     </div>
                 </div>
                 <div class="form-row">
