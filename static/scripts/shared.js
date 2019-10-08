@@ -145,7 +145,11 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
         }
     }
 
+    let configurated = false
     $scope.$watch('config.modelName', function(modelName) {
+        if(!modelName || configurated === true) return
+        configurated = true
+
         $scope.model = {
             [modelName]: existing ? prepForForm(existing, templateModel) : templateModel()
         }
