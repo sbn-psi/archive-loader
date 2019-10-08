@@ -32,6 +32,10 @@ function expressSetup(minioHandler) {
 
 const HARVESTWRAPPER = (process.env.HARVEST ? process.env.HARVEST : 'http://localhost:3009') + '/extract'
 
+// // // EXPRESS ROUTING // // //
+const relationshipTypes = require('./relationship-types/index')
+app.use('/relationship-types', relationshipTypes)
+
 app.post('/datasets/add', async function(req, res) {
     let bailed = false
     // ensure input
@@ -350,46 +354,6 @@ async function related(desiredType, req, res) {
     }
     res.status(200).send(discovered)
 }
-app.post('/relationship-types/target', async function(req, res) {
-    const toInsert = req.body
-    await db.connect()
-    const result = await db.insert(toInsert.map(doc => {
-        if (!doc.relationshipId) doc.relationshipId = uuid4()
-        return doc
-    }), db.targetRelationships)
-    res.status(201).send( result.ops )
-})
-app.get('/relationship-types/target', async function(req, res) {
-    await db.connect()
-    const result = await db.find({}, db.targetRelationships)
-    res.status(200).send( result.sort((a,b) => a.order > b.order) )
-})
-app.post('/relationship-types/target/remove', async function(req, res) {
-    await db.connect()
-    const toRemove = req.body
-    const result = await db.deleteOne(toRemove, db.targetRelationships)
-    res.status(202).send( result.ops )
-})
-app.post('/relationship-types/instrument', async function(req, res) {
-    const toInsert = req.body
-    await db.connect()
-    const result = await db.insert(toInsert.map(doc => {
-        if (!doc.relationshipId) doc.relationshipId = uuid4()
-        return doc
-    }), db.instrumentRelationships)
-    res.status(201).send( result.ops )
-})
-app.get('/relationship-types/instrument', async function(req, res) {
-    await db.connect()
-    const result = await db.find({}, db.instrumentRelationships)
-    res.status(200).send( result.sort((a,b) => a.order > b.order) )
-})
-app.post('/relationship-types/instrument/remove', async function(req, res) {
-    await db.connect()
-    const toRemove = req.body
-    const result = await db.deleteOne(toRemove, db.instrumentRelationships)
-    res.status(202).send( result.ops )
-})
 
 app.get('/targets/tags', async function(req, res) {
     await tagLookupRequest(req, res, db.targets)    
