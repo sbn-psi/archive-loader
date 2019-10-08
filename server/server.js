@@ -364,6 +364,12 @@ app.get('/relationship-types/target', async function(req, res) {
     const result = await db.find({}, db.targetRelationships)
     res.status(200).send( result.sort((a,b) => a.order > b.order) )
 })
+app.post('/relationship-types/target/remove', async function(req, res) {
+    await db.connect()
+    const toRemove = req.body
+    const result = await db.deleteOne(toRemove, db.targetRelationships)
+    res.status(202).send( result.ops )
+})
 app.get('/relationship-types/instrument', async function(req, res) {
     //TODO: build this dynamically
     res.status(200).send([
