@@ -1,18 +1,18 @@
 <div class="row">
     <div class="col">
-        <h4>Targets <span ng-show="relationships.savingState" class="spinner-border text-primary spinner-border-sm"></span></h4>
+        <h4>Targets <span ng-show="relationships.savingTargets" class="spinner-border text-primary spinner-border-sm"></span></h4>
         <relationships-form
             types="relationships.targetTypes"
             cb="relationships.getTargetRelationships"
             relationship-endpoints="relationships.endpoints.target"
-            saving-state="relationships.savingState"></relationships-form>
+            saving-state="relationships.savingTargets"></relationships-form>
     </div>
     <div class="col">
-        <h4>Instruments <span ng-show="relationships.savingState" class="spinner-border text-primary spinner-border-sm"></span></h4>
+        <h4>Instruments <span ng-show="relationships.savingInstruments" class="spinner-border text-primary spinner-border-sm"></span></h4>
         <relationships-form
             types="relationships.instrumentTypes"
             cb="relationships.getInstrumentRelationships"
             relationship-endpoints="relationships.endpoints.instrument"
-            saving-state="relationships.savingState"></relationships-form>
+            saving-state="relationships.savingInstruments"></relationships-form>
     </div>
 </div>

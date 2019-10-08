@@ -39,6 +39,8 @@ app.config(function($stateProvider) {
                 instrumentTypes: instrumentTypes,
                 getTargetRelationships: getTargetRelationships,
                 getInstrumentRelationships: getInstrumentRelationships,
+                savingTargets: false,
+                savingInstruments: false,
             }
         }
     })
