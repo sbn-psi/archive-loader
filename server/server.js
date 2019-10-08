@@ -370,14 +370,26 @@ app.post('/relationship-types/target/remove', async function(req, res) {
     const result = await db.deleteOne(toRemove, db.targetRelationships)
     res.status(202).send( result.ops )
 })
+app.post('/relationship-types/instrument', async function(req, res) {
+    const toInsert = req.body
+    await db.connect()
+    console.log(req.body);
+    const result = await db.insert(toInsert.map(doc => {
+        if (!doc.relationshipId) doc.relationshipId = uuid4()
+        return doc
+    }), db.instrumentRelationships)
+    res.status(201).send( result.ops )
+})
 app.get('/relationship-types/instrument', async function(req, res) {
-    //TODO: build this dynamically
-    res.status(200).send([
-        'Science',
-        'Support',
-        'Derived',
-        'Ancillary'
-    ])
+    await db.connect()
+    const result = await db.find({}, db.instrumentRelationships)
+    res.status(200).send( result.sort((a,b) => a.order > b.order) )
+})
+app.post('/relationship-types/instrument/remove', async function(req, res) {
+    await db.connect()
+    const toRemove = req.body
+    const result = await db.deleteOne(toRemove, db.instrumentRelationships)
+    res.status(202).send( result.ops )
 })
 
 app.get('/targets/tags', async function(req, res) {

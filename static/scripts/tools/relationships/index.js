@@ -1,5 +1,7 @@
+const getTargetRelationships = $http => $http.get('/relationship-types/target').then(res => res.data)
+const getInstrumentRelationships = $http => $http.get('/relationship-types/instrument').then(res => res.data)
+
 app.config(function($stateProvider) {
-    const getTargetRelationships = $http => $http.get('/relationship-types/target').then(res => res.data);
     $stateProvider.state({
         name: 'tools',
         url: '/Tools',
@@ -13,50 +15,89 @@ app.config(function($stateProvider) {
             title: 'Manage Relationships'
         },
         resolve: {
-            types: getTargetRelationships,
+            targetTypes: getTargetRelationships,
+            instrumentTypes: getInstrumentRelationships,
+            endpoints: function() {
+                return {
+                    target: {
+                        'get': null,
+                        'save': '/relationship-types/target',
+                        'remove': '/relationship-types/target/remove',
+                    },
+                    instrument: {
+                        'get': null,
+                        'save': '/relationship-types/instrument',
+                        'remove': '/relationship-types/instrument/remove',
+                    },
+                }
+            }
         },
-        controller: function ManageRelationshipsController($scope, $http, types) {
+        controller: function ManageRelationshipsController($scope, $http, targetTypes, instrumentTypes, endpoints) {
             $scope.relationships = {
-                types: types,
-                savingState: false,
+                endpoints: endpoints,
+                targetTypes: targetTypes,
+                instrumentTypes: instrumentTypes,
+                getTargetRelationships: getTargetRelationships,
+                getInstrumentRelationships: getInstrumentRelationships,
+            }
+        }
+    })
+})
+
+app.directive('relationshipsForm', () => {
+    return {
+        templateUrl: 'directives/relationships-form.html',
+        scope: {
+            types: '=',
+            savingState: '=',
+            relationshipEndpoints: '=',
+            cb: '=',
+        },
+        controller: function($scope,$http) {
+            const cb = $scope.cb
+            const endpoints = $scope.relationshipEndpoints;
+            $scope.relationships = {
+                removing: null,
+                addRelationship: function() {
+                    const newRelationship = {
+                        name: $scope.relationships.newType,
+                        order: $scope.types.length + 1,
+                    }
+                    $scope.types.push(newRelationship)
+                    $scope.relationships.newType = ''
+                },
                 saveState: function(types) {
-                    if (!types || !types.length) return;
-                    $scope.relationships.savingState = true;
-                    const rels = $scope.relationships.types
+                    if (!types || !types.length) return $scope.types = [];
+                    else if (!endpoints) return;
+                    
+                    $scope.savingState = true;
+                    const rels = $scope.types
                     const newrels = rels.sort((rel1,rel2) => rel1.order > rel2.order).map((rel,idx) => {
                         rel.order = idx + 1
                         return rel
                     })
                     setTimeout(() => {
-                        $http.post('/relationship-types/target',newrels).finally(() => {
-                            getTargetRelationships($http).then(res => {
-                                $scope.relationships.types = res
-                                $scope.relationships.savingState = false;
+                        $http.post(endpoints.save,newrels).finally(() => {
+                            cb($http).then(res => {
+                                $scope.types = res
+                                $scope.savingState = false;
                             })
                         })
                     }, 800)
                 },
-                addRelationship: function() {
-                    const newRelationship = {
-                        name: $scope.relationships.newType,
-                        order: $scope.relationships.types.length + 1,
-                    }
-                    $scope.relationships.types.push(newRelationship)
-                    $scope.relationships.newType = ''
-                },
                 removeRelationship: function(doc) {
                     $scope.relationships.removing = doc.relationshipId;
                     setTimeout(() => {
-                        $http.post('/relationship-types/target/remove',doc).then(res => {
-                            getTargetRelationships($http).then(res => {
-                                $scope.relationships.types = res
+                        $http.post(endpoints.remove,doc).then(res => {
+                            cb($http).then(res => {
+                                $scope.types = res
                                 $scope.relationships.removing = null;
                             })
                         })
                     },800)
                 },
             }
-            $scope.$watch('relationships.types',$scope.relationships.saveState,true)
+            $scope.$watch('types',$scope.relationships.saveState,true)
         }
-    })
+    }
 })

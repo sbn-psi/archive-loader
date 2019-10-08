@@ -10,6 +10,7 @@ const missionsCollection = 'missions'
 const spacecraftCollection = 'spacecraft'
 const instrumentsCollection = 'instruments'
 const targetRelationshipsCollection = 'targetRelationships'
+const instrumentRelationshipsCollection = 'instrumentRelationships'
 const tagsCollection = 'tags'
 
 let db;
@@ -21,6 +22,7 @@ module.exports = {
     spacecraft: spacecraftCollection,
     instruments: instrumentsCollection,
     targetRelationships: targetRelationshipsCollection,
+    instrumentRelationships: instrumentRelationshipsCollection,
     tags: tagsCollection,
     connect: async function() {
         if(!db) {
