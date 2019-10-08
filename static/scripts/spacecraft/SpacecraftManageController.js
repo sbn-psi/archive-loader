@@ -1,5 +1,5 @@
 export default function($scope, $http, $state) {
-    $http.get('./spacecraft/status').then(function(res) {
+    $http.get('./status/spacecraft').then(function(res) {
         $scope.status = res.data;
     }, function(err) {
         $scope.state.error = err;

@@ -3,7 +3,7 @@ export default function($scope, $http, $state) {
     $scope.state.mode = INITIAL
 
     const refresh = () => { 
-        $http.get('./target-relationships/status').then(function(res) {
+        $http.get('./status/target-relationships').then(function(res) {
             $scope.targets = res.data.targets;
             $scope.relationships = res.data.relationships;
         }, function(err) {

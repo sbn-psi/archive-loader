@@ -2,7 +2,7 @@ export default function($scope) {
     let config = {
         modelName: 'target',
         requiredFields: ['logical_identifier', 'display_name', 'display_description', 'image_url'],
-        primaryPostEndpoint: './targets/add',
+        primaryPostEndpoint: './save/targets',
         submitError: 'Target was invalid',
         lookupReplacements: [
             {

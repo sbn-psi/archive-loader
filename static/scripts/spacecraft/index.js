@@ -15,13 +15,13 @@ app.config(function($stateProvider) {
         resolve: {
             existing: function($http, $stateParams) {
                 if(!!$stateParams.edit) {
-                    return $http.get('./spacecraft/edit', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data })
+                    return $http.get('./edit/spacecraft', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data })
                 } else {
                     return null
                 }
             },
             tags: function($http) {
-                return $http.get('./spacecraft/tags').then(result => result.data)
+                return $http.get('./tags/spacecraft').then(result => result.data)
             },
             instrumentRelationships: function($http) {
                 return $http.get('./relationship-types/instrument').then(result => result.data)

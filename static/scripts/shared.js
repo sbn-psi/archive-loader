@@ -130,7 +130,7 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
                 postableRelationships = postableRelationships.concat($scope.model[relName].map(rel => $scope.config.relationshipTransformer(rel, relName)))
             })
             if(postableRelationships.length > 0) {
-                backendRequests.push($http.post('./relationships/add', postableRelationships))
+                backendRequests.push($http.post('./save/relationships', postableRelationships))
             }
 
             Promise.all(backendRequests).then(function(res) {

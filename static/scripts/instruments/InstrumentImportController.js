@@ -2,7 +2,7 @@ export default function($scope) {
     let config = {
         modelName: 'instrument',
         requiredFields: ['logical_identifier', 'display_name', 'display_description'],
-        primaryPostEndpoint: './instruments/add',
+        primaryPostEndpoint: './save/instruments',
         submitError: 'Instrument was invalid',
         lookupReplacements: [
             {

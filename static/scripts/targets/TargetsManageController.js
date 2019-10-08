@@ -1,5 +1,5 @@
 export default function($scope, $http, $state) {
-    $http.get('./targets/status').then(function(res) {
+    $http.get('./status/targets').then(function(res) {
         $scope.status = res.data;
     }, function(err) {
         $scope.state.error = err;

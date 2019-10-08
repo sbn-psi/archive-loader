@@ -15,13 +15,13 @@ app.config(function($stateProvider) {
         resolve: {
             existing: function($http, $stateParams) {
                 if(!!$stateParams.edit) {
-                    return $http.get('./missions/edit', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data })
+                    return $http.get('./edit/missions', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data })
                 } else {
                     return null
                 }
             },
             tags: function($http) {
-                return $http.get('./missions/tags').then(result => result.data)
+                return $http.get('./tags/missions').then(result => result.data)
             },
             targetRelationships: () => null, 
             instrumentRelationships: () => null

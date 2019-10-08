@@ -99,7 +99,7 @@ export default function($scope, $http, constants, existingDataset, sanitizer, pr
             bundle: sanitizer($scope.model.bundle, templateModel),
             collections: $scope.model.collections.map(c => sanitizer(c, templateModel))
         }
-        $http.post('./datasets/add', postable).then(function(res) {
+        $http.post('./save/datasets', postable).then(function(res) {
             $scope.state.progress();
             $scope.state.loading = false;
         }, function(err) {

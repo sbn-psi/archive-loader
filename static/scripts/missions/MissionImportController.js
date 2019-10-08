@@ -2,7 +2,7 @@ export default function($scope) {
     let config = {
         modelName: 'mission',
         requiredFields: ['logical_identifier', 'display_name', 'display_description'],
-        primaryPostEndpoint: './missions/add',
+        primaryPostEndpoint: './save/missions',
         submitError: 'Mission was invalid',
         lookupReplacements: [
             {
