@@ -1,4 +1,5 @@
 app.config(function($stateProvider) {
+    const getTargetRelationships = $http => $http.get('/relationship-types/target').then(res => res.data);
     $stateProvider.state({
         name: 'tools',
         url: '/Tools',
@@ -12,22 +13,28 @@ app.config(function($stateProvider) {
             title: 'Manage Relationships'
         },
         resolve: {
-            types: function($http) {
-                return $http.get('/relationship-types/target').then(res => res.data)
-            }
+            types: getTargetRelationships,
         },
         controller: function ManageRelationshipsController($scope, $http, types) {
             $scope.relationships = {
                 types: types,
                 savingState: false,
-                saveState: function() {
+                saveState: function(types) {
+                    if (!types || !types.length) return;
                     $scope.relationships.savingState = true;
                     const rels = $scope.relationships.types
                     const newrels = rels.sort((rel1,rel2) => rel1.order > rel2.order).map((rel,idx) => {
                         rel.order = idx + 1
                         return rel
                     })
-                    setTimeout($http.post('/relationship-types/target',newrels).finally(() => $scope.relationships.savingState = false), 500)
+                    setTimeout(() => {
+                        $http.post('/relationship-types/target',newrels).finally(() => {
+                            getTargetRelationships($http).then(res => {
+                                $scope.relationships.types = res
+                                $scope.relationships.savingState = false;
+                            })
+                        })
+                    }, 500)
                 },
                 addRelationship: function() {
                     const newRelationship = {
