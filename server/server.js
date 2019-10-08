@@ -333,7 +333,11 @@ app.get('/spacecraft/edit', async function(req, res) {
 app.get('/instruments/edit', async function(req, res) {
     await editLookupRequest(req, res, db.instruments)    
 })
-
+const dbToFieldMap = {
+    [db.targets]: 'target',
+    [db.spacecraft]: 'instrument_host',
+    [db.instruments]: 'instrument',
+}
 async function editLookupRequest(req, res, type) {
     try {
         assert(req.query.logical_identifier, 'Expected logical_identifier argument')
@@ -344,8 +348,12 @@ async function editLookupRequest(req, res, type) {
     }
 
     await db.connect()
-    const result = await db.find({ "logical_identifier": req.query.logical_identifier }, type)
-    res.status(200).send( result )
+    const object = await db.find({ "logical_identifier": req.query.logical_identifier }, type)
+    const relationships = await db.find({ [dbToFieldMap[type]]: req.query.logical_identifier }, db.objectRelationships)
+    res.status(200).send( {
+        object: object[0],
+        relationships: relationships
+    } )
 }
 
 const {contextObjectLookupRequest, lookupRelated} = registry
@@ -394,22 +402,22 @@ async function related(desiredType, req, res) {
 app.get('/relationship-types/target', async function(req, res) {
     //TODO: build this dynamically
     res.status(200).send([
-        'Primary',
-        'Secondary',
-        'Minor',
-        'Serendipitous',
-        'Calibration',
-        'Ad Hoc',
-        'Spurious'
+        {name: 'Primary', order: 1, relationshipId: 1},
+        {name: 'Secondary', order: 2, relationshipId: 2},
+        {name: 'Minor', order: 3, relationshipId: 3},
+        {name: 'Serendipitous', order: 4, relationshipId: 4},
+        {name: 'Calibration', order: 5, relationshipId: 5},
+        {name: 'Ad Hoc', order: 6, relationshipId: 6},
+        {name: 'Spurious', order: 7, relationshipId: 7}
     ])
 })
 app.get('/relationship-types/instrument', async function(req, res) {
     //TODO: build this dynamically
     res.status(200).send([
-        'Science',
-        'Support',
-        'Derived',
-        'Ancillary'
+        {name: 'Science', order: 1, relationshipId: 1},
+        {name: 'Support', order: 2, relationshipId: 2},
+        {name: 'Derived', order: 3, relationshipId: 3},
+        {name: 'Ancillary', order: 4, relationshipId: 4}
     ])
 })
 

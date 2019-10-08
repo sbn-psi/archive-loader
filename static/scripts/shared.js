@@ -105,9 +105,7 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
     $scope.tags = tags
     $scope.targetRelationships = targetRelationships
     $scope.instrumentRelationships = instrumentRelationships
-    
     $scope.config = {}
-
     const validate = function() {
         return $scope.config.requiredFields.every(field => isPopulated($scope.model[$scope.config.modelName][field]))
     }
@@ -151,8 +149,12 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
         configurated = true
 
         $scope.model = {
-            [modelName]: existing ? prepForForm(existing, templateModel) : templateModel()
+            [modelName]: existing ? prepForForm(existing.object, templateModel) : templateModel()
         }
+        $scope.config.relationshipModelNames.forEach(relName => {
+            $scope.model[relName] = existing ? existing.relationships.map($scope.config.relationshipUnpacker) : []
+        })
+        
         $scope.$watch(`model.${modelName}.logical_identifier`, function(lid) {
             if(!!existing) { return }
             $scope.state.loading = true;

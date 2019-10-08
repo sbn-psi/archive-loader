@@ -21,6 +21,12 @@ export default function($scope) {
                 [domain]: relationship.lid,
                 relationshipId: relationship.relationshipId
             }
+        },
+        relationshipUnpacker: function(relationship) {
+            return {
+                lid: relationship.target ? relationship.target : relationship.instrument,
+                relationshipId: relationship.relationshipId
+            }
         }
     }
     Object.assign($scope.config, config)
