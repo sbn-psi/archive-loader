@@ -10,6 +10,8 @@ const missionsCollection = 'missions'
 const spacecraftCollection = 'spacecraft'
 const instrumentsCollection = 'instruments'
 const targetRelationshipsCollection = 'targetRelationships'
+const targetSpacecraftRelationshipTypesCollection = 'targetSpacecraftRelationshipTypes'
+const instrumentSpacecraftRelationshipTypes = 'instrumentSpacecraftRelationshipTypes'
 const tagsCollection = 'tags'
 const objectRelationshipsCollection = 'objectRelationships'
 
@@ -23,6 +25,8 @@ module.exports = {
     spacecraft: spacecraftCollection,
     instruments: instrumentsCollection,
     targetRelationships: targetRelationshipsCollection,
+    targetSpacecraftRelationshipTypes: targetSpacecraftRelationshipTypesCollection,
+    instrumentSpacecraftRelationshipTypes: instrumentSpacecraftRelationshipTypes,
     tags: tagsCollection,
     objectRelationships: objectRelationshipsCollection,
     connect: async function() {
@@ -45,6 +49,8 @@ module.exports = {
             doc._isActive = true;
             if(!!doc.logical_identifier) {
                 bulkOperation.find({logical_identifier: doc.logical_identifier}).upsert().replaceOne(doc)
+            } else if (!!doc.relationshipId) {
+                bulkOperation.find({relationshipId:doc.relationshipId}).upsert(true).replaceOne(doc)
             } else {
                 bulkOperation.insert(doc)
             }
@@ -69,10 +75,11 @@ module.exports = {
                 }, {});
         })
     },
-    deleteOne: async function(id, type) {
+    deleteOne: async function(doc, type) {
         const collection = db.collection(type);
+        const toUpdate = (doc.relationshipId) ? { 'relationshipId': doc.relationshipId } : { '_id': doc.id };
         // do a soft delete
-        const result = await collection.updateOne({ '_id': id }, { $set: { _isActive: false }});
+        const result = await collection.updateOne(toUpdate, { $set: { _isActive: false }});
         return result;
     },
     insertRelationships: async function(documents) {

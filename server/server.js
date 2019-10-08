@@ -1,5 +1,6 @@
 // external modules
 const assert = require('assert')
+const uuid4 = require('uuid/v4')
 
 // internal modules
 require('../static/scripts/helpers.js')
@@ -30,6 +31,10 @@ function expressSetup(minioHandler) {
 }
 
 const HARVESTWRAPPER = (process.env.HARVEST ? process.env.HARVEST : 'http://localhost:3009') + '/extract'
+
+// // // EXPRESS ROUTING // // //
+const relationshipTypes = require('./relationship-types/index')
+app.use('/relationship-types', relationshipTypes)
 
 app.post('/datasets/add', async function(req, res) {
     let bailed = false
@@ -399,27 +404,6 @@ async function related(desiredType, req, res) {
     }
     res.status(200).send(discovered)
 }
-app.get('/relationship-types/target', async function(req, res) {
-    //TODO: build this dynamically
-    res.status(200).send([
-        {name: 'Primary', order: 1, relationshipId: 1},
-        {name: 'Secondary', order: 2, relationshipId: 2},
-        {name: 'Minor', order: 3, relationshipId: 3},
-        {name: 'Serendipitous', order: 4, relationshipId: 4},
-        {name: 'Calibration', order: 5, relationshipId: 5},
-        {name: 'Ad Hoc', order: 6, relationshipId: 6},
-        {name: 'Spurious', order: 7, relationshipId: 7}
-    ])
-})
-app.get('/relationship-types/instrument', async function(req, res) {
-    //TODO: build this dynamically
-    res.status(200).send([
-        {name: 'Science', order: 1, relationshipId: 1},
-        {name: 'Support', order: 2, relationshipId: 2},
-        {name: 'Derived', order: 3, relationshipId: 3},
-        {name: 'Ancillary', order: 4, relationshipId: 4}
-    ])
-})
 
 app.get('/targets/tags', async function(req, res) {
     await tagLookupRequest(req, res, db.targets)    

@@ -1,5 +1,5 @@
 <h2 class="capitalize">{{to | pluralizeDumb}}</h2>
 <div class="form-group form-row" ng-repeat="related in model">
     <div class="col"><input class="form-control" type="text" disabled ng-model="related.lid"></div>
-    <div class="col"><select class="form-control" ng-options="type.relationshipId as type.name for type in relationshipTypes" ng-model="related.relationshipId"></select></div>
+    <div class="col"><select class="form-control" ng-options="type.relationshipId as type.name for type in relationshipTypes | orderBy: 'order' " ng-model="related.relationshipId"></select></div>
 </div>

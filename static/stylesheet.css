@@ -86,3 +86,14 @@ ui-view {
     transform: rotate(360deg);
   }
 }
+.relationship-type {
+    background: #fafafa !important;
+    cursor: pointer;
+}
+.relationship-type.active {
+    background: #cef !important;
+}
+.rownowrap {
+    display: flex;
+    flex-flow: row nowrap;
+}

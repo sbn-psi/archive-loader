@@ -1,0 +1,28 @@
+<form>
+    <div class="form-group" ui-sortable ng-model="types">
+        <div ng-repeat="type in types track by $index" class="form-row">
+            <div class="col">
+                <span class="rownowrap"><p class="form-control relationship-type" ng-class="{'text-primary':$index <= 2,'text-secondary':$index > 2}">{{ type.name }}</p></span>
+            </div>
+            <div class="col">
+                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
+                    Remove
+                </button>
+                <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
+                    <span class="spinner-border spinner-border-sm"></span>
+                    Removing...
+                </button>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="col">
+                <span class="rownowrap">
+                    <input type="text" ng-model="relationships.newType" class="form-control" autofocus>
+                </span>
+            </div>
+            <div class="col">
+                <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.addRelationship()">
+            </div>
+        </div>
+    </div>
+</form>

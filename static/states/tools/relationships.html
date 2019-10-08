@@ -1,0 +1,28 @@
+<div class="row">
+    <div class="col">
+        <h4>Targets
+            <button disabled ng-show="relationships.savingTargets" class="btn btn-outline-light text-primary">
+                <span class="spinner-border spinner-border-sm"></span>
+                Saving...
+            </button>
+        </h4>
+        <relationships-form
+            types="relationships.targetTypes"
+            cb="relationships.getTargetRelationships"
+            relationship-endpoints="relationships.endpoints.target"
+            saving-state="relationships.savingTargets"></relationships-form>
+    </div>
+    <div class="col">
+        <h4>Instruments
+            <button disabled ng-show="relationships.savingInstruments" class="btn btn-outline-light text-primary">
+                <span class="spinner-border spinner-border-sm"></span>
+                Saving...
+            </button>
+        </h4>
+        <relationships-form
+            types="relationships.instrumentTypes"
+            cb="relationships.getInstrumentRelationships"
+            relationship-endpoints="relationships.endpoints.instrument"
+            saving-state="relationships.savingInstruments"></relationships-form>
+    </div>
+</div>
