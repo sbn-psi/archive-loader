@@ -123,14 +123,17 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
             
             let postablePrimary = sanitizer($scope.model[$scope.config.modelName], templateModel)
             let primaryPost = $http.post($scope.config.primaryPostEndpoint, postablePrimary)
+            let backendRequests = [primaryPost]
 
             let postableRelationships = []
             $scope.config.relationshipModelNames.forEach(relName => {
                 postableRelationships = postableRelationships.concat($scope.model[relName].map(rel => $scope.config.relationshipTransformer(rel, relName)))
             })
-            let relationshipsPost = $http.post('./relationships/add', postableRelationships)
+            if(postableRelationships.length > 0) {
+                backendRequests.push($http.post('./relationships/add', postableRelationships))
+            }
 
-            Promise.all([primaryPost, relationshipsPost]).then(function(res) {
+            Promise.all(backendRequests).then(function(res) {
                 $scope.state.progress();
                 $scope.state.loading = false;
             }, function(err) {
@@ -152,7 +155,9 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
             [modelName]: existing ? prepForForm(existing.object, templateModel) : templateModel()
         }
         $scope.config.relationshipModelNames.forEach(relName => {
-            $scope.model[relName] = existing ? existing.relationships.map($scope.config.relationshipUnpacker) : []
+            if(!$scope.model[relName]) { $scope.model[relName] = []}
+            let relationships = existing ? existing.relationships.reduce((arr, rel) => $scope.config.relationshipUnpacker(arr, rel, relName), []) : []
+            $scope.model[relName] = $scope.model[relName].concat(relationships)
         })
         
         $scope.$watch(`model.${modelName}.logical_identifier`, function(lid) {

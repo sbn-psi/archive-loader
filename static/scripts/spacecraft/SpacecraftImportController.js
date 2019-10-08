@@ -22,11 +22,12 @@ export default function($scope) {
                 relationshipId: relationship.relationshipId
             }
         },
-        relationshipUnpacker: function(relationship) {
-            return {
-                lid: relationship.target ? relationship.target : relationship.instrument,
+        relationshipUnpacker: function(arr, relationship, domain) {
+            if(!relationship[domain]) return arr
+            return arr.concat({
+                lid: relationship[domain],
                 relationshipId: relationship.relationshipId
-            }
+            })
         }
     }
     Object.assign($scope.config, config)
