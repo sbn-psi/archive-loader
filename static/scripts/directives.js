@@ -80,9 +80,7 @@ app.directive('relationshipSelector', function() {
 
             $scope.$watch('lid', function(lid) {
                 if(!!lid && lid.startsWith('urn:nasa')) {
-                    relatedLookup($scope.from, $scope.to, lid).then(function(lids) {
-                        mergeIntoModel(lids.map(related => { return { lid: related.identifier, name: related.title }}))
-                    }, function(err) { 
+                    relatedLookup($scope.from, $scope.to, lid).then(mergeIntoModel, function(err) { 
                         console.log(err)
                         // don't care about errors
                     })
@@ -94,7 +92,9 @@ app.directive('relationshipSelector', function() {
                     if(!$scope.model.some(orig => orig.lid === obj.lid)) {
                         $scope.model.push(obj)
                     } else {
-                        $scope.model.find(rel => rel.lid === obj.lid).name = obj.name
+                        let existing = $scope.model.find(rel => rel.lid === obj.lid)
+                        existing.name = obj.name
+                        existing.relationshipId = obj.relationshipId
                     }
                 })
                 $scope.$digest()
