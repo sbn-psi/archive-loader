@@ -4,14 +4,14 @@
             <div class="col-1" style="cursor:pointer;">
                 <img src="img/noun_sorting_347858.png" alt="" style="height:2em">
             </div>
-            <div class="col-5">
+            <div class="col-4">
                 <span class="rownowrap"><input type="text" id="{{type.relationshipId}}" ng-disabled="relationships.modifyingRelationship.relationshipId !== type.relationshipId" class="form-control" ng-class="{'text-primary':$index <= 2,'text-secondary':$index > 2}" ng-model="type.name" ng-model-options="{updateOn:'submit'}"></span>
             </div>
             <div class="col-3">
                 <button class="btn btn-secondary" type="button" ng-click="relationships.modifyRelationship(type)" ng-show="relationships.modifyingRelationship.relationshipId !== type.relationshipId">Edit Name</button>
                 <button class="btn btn-primary" ng-click="relationships.saveState(types)" ng-show="relationships.modifyingRelationship.relationshipId === type.relationshipId">Done</button>
             </div>
-            <div class="col-3">
+            <div class="col-4">
                 <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
                     Remove
                 </button>
