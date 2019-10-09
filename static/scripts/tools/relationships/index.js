@@ -68,11 +68,26 @@ app.directive('relationshipsForm', () => {
                     $scope.types.push(newRelationship)
                     $scope.relationships.newType = ''
                 },
+                
+                modifyingRelationship: null,
+                
+                modifyRelationship: function(doc) {
+                    if (doc === null) {
+                        const revertId = $scope.relationships.modifyingRelationship.relationshipId
+                        $scope.types.map(type => (type.relationshipId === revertId) ? type.name = $scope.relationships.modifyingRelationship.name : null)
+                        $scope.relationships.modifyingRelationship = null
+                    } else {
+                        $scope.relationships.modifyingRelationship = doc
+                        setTimeout(() => $(`#${doc.relationshipId}`).focus(),75)
+                    }
+                },
+                
                 saveState: function(types) {
                     if (!types || !types.length) return $scope.types = [];
                     else if (!endpoints) return;
                     
                     $scope.savingState = true;
+                    $scope.relationships.modifyingRelationship = null
                     const rels = $scope.types
                     const newrels = rels.sort((rel1,rel2) => rel1.order > rel2.order).map((rel,idx) => {
                         rel.order = idx + 1

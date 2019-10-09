@@ -1,10 +1,11 @@
 <form>
     <div class="form-group" ui-sortable ng-model="types">
-        <div ng-repeat="type in types track by $index" class="form-row">
+        <div ng-repeat-start="type in types track by $index" class="form-row">
             <div class="col">
-                <span class="rownowrap"><p class="form-control relationship-type" ng-class="{'text-primary':$index <= 2,'text-secondary':$index > 2}">{{ type.name }}</p></span>
+                <span class="rownowrap"><input type="text" id="{{type.relationshipId}}" ng-disabled="relationships.modifyingRelationship.relationshipId !== type.relationshipId" class="form-control" ng-class="{'text-primary':$index <= 2,'text-secondary':$index > 2}" ng-model="type.name" ng-model-options="{updateOn:'submit'}"></span>
             </div>
             <div class="col">
+                <button class="btn btn-secondary" type="button" ng-click="relationships.modifyRelationship(type)">Edit Name</button>
                 <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
                     Remove
                 </button>
@@ -12,6 +13,11 @@
                     <span class="spinner-border spinner-border-sm"></span>
                     Removing...
                 </button>
+            </div>
+        </div>
+        <div class="form-row" ng-repeat-end ng-show="relationships.modifyingRelationship.relationshipId === type.relationshipId">
+            <div class="col">
+                <button class="btn btn-primary" ng-click="relationships.saveState(types)">Done</button>
             </div>
         </div>
         <div class="form-row">
