@@ -1,11 +1,17 @@
 <form>
     <div class="form-group" ui-sortable ng-model="types">
-        <div ng-repeat-start="type in types track by $index" class="form-row">
-            <div class="col">
+        <div ng-repeat="type in types track by $index" class="row">
+            <div class="col-1" style="cursor:pointer;">
+                <img src="img/noun_sorting_347858.png" alt="" style="height:2em">
+            </div>
+            <div class="col-5">
                 <span class="rownowrap"><input type="text" id="{{type.relationshipId}}" ng-disabled="relationships.modifyingRelationship.relationshipId !== type.relationshipId" class="form-control" ng-class="{'text-primary':$index <= 2,'text-secondary':$index > 2}" ng-model="type.name" ng-model-options="{updateOn:'submit'}"></span>
             </div>
-            <div class="col">
-                <button class="btn btn-secondary" type="button" ng-click="relationships.modifyRelationship(type)">Edit Name</button>
+            <div class="col-3">
+                <button class="btn btn-secondary" type="button" ng-click="relationships.modifyRelationship(type)" ng-show="relationships.modifyingRelationship.relationshipId !== type.relationshipId">Edit Name</button>
+                <button class="btn btn-primary" ng-click="relationships.saveState(types)" ng-show="relationships.modifyingRelationship.relationshipId === type.relationshipId">Done</button>
+            </div>
+            <div class="col-3">
                 <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
                     Remove
                 </button>
@@ -15,18 +21,14 @@
                 </button>
             </div>
         </div>
-        <div class="form-row" ng-repeat-end ng-show="relationships.modifyingRelationship.relationshipId === type.relationshipId">
-            <div class="col">
-                <button class="btn btn-primary" ng-click="relationships.saveState(types)">Done</button>
-            </div>
-        </div>
-        <div class="form-row">
-            <div class="col">
+        <div class="row">
+            <div class="col-1"></div>
+            <div class="col-5">
                 <span class="rownowrap">
                     <input type="text" ng-model="relationships.newType" class="form-control" autofocus>
                 </span>
             </div>
-            <div class="col">
+            <div class="col-6">
                 <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.addRelationship()">
             </div>
         </div>
