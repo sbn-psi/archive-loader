@@ -97,6 +97,3 @@ ui-view {
     display: flex;
     flex-flow: row nowrap;
 }
-.form-row {
-    padding-bottom: 1em;
-}
