@@ -1,8 +1,8 @@
 <form>
     <div class="form-group" ui-sortable ng-model="types">
-        <div ng-repeat="type in types track by $index" class="form-row">
+        <div ng-repeat="type in types track by $index" class="form-row" style="margin-bottom:1em">
             <div class="col-1" style="cursor:pointer;">
-                <img src="img/noun_sorting_347858.png" alt="" style="height:2em">
+                <img src="img/noun_sorting_347858.png" style="height:2em" alt="Click and drag to sort items" title="Sort">
             </div>
             <div class="col-4">
                 <span class="rownowrap"><input type="text" id="{{type.relationshipId}}" ng-disabled="relationships.modifyingRelationship.relationshipId !== type.relationshipId" class="form-control" ng-class="{'text-primary':$index <= 2,'text-secondary':$index > 2}" ng-model="type.name" ng-model-options="{updateOn:'submit'}"></span>
