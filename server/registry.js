@@ -61,6 +61,7 @@ async function ownedReferneces(sourceType, desiredType, lid) {
     return owned ? owned : []
 }
 async function fieldLookup(identifiers, fields) {
+    if(identifiers.length === 0) { return []}
     let solrResponse = await httpRequest(registryUrl, {
         wt: 'json',
         q: identifiers.reduce((query, lid) => query + 'identifier:"' + new LID(lid).lid + '" ', ''),
