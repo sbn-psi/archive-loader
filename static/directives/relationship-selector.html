@@ -1,7 +1,7 @@
 <h2 class="capitalize">{{to | pluralizeDumb}}</h2>
 <div class="form-group form-row" ng-repeat="related in model">
     <div class="col">
-        <input ng-if="!!related.name" class="form-control" type="text" disabled ng-model="related.name">
+        <input ng-if="!!related.name" class="form-control" type="text" disabled ng-model="related.name" title="{{related.lid}}">
         <input ng-if="!related.name" class="form-control" type="text" disabled ng-model="related.lid">
     </div>
     <div class="col"><select class="form-control" ng-options="type.relationshipId as type.name for type in relationshipTypes | orderBy: 'order' " ng-model="related.relationshipId"></select></div>
