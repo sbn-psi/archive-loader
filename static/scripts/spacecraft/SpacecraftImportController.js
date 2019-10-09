@@ -3,7 +3,6 @@ export default function($scope) {
         modelName: 'spacecraft',
         requiredFields: ['logical_identifier', 'display_name', 'display_description'],
         primaryPostEndpoint: './save/spacecraft',
-        submitError: 'Spacecraft was invalid',
         lookupReplacements: [
             {
                 formField: 'display_name',

@@ -107,7 +107,9 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
     $scope.instrumentRelationships = instrumentRelationships
     $scope.config = {}
     const validate = function() {
-        return $scope.config.requiredFields.every(field => isPopulated($scope.model[$scope.config.modelName][field]))
+        const requiredFieldsPresent = $scope.config.requiredFields.every(field => isPopulated($scope.model[$scope.config.modelName][field]))
+        const relationshipsHaveValues = $scope.config.relationshipModelNames.every(modelName => $scope.model[modelName].every(rel => !!rel.relationshipId))
+        return requiredFieldsPresent ? relationshipsHaveValues ? true : 'All relationships must have types set' : 'Some required fields are missing'
     }
 
     const templateModel = function() {
@@ -117,7 +119,8 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
     }
 
     $scope.submit = function() {
-        if(validate()) {
+        let validation = validate()
+        if(validation === true) {
             $scope.state.error = null;
             $scope.state.loading = true;  
             
@@ -142,7 +145,7 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
                 console.log(err);
             })
         } else {
-            $scope.state.error = $scope.config.submitError;
+            $scope.state.error = validation;
         }
     }
 

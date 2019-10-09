@@ -3,7 +3,6 @@ export default function($scope) {
         modelName: 'mission',
         requiredFields: ['logical_identifier', 'display_name', 'display_description'],
         primaryPostEndpoint: './save/missions',
-        submitError: 'Mission was invalid',
         lookupReplacements: [
             {
                 formField: 'display_name',

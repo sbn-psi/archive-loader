@@ -3,7 +3,6 @@ export default function($scope) {
         modelName: 'target',
         requiredFields: ['logical_identifier', 'display_name', 'display_description', 'image_url'],
         primaryPostEndpoint: './save/targets',
-        submitError: 'Target was invalid',
         lookupReplacements: [
             {
                 formField: 'display_name',
