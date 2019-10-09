@@ -1,6 +1,6 @@
 const assert = require('assert')
 const httpRequest = require('./httpRequest.js')
-const LogicalIdentifier = require('./LogicalIdentifier')
+const LID = require('./LogicalIdentifier')
 const registryUrl = 'https://pds.nasa.gov/services/search/search'
 
 const type = {
@@ -37,22 +37,36 @@ async function contextObjectLookupRequest(lid) {
 async function lookupRelated(sourceType, desiredType, lid) {
     let findForeign = foreignReferences(sourceType, desiredType, lid)
     let findOwned = ownedReferneces(sourceType, desiredType, lid)
-    let result = [...new Set([...await findForeign, ...await findOwned])] // concat arrays and remove duplicates
-    return result.map(identifier => new LogicalIdentifier(identifier).lid)
+    
+    // concat arrays and remove duplicates
+    let result = [...await findForeign, ...await findOwned] 
+    let uniqueLids = [...new Set(result.map(identifier => new LID(identifier).lid))]
+
+    // get names for each, and return
+    return await fieldLookup(uniqueLids, 'identifier,title')
 }
+
+
 async function foreignReferences(sourceType, desiredType, lid) {
     let solrResponse = await httpRequest(registryUrl, {
         wt: 'json',
-        q: `${referenceField[sourceType]}:${new LogicalIdentifier(lid).escapedLid}\\:\\:* AND data_class:"${relatedTypeVal[desiredType]}"`,
+        q: `${referenceField[sourceType]}:${new LID(lid).escapedLid}\\:\\:* AND data_class:"${relatedTypeVal[desiredType]}"`,
         fl: 'identifier'
     })
     return solrResponse.response.docs.map(doc => doc.identifier)
 }
-
 async function ownedReferneces(sourceType, desiredType, lid) {
     let doc = await contextObjectLookupRequest(lid)
     let owned = doc[referenceField[desiredType]]
     return owned ? owned : []
+}
+async function fieldLookup(identifiers, fields) {
+    let solrResponse = await httpRequest(registryUrl, {
+        wt: 'json',
+        q: identifiers.reduce((query, lid) => query + 'identifier:"' + new LID(lid).lid + '" ', ''),
+        fl: fields
+    })
+    return solrResponse.response.docs
 }
 
 module.exports = {
