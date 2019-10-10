@@ -1,5 +1,5 @@
-const getTargetRelationships = $http => $http.get('/relationship-types/target').then(res => res.data)
-const getInstrumentRelationships = $http => $http.get('/relationship-types/instrument').then(res => res.data)
+const getTargetRelationships = $http => $http.get('./relationship-types/target').then(res => res.data)
+const getInstrumentRelationships = $http => $http.get('./relationship-types/instrument').then(res => res.data)
 
 app.config(function($stateProvider) {
     $stateProvider.state({
@@ -16,13 +16,13 @@ app.config(function($stateProvider) {
                 return {
                     target: {
                         'get': null,
-                        'save': '/relationship-types/target',
-                        'remove': '/relationship-types/target/remove',
+                        'save': './relationship-types/target',
+                        'remove': './relationship-types/target/remove',
                     },
                     instrument: {
                         'get': null,
-                        'save': '/relationship-types/instrument',
-                        'remove': '/relationship-types/instrument/remove',
+                        'save': './relationship-types/instrument',
+                        'remove': './relationship-types/instrument/remove',
                     },
                 }
             }
