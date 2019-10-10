@@ -9,9 +9,6 @@
         <div class="form-group">
             <label>Display Description: </label><textarea class="form-control" ng-model="instrument.display_description"></textarea>
         </div>
-        <div class="form-check">
-            <input class="form-check-input" type="checkbox" ng-model="instrument.is_prime" id="is_prime"><label class="form-check-label">Is Prime</label>
-        </div>
         <section class="repeating-group">
             <h2>Tags</h2>
             <div class="form-group empty" ng-repeat="tag in groupRepeater(instrument.tags)">
