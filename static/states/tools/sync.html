@@ -1,0 +1,32 @@
+<div>
+    <div class="row d-flex justify-content-center">
+        <div class="col-sm-5">
+            <p>Set a unique name for this data submission. We've provided a default below</p>
+            <input ng-disabled="state.loading" class="form-control input-sm" type="text" ng-model="model.suffix">            
+        </div>
+    </div>
+    <div class="row d-flex justify-content-center mt-2">
+        <input class="btn btn-primary" type="submit" value="Submit" ng-click="submit()" ng-disabled="state.loading">
+    </div>
+    <div class="row d-flex justify-content-center" ng-if="state.loading">
+        <loading></loading>
+    </div>
+    <div class="row d-flex justify-content-center" ng-if="!state.loading">
+        <div ng-if="model.last" class="col-sm-5 mt-2">
+            <h2>Last successful sync:</h2>
+            <h3>{{model.last.suffix}}</h3>
+            <ul>
+                <li>Datasets: {{model.last.datasets}}</li>
+                <li>Targets: {{model.last.targets}}</li>
+                <li>Missions: {{model.last.missions}}</li>
+                <li>Spacecraft: {{model.last.spacecraft}}</li>
+                <li>Instruments: {{model.last.instruments}}</li>
+                <li>Tags: {{model.last.tags}}</li>
+                <li>Relationship groups assigned: {{model.last.objectRelationships}}</li>
+                <li>Targets related: {{model.last.targetRelationships}}</li>
+                <li>Spacecraft-Target relationship types: {{model.last.targetSpacecraftRelationshipTypes}}</li>
+                <li>Spacecraft-Instrument relationship types: {{model.last.instrumentSpacecraftRelationshipTypes}}</li>
+            </ul>
+        </div>
+    </div>
+</div>

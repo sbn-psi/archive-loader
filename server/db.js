@@ -14,8 +14,8 @@ const targetSpacecraftRelationshipTypesCollection = 'targetSpacecraftRelationshi
 const instrumentSpacecraftRelationshipTypes = 'instrumentSpacecraftRelationshipTypes'
 const tagsCollection = 'tags'
 const objectRelationshipsCollection = 'objectRelationships'
+const successfulIndexesCollection = 'successfulIndexes'
 
-const objectKeys = ['instrument_host', 'target', 'instrument']
 let db;
 
 module.exports = {
@@ -29,6 +29,7 @@ module.exports = {
     instrumentSpacecraftRelationshipTypes: instrumentSpacecraftRelationshipTypes,
     tags: tagsCollection,
     objectRelationships: objectRelationshipsCollection,
+    successfulIndexes: successfulIndexesCollection,
     connect: async function() {
         if(!db) {
             const client = await MongoClient.connect(url, { 
@@ -63,7 +64,7 @@ module.exports = {
         const collection = db.collection(type)
         let activeFilter = { _isActive: true }
         Object.assign(activeFilter, inputFilter)
-        const docs = await collection.find(activeFilter).toArray()
+        const docs = await collection.find(activeFilter).sort({$natural:1}).toArray()
 
         // hide internal properties
         return docs.map(doc => {
