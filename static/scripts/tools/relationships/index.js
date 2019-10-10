@@ -3,12 +3,7 @@ const getInstrumentRelationships = $http => $http.get('/relationship-types/instr
 
 app.config(function($stateProvider) {
     $stateProvider.state({
-        name: 'tools',
-        url: '/Tools',
-        redirectTo: 'tools.relationships'
-    })
-    $stateProvider.state({
-        name: 'tools.relationships',
+        name: 'relationships',
         url: '/Relationships',
         templateUrl: 'states/tools/relationships.html',
         data: {

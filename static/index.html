@@ -33,6 +33,7 @@
     <script src="./scripts/spacecraft/index.js" type="module"></script>
     <script src="./scripts/instruments/index.js" type="module"></script>
     <script src="./scripts/tools/relationships/index.js" type="module"></script>
+    <script src="./scripts/tools/sync/index.js" type="module"></script>
     <script src="./lib/ui-sortable-0.19.0/sortable.js" type="text/javascript" charset="utf-8"></script>
     <title title-container></title>
 </head>
@@ -106,7 +107,8 @@
                         Tools
                     </a>
                     <div class="dropdown-menu" uib-dropdown-menu aria-labelledby="toolsDropdown">
-                        <a class="dropdown-item" ui-sref="tools.relationships">Manage Relationships</a>
+                        <a class="dropdown-item" ui-sref="relationships">Manage Relationships</a>
+                        <a class="dropdown-item" ui-sref="sync">Sync Data</a>
                     </div>
                 </li>
             </ul>
