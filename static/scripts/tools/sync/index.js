@@ -15,7 +15,6 @@ app.config(function($stateProvider) {
             const getSuffix = () => {
                 $http.get('./solr/suffix-suggestion').then(res => $scope.model.suffix = res.data, err => $scope.state.error = err.data)
             }
-            console.log(lastIndex)
             $scope.model = {
                 last: lastIndex
             }

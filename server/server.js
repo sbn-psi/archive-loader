@@ -1,10 +1,5 @@
-// external modules
-const assert = require('assert')
-
 // internal modules
 require('../static/scripts/helpers.js')
-const db = require('./db.js')
-const httpRequest = require('./httpRequest.js')
 
 // env setup
 if(!process.env.MINIO_ACCESS_KEY) {

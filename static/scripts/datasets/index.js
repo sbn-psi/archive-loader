@@ -20,7 +20,7 @@ app.config(function($stateProvider) {
         resolve: {
             existingDataset: function($http, $stateParams) {
                 if(!!$stateParams.edit) {
-                    return $http.get('./edit/datasets', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data[0] })
+                    return $http.get('./edit/datasets', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data.object })
                 } else {
                     return null
                 }
