@@ -75,21 +75,20 @@ module.exports = {
         assert(result.result.ok)
         return result
     },
-    find: async function(inputFilter, type) {
+    find: async function(inputFilter, type, stream, end) {
         const collection = db.collection(type)
         let activeFilter = { _isActive: true }
         Object.assign(activeFilter, inputFilter)
-        const docs = await collection.find(activeFilter).sort({$natural:1}).toArray()
 
-        // hide internal properties
-        return docs.map(doc => {
-            return Object.keys(doc)
-                .filter(key => !key.startsWith('_'))
-                .reduce((obj, key) => {
-                    obj[key] = doc[key];
-                    return obj;
-                }, {});
-        })
+        if(!!stream && !!end) {
+            // stream documents instead of grouping them together
+            await collection.find(activeFilter).sort({$natural:1}).on('data', data => stream(hideInternalProperties(data))).on('end', end)
+            return
+        } else {
+            // bunch up all documents into array and return
+            const docs = await collection.find(activeFilter).sort({$natural:1}).toArray()
+            return docs.map(hideInternalProperties)
+        }
     },
     deleteOne: async function(doc, type) {
         const collection = db.collection(type);
@@ -115,4 +114,13 @@ module.exports = {
         assert(result.result.ok)
         return result
     }
+}
+
+function hideInternalProperties(doc) {
+    return Object.keys(doc)
+        .filter(key => !key.startsWith('_'))
+        .reduce((obj, key) => {
+            obj[key] = doc[key];
+            return obj;
+        }, {});
 }
