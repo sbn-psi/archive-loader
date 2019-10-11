@@ -45,12 +45,14 @@ async function processContextObject(req, res, type, fieldList) {
     await db.connect()
 
     // pull out any new tags
-    let associatedTags = object.tags
-    let allTags = await db.find({ "type": type }, db.tags)
     let newTags = []
-    for (associatedTag of associatedTags) {
-        if(!allTags.find(tag => tag.name === associatedTag)) {
-            newTags.push({name: associatedTag, type: type})
+    if(!!object.tags) {
+        let associatedTags = object.tags
+        let allTags = await db.find({ "type": type }, db.tags)
+        for (associatedTag of associatedTags) {
+            if(!allTags.find(tag => tag.name === associatedTag)) {
+                newTags.push({name: associatedTag, type: type})
+            }
         }
     }
 

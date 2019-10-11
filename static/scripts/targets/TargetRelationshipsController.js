@@ -45,7 +45,7 @@ export default function($scope, $http, $state) {
             default: cosole.log('invalid relationship'); return
         }
 
-        $http.post('./target-relationships/add', model).then(function(res) {
+        $http.post('./save/target-relationships', model).then(function(res) {
             refresh()
             $scope.state.mode = INITIAL;
             $scope.state.relationship = null
