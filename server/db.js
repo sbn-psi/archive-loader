@@ -82,8 +82,11 @@ module.exports = {
 
         if(!!stream && !!end) {
             // stream documents instead of grouping them together
-            await collection.find(activeFilter).sort({$natural:1}).on('data', data => stream(hideInternalProperties(data))).on('end', end)
-            return
+            return new Promise((resolve, reject) => {
+                collection.find(activeFilter).sort({$natural:1})
+                    .on('data', data => stream(hideInternalProperties(data)))
+                    .on('end', () => { end(); resolve()})
+            })
         } else {
             // bunch up all documents into array and return
             const docs = await collection.find(activeFilter).sort({$natural:1}).toArray()
