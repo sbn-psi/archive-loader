@@ -71,8 +71,7 @@ router.post('/targets', async function(req, res) {
     await processContextObject(req, res, db.targets, [
         'logical_identifier',
         'display_name',
-        'display_description',
-        'image_url'])
+        'display_description'])
 })
 
 router.post('/missions', async function(req, res) {
