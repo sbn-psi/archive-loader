@@ -16,7 +16,8 @@ const tagsCollection = 'tags'
 const objectRelationshipsCollection = 'objectRelationships'
 const successfulIndexesCollection = 'successfulIndexes'
 
-let db;
+let db
+let connectionPromise
 
 module.exports = {
     datasets: datasetsCollection,
@@ -31,15 +32,29 @@ module.exports = {
     objectRelationships: objectRelationshipsCollection,
     successfulIndexes: successfulIndexesCollection,
     connect: async function() {
-        if(!db) {
-            const client = await MongoClient.connect(url, { 
-                useNewUrlParser: true,
-                poolSize: 10
-            });
-            console.log("Connected successfully to database server");
-
-            db = client.db(APP_NAME);
+        if(!!connectionPromise) { 
+            // if we're already building the db connection, just wait for that to finish
+            await connectionPromise
+            return
         }
+        if(!db) {
+            // if db hasn't been spun up, do so
+            connectionPromise = new Promise(async (resolve, reject) => {
+                try {
+                    const client = await MongoClient.connect(url, { 
+                        useNewUrlParser: true,
+                        poolSize: 10
+                    });
+                    console.log("connected successfully to database server");
+        
+                    db = client.db(APP_NAME);
+                    resolve()
+                } catch (err) {reject(err)}
+            })
+            await connectionPromise
+            connectionPromise = null
+        }
+        // if we get here, db connection is established
     },
     insert: async function(documents, type) {
         assert(documents.constructor === Array, "First argument must be an array of documents to insert")
