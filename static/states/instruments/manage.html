@@ -1,7 +1,4 @@
 <div ng-controller="InstrumentsManageController">
     <h2>There are {{status.count}} instruments saved:</h2>
-    <loading ng-if="status.count === undefined"></loading>
-    <ul>
-        <li ng-repeat="lid in status.lids track by $index">{{lid}} <button class="btn btn-link" ng-click="edit(lid)">Edit</button></li>
-    </ul>
+    <manage-list edit="edit" list="status"></manage-list>
 </div>

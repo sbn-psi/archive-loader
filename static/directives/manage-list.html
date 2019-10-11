@@ -1,0 +1,8 @@
+<loading ng-if="list.count === undefined"></loading>
+<table class="table table-responsive-sm">
+    <tr ng-repeat="item in list.results track by $index">
+        <td class="align-middle">{{item.name}}</td>
+        <td class="align-middle text-note">{{item.lid}}</td>
+        <td><button class="btn btn-link" ng-click="edit(item.lid)">Edit</button></td>
+    </tr>
+</table>

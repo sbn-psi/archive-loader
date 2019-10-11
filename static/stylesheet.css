@@ -97,3 +97,7 @@ ui-view {
     display: flex;
     flex-flow: row nowrap;
 }
+.text-note {
+  color: grey;
+  font-size: 0.9em;
+}

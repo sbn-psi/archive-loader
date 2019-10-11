@@ -21,6 +21,16 @@ app.directive('titleContainer', function() {
     }   
 });
 
+app.directive('manageList', function() {
+    return {
+        scope: {
+            edit: '<',
+            list: '<'
+        },
+        templateUrl: './directives/manage-list.html'
+    }   
+});
+
 app.directive('imageUpload', function() {
     return {
         templateUrl: './directives/image-upload-widget.html',
