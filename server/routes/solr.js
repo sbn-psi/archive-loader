@@ -16,7 +16,7 @@ const collections = [{
     collectionName: 'web-targets'
 },{
     dbName: db.missions,
-    collectionName: 'web-missions'
+    collectionName: 'web-investigations'
 },{
     dbName: db.spacecraft,
     collectionName: 'web-instrumenthosts'
