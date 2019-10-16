@@ -116,7 +116,7 @@
     </nav>
 
     <h1 title-container></h1>
-    <ui-view></ui-view>
+    <ui-view ng-if="!state.transitioning"></ui-view>
 
     <div id="alert-frame">
         <loading ng-if="state.loading"></loading>
