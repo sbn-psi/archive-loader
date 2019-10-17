@@ -1,6 +1,8 @@
 var app = angular.module('app', ['ui.bootstrap', 'ui.router', 'textAngular', 'ngFileUpload', 'ui.sortable']);
 
 app.controller('RootController', function($scope, constants, $state, $transitions) {
+    // set initial state
+    $scope.constants = constants;
     $scope.state = {
         datasetType: constants.bundleType,
         progress: function() {
@@ -24,21 +26,21 @@ app.controller('RootController', function($scope, constants, $state, $transition
         alerts: []
     };
 
-    $scope.constants = constants;
-    $state.go('root');
-
-    $transitions.onStart({}, transition => {
+    // handle transitions
+    function beginTransitioning() {
         $scope.state.transitioning = true;
         $scope.state.loading = true;
-    })
-    $transitions.onSuccess({}, transition => {
+    }
+    function endTransitioning() {
         $scope.state.transitioning = false;
         $scope.state.loading = false;
-    })
-    $transitions.onError({}, transition => {
-        $scope.state.transitioning = false;
-        $scope.state.loading = false;
-    })
+    }
+    $transitions.onStart({}, beginTransitioning)
+    $transitions.onSuccess({}, endTransitioning)
+    $transitions.onError({}, endTransitioning)
+
+    // go to root state
+    $state.go('root');
 });
 
 // provide custom image uploader
