@@ -27,7 +27,8 @@ const relatedTypeVal = {
 async function contextObjectLookupRequest(lid) {
     let solrResponse = await httpRequest(registryUrl, {
         wt: 'json',
-        identifier: lid
+        identifier: lid,
+        rows: 1
     })
     assert(solrResponse.response.numFound != 0, "Could not find context object with that identifier")
     assert(solrResponse.response.numFound == 1, "Found more than one context object with that identifier")
@@ -51,7 +52,8 @@ async function foreignReferences(sourceType, desiredType, lid) {
     let solrResponse = await httpRequest(registryUrl, {
         wt: 'json',
         q: `${referenceField[sourceType]}:${new LID(lid).escapedLid}\\:\\:* AND data_class:"${relatedTypeVal[desiredType]}"`,
-        fl: 'identifier'
+        fl: 'identifier',
+        rows: 100
     })
     return solrResponse.response.docs.map(doc => doc.identifier)
 }
@@ -65,7 +67,8 @@ async function fieldLookup(identifiers, fields) {
     let solrResponse = await httpRequest(registryUrl, {
         wt: 'json',
         q: identifiers.reduce((query, lid) => query + 'identifier:"' + new LID(lid).lid + '" ', ''),
-        fl: fields
+        fl: fields,
+        rows: 100
     })
     return solrResponse.response.docs
 }
