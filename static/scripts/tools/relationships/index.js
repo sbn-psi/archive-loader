@@ -91,7 +91,7 @@ app.directive('relationshipsForm', () => {
                     $scope.groups[group].push({name})
                     
                     $scope.relationships.save()
-                    $scope.relationships.modifyingRelationship = null
+                    $scope.relationships.new = {name:null,group:'never'}
                 },
                 
                 new: {
@@ -101,10 +101,10 @@ app.directive('relationshipsForm', () => {
                 
                 modifyingRelationship: null,
                 
+                editing: type => (!$scope.relationships.modifyingRelationship) ? false : type.relationshipId === $scope.relationships.modifyingRelationship.relationshipId,
+                
                 modifyRelationship: function(doc) {
                     if (doc === null) {
-                        const revertId = $scope.relationships.modifyingRelationship.relationshipId
-                        $scope.types.map(type => (type.relationshipId === revertId) ? type.name = $scope.relationships.modifyingRelationship.name : null)
                         $scope.relationships.modifyingRelationship = null
                     } else {
                         $scope.relationships.modifyingRelationship = doc
@@ -114,7 +114,6 @@ app.directive('relationshipsForm', () => {
                 
                 save: function() {
                     $scope.savingState = true;
-                    $scope.relationships.modifyingRelationship = null
 
                     function offset(type,idx,groupOffset) {
                         type.order = idx + groupOffset
@@ -133,6 +132,7 @@ app.directive('relationshipsForm', () => {
                         $http.post(endpoints.save,relationships).then(res => console.log(res)).finally(() => {
                             cb($http).then(res => {
                                 $scope.savingState = false;
+                                $scope.relationships.modifyRelationship(null)
                             })
                         })
                     }, 800)
