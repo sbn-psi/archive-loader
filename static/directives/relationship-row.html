@@ -1,0 +1,21 @@
+<div style="cursor:pointer;" class="form-row">
+    <div class="col-1">
+        <img src="img/noun_sorting_347858.png" style="height:2em" alt="Click and drag to sort items" title="Sort">
+    </div>
+    <div class="col-4">
+        <span class="rownowrap"><input type="text" id="{{type.relationshipId}}" ng-disabled="relationships.modifyingRelationship.relationshipId !== type.relationshipId" class="form-control text-primary" ng-model="type.name" ng-model-options="{updateOn:'submit'}"></span>
+    </div>
+    <div class="col-3">
+        <button class="btn btn-secondary" type="button" ng-click="relationships.modifyRelationship(type)" ng-show="relationships.modifyingRelationship.relationshipId !== type.relationshipId">Edit Name</button>
+        <button class="btn btn-primary" ng-click="relationships.saveState(types)" ng-show="relationships.modifyingRelationship.relationshipId === type.relationshipId">Done</button>
+    </div>
+    <div class="col-4">
+        <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
+            Remove
+        </button>
+        <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
+            <span class="spinner-border spinner-border-sm"></span>
+            Removing...
+        </button>
+    </div>
+</div>

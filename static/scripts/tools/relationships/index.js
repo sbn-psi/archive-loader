@@ -41,6 +41,12 @@ app.config(function($stateProvider) {
     })
 })
 
+app.directive('relationshipRow', () => {
+    return {
+        templateUrl: 'directives/relationship-row.html'
+    }
+})
+
 app.directive('relationshipsForm', () => {
     return {
         templateUrl: 'directives/relationships-form.html',
@@ -52,16 +58,45 @@ app.directive('relationshipsForm', () => {
         },
         controller: function($scope,$http) {
             const cb = $scope.cb
-            const endpoints = $scope.relationshipEndpoints;
+            const endpoints = $scope.relationshipEndpoints
+            
+            $scope.groups = {
+                always: [],
+                sometimes: [],
+                never: [],
+            }
+            
+            $scope.$watch('types',types => {
+                $scope.groups = {
+                    always: [],
+                    sometimes: [],
+                    never: [],
+                }
+                types.map(type => {
+                    if (type.order < 100) {
+                        $scope.groups.always.push(type)
+                    } else if (100 <= type.order && type.order < 1000) {
+                        $scope.groups.sometimes.push(type)
+                    } else {
+                        $scope.groups.never.push(type)
+                    }
+                })
+            })
+            
             $scope.relationships = {
                 removing: null,
-                addRelationship: function() {
-                    const newRelationship = {
-                        name: $scope.relationships.newType,
-                        order: $scope.types.length + 1,
-                    }
-                    $scope.types.push(newRelationship)
-                    $scope.relationships.newType = ''
+                add: function() {
+                    const {name,group} = $scope.relationships.new
+                    
+                    $scope.groups[group].push({name})
+                    
+                    $scope.relationships.save()
+                    $scope.relationships.modifyingRelationship = null
+                },
+                
+                new: {
+                    name: null,
+                    group: 'never',
                 },
                 
                 modifyingRelationship: null,
@@ -77,21 +112,26 @@ app.directive('relationshipsForm', () => {
                     }
                 },
                 
-                saveState: function(types) {
-                    if (!types || !types.length) return $scope.types = [];
-                    else if (!endpoints) return;
-                    
+                save: function() {
                     $scope.savingState = true;
                     $scope.relationships.modifyingRelationship = null
-                    const rels = $scope.types
-                    const newrels = rels.sort((rel1,rel2) => rel1.order > rel2.order).map((rel,idx) => {
-                        rel.order = idx + 1
-                        return rel
-                    })
+
+                    function offset(type,idx,groupOffset) {
+                        type.order = idx + groupOffset
+                        return type
+                    }
+
+                    const groups = $scope.groups
+                    
+                    const _always = groups.always.map((type,idx) => offset(type,idx,0))
+                    const _sometimes = groups.sometimes.map((type,idx) => offset(type,idx,100))
+                    const _never = groups.never.map((type,idx) => offset(type,idx,1000))
+                    
+                    const relationships = _always.concat(_sometimes,_never)
+                    
                     setTimeout(() => {
-                        $http.post(endpoints.save,newrels).finally(() => {
+                        $http.post(endpoints.save,relationships).then(res => console.log(res)).finally(() => {
                             cb($http).then(res => {
-                                $scope.types = res
                                 $scope.savingState = false;
                             })
                         })
@@ -109,7 +149,21 @@ app.directive('relationshipsForm', () => {
                     },800)
                 },
             }
-            $scope.$watch('types',$scope.relationships.saveState,true)
+            
+            $scope.options = {
+                always: {
+                    connectWith: ['#sometimes','#never'],
+                    stop: $scope.relationships.save,
+                },
+                sometimes: {
+                    connectWith: ['#always','#never'],
+                    stop: $scope.relationships.save,
+                },
+                never: {
+                    connectWith: ['#sometimes','#always'],
+                    stop: $scope.relationships.save,
+                },
+            }
         }
     }
 })
