@@ -1,5 +1,5 @@
 <form>
-    <div class="form-group" ui-sortable="options.always" ng-model="groups.always" id="always">
+    <div class="form-group always" ng-class="{{relationshipType}}" ui-sortable="options[relationshipType]['always']" ng-model="groups.always">
         <h5>Show Always</h5>
         <relationship-row ng-repeat="type in groups.always"></relationship-row>
         <div ng-show="!groups.always.length">
@@ -7,7 +7,7 @@
         </div>
     </div>
     
-    <div class="form-group" ui-sortable="options.sometimes" ng-model="groups.sometimes" id="sometimes">
+    <div class="form-group sometimes" ng-class="{{relationshipType}}" ui-sortable="options[relationshipType]['sometimes']" ng-model="groups.sometimes">
         <h5>Show Sometimes</h5>
         <relationship-row ng-repeat="type in groups.sometimes"></relationship-row>
         <div ng-show="!groups.sometimes.length">
@@ -15,7 +15,7 @@
         </div>
     </div>
     
-    <div class="form-group" ui-sortable="options.never" ng-model="groups.never" id="never">
+    <div class="form-group never" ng-class="{{relationshipType}}" ui-sortable="options[relationshipType]['never']" ng-model="groups.never">
         <h5>Show Never</h5>
         <relationship-row ng-repeat="type in groups.never"></relationship-row>
         <div ng-show="!groups.never.length">

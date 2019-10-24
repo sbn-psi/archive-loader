@@ -51,6 +51,7 @@ app.directive('relationshipsForm', () => {
     return {
         templateUrl: 'directives/relationships-form.html',
         scope: {
+            relationshipType: '=',
             types: '=',
             savingState: '=',
             relationshipEndpoints: '=',
@@ -151,18 +152,34 @@ app.directive('relationshipsForm', () => {
             }
             
             $scope.options = {
-                always: {
-                    connectWith: ['#sometimes','#never'],
-                    stop: $scope.relationships.save,
+                target: {
+                    always: {
+                        connectWith: ['.sometimes','.never'],
+                        stop: $scope.relationships.save,
+                    },
+                    sometimes: {
+                        connectWith: ['.always','.never'],
+                        stop: $scope.relationships.save,
+                    },
+                    never: {
+                        connectWith: ['.sometimes','.always'],
+                        stop: $scope.relationships.save,
+                    },
                 },
-                sometimes: {
-                    connectWith: ['#always','#never'],
-                    stop: $scope.relationships.save,
-                },
-                never: {
-                    connectWith: ['#sometimes','#always'],
-                    stop: $scope.relationships.save,
-                },
+                instrument: {
+                    always: {
+                        connectWith: ['.sometimes','.never'],
+                        stop: $scope.relationships.save,
+                    },
+                    sometimes: {
+                        connectWith: ['.always','.never'],
+                        stop: $scope.relationships.save,
+                    },
+                    never: {
+                        connectWith: ['.sometimes','.always'],
+                        stop: $scope.relationships.save,
+                    },
+                }
             }
         }
     }
