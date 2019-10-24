@@ -182,6 +182,6 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
 
 app.filter('pluralizeDumb', function() {
     return function(input) {
-      return (angular.isString(input) && !input.endsWith('s')) ? `${input}s` : input;
+      return (angular.isString(input) && !input.toUpperCase().endsWith('SPACECRAFT')) ? `${input}s` : input;
     }
 });
