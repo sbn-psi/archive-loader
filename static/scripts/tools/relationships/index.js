@@ -122,12 +122,16 @@ app.directive('relationshipsForm', () => {
                     }
 
                     const groups = $scope.groups
+                    console.log(groups.always[0].name);
+                    console.log(groups.always[1].name);
+                    console.log(groups.always[2].name);
                     
                     const _always = groups.always.map((type,idx) => offset(type,idx,0))
                     const _sometimes = groups.sometimes.map((type,idx) => offset(type,idx,100))
                     const _never = groups.never.map((type,idx) => offset(type,idx,1000))
                     
                     const relationships = _always.concat(_sometimes,_never)
+                    console.log(relationships);
                     
                     setTimeout(() => {
                         $http.post(endpoints.save,relationships).then(res => console.log(res)).finally(() => {
@@ -153,32 +157,12 @@ app.directive('relationshipsForm', () => {
             
             $scope.options = {
                 target: {
-                    always: {
-                        connectWith: ['.sometimes','.never'],
-                        stop: $scope.relationships.save,
-                    },
-                    sometimes: {
-                        connectWith: ['.always','.never'],
-                        stop: $scope.relationships.save,
-                    },
-                    never: {
-                        connectWith: ['.sometimes','.always'],
-                        stop: $scope.relationships.save,
-                    },
+                    connectWith: '.sortable',
+                    stop: $scope.relationships.save,
                 },
                 instrument: {
-                    always: {
-                        connectWith: ['.sometimes','.never'],
-                        stop: $scope.relationships.save,
-                    },
-                    sometimes: {
-                        connectWith: ['.always','.never'],
-                        stop: $scope.relationships.save,
-                    },
-                    never: {
-                        connectWith: ['.sometimes','.always'],
-                        stop: $scope.relationships.save,
-                    },
+                    connectWith: '.sortable',
+                    stop: $scope.relationships.save,
                 }
             }
         }
