@@ -22,21 +22,24 @@
             <p style="padding-left:2em">Drag items here.</p>
         </div>
     </div>
-    <div class="row">
-        <div class="col-4">
-            <span class="rownowrap">
-                <input type="text" ng-model="relationships.new.name" class="form-control" autofocus>
-            </span>
-        </div>
-        <div class="col-4">
-            <select name="group" class="form-control" id="group" ng-model="relationships.new.group">
-                <option value="never">Never</option>
-                <option value="sometimes">Sometimes</option>
-                <option value="always">Always</option>
-            </select>
-        </div>
-        <div class="col-1">
-            <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.add()">
+    
+    <div class="form-group">
+        <div class="row">
+            <div class="col-4">
+                <span class="rownowrap">
+                    <input type="text" ng-model="relationships.new.name" class="form-control" autofocus>
+                </span>
+            </div>
+            <div class="col-4">
+                <select name="group" class="form-control" id="group" ng-model="relationships.new.group">
+                    <option value="never">Never</option>
+                    <option value="sometimes">Sometimes</option>
+                    <option value="always">Always</option>
+                </select>
+            </div>
+            <div class="col-1">
+                <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.add()">
+            </div>
         </div>
     </div>
 </form>

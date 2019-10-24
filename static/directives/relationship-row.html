@@ -1,9 +1,17 @@
-<div style="cursor:pointer;" class="form-row">
+<div style="cursor:pointer;" class="row">
     <div class="col-1">
         <img src="img/noun_sorting_347858.png" style="height:2em" alt="Click and drag to sort items" title="Sort">
     </div>
     <div class="col-4">
-        <span class="rownowrap"><input type="text" id="{{type.relationshipId}}" ng-disabled="!relationships.editing(type)" class="form-control text-primary" ng-model="type.name" ng-model-options="{updateOn:'submit'}"></span>
+        <span class="rownowrap">
+            <input
+                type="text"
+                id="{{type.relationshipId}}"
+                ng-disabled="!relationships.editing(type)"
+                class="form-control text-primary"
+                ng-model="type.name"
+                ng-model-options="{updateOn:'submit'}">
+        </span>
     </div>
     <div class="col-3">
         <button
