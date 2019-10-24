@@ -99,4 +99,12 @@ router.post('/target-relationships', async function(req, res) {
     await processContextObject(req, res, db.targetRelationships, [])
 })
 
+router.post('/tool', async function(req, res) {
+    await processContextObject(req, res, db.tools, [
+        'display_name',
+        'url',
+        'image_url'
+    ])
+})
+
 module.exports = router

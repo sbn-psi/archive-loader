@@ -14,6 +14,7 @@ const targetSpacecraftRelationshipTypesCollection = 'targetSpacecraftRelationshi
 const instrumentSpacecraftRelationshipTypes = 'instrumentSpacecraftRelationshipTypes'
 const tagsCollection = 'tags'
 const objectRelationshipsCollection = 'objectRelationships'
+const toolsCollection = 'tools'
 const successfulIndexesCollection = 'successfulIndexes'
 
 let db
@@ -30,6 +31,7 @@ module.exports = {
     instrumentSpacecraftRelationshipTypes: instrumentSpacecraftRelationshipTypes,
     tags: tagsCollection,
     objectRelationships: objectRelationshipsCollection,
+    tools: toolsCollection,
     successfulIndexes: successfulIndexesCollection,
     connect: async function() {
         if(!!connectionPromise) { 

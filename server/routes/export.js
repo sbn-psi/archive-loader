@@ -43,7 +43,7 @@ router.get('/all', async (req, res) => {
     res.set('Content-Type', 'json')
     res.write('{')
     await db.connect()
-    let databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments, db.targetRelationships, db.targetSpacecraftRelationshipTypes, db.instrumentSpacecraftRelationshipTypes, db.tags, db.objectRelationships]
+    let databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments, db.targetRelationships, db.targetSpacecraftRelationshipTypes, db.instrumentSpacecraftRelationshipTypes, db.tags, db.objectRelationships, db.tools]
     let index = 0
     for (database of databases) {
         res.write(`"${database}": `)
