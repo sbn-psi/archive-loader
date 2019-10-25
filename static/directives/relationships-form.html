@@ -1,24 +1,138 @@
 <form>
     <div class="form-group" ng-class="className(relationshipType)" ui-sortable="options[relationshipType]" ng-model="groups.always">
         <h5>Show Always</h5>
-        <relationship-row ng-repeat="type in groups.always"></relationship-row>
-        <div ng-show="!groups.always.length">
+        <div style="cursor:pointer;margin-bottom:0.3em" class="row sortable-item" ng-repeat="type in groups.always">
+            <div class="col-1">
+                <img src="img/noun_sorting_347858.png" style="height:2em" alt="Click and drag to sort items" title="Sort">
+            </div>
+            <div class="col-4">
+                <span class="rownowrap">
+                    <input
+                        type="text"
+                        id="{{type.relationshipId}}"
+                        ng-disabled="!relationships.editing(type)"
+                        class="form-control text-primary"
+                        ng-model="type.name"
+                        ng-model-options="{updateOn:'submit'}">
+                </span>
+            </div>
+            <div class="col-3">
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    ng-click="relationships.modifyRelationship(type)"
+                    ng-show="!relationships.editing(type)">
+                    Edit Name
+                </button>
+                <button
+                    class="btn btn-primary"
+                    ng-click="relationships.save()"
+                    ng-show="relationships.editing(type)">
+                    Done
+                </button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
+                    Remove
+                </button>
+                <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
+                    <span class="spinner-border spinner-border-sm"></span>
+                    Removing...
+                </button>
+            </div>
+        </div>        <div ng-show="!groups.always.length">
             <p style="padding-left:2em">Drag items here.</p>
         </div>
     </div>
     
     <div class="form-group" ng-class="className(relationshipType)" ui-sortable="options[relationshipType]" ng-model="groups.sometimes">
         <h5>Show Sometimes</h5>
-        <relationship-row ng-repeat="type in groups.sometimes"></relationship-row>
-        <div ng-show="!groups.sometimes.length">
+        <div style="cursor:pointer;margin-bottom:0.3em" class="row sortable-item" ng-repeat="type in groups.sometimes">
+            <div class="col-1">
+                <img src="img/noun_sorting_347858.png" style="height:2em" alt="Click and drag to sort items" title="Sort">
+            </div>
+            <div class="col-4">
+                <span class="rownowrap">
+                    <input
+                        type="text"
+                        id="{{type.relationshipId}}"
+                        ng-disabled="!relationships.editing(type)"
+                        class="form-control text-primary"
+                        ng-model="type.name"
+                        ng-model-options="{updateOn:'submit'}">
+                </span>
+            </div>
+            <div class="col-3">
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    ng-click="relationships.modifyRelationship(type)"
+                    ng-show="!relationships.editing(type)">
+                    Edit Name
+                </button>
+                <button
+                    class="btn btn-primary"
+                    ng-click="relationships.save()"
+                    ng-show="relationships.editing(type)">
+                    Done
+                </button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
+                    Remove
+                </button>
+                <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
+                    <span class="spinner-border spinner-border-sm"></span>
+                    Removing...
+                </button>
+            </div>
+        </div>        <div ng-show="!groups.sometimes.length">
             <p style="padding-left:2em">Drag items here.</p>
         </div>
     </div>
     
     <div class="form-group" ng-class="className(relationshipType)" ui-sortable="options[relationshipType]" ng-model="groups.never">
         <h5>Show Never</h5>
-        <relationship-row ng-repeat="type in groups.never"></relationship-row>
-        <div ng-show="!groups.never.length">
+        <div style="cursor:pointer;margin-bottom:0.3em" class="row sortable-item" ng-repeat="type in groups.never">
+            <div class="col-1">
+                <img src="img/noun_sorting_347858.png" style="height:2em" alt="Click and drag to sort items" title="Sort">
+            </div>
+            <div class="col-4">
+                <span class="rownowrap">
+                    <input
+                        type="text"
+                        id="{{type.relationshipId}}"
+                        ng-disabled="!relationships.editing(type)"
+                        class="form-control text-primary"
+                        ng-model="type.name"
+                        ng-model-options="{updateOn:'submit'}">
+                </span>
+            </div>
+            <div class="col-3">
+                <button
+                    class="btn btn-secondary"
+                    type="button"
+                    ng-click="relationships.modifyRelationship(type)"
+                    ng-show="!relationships.editing(type)">
+                    Edit Name
+                </button>
+                <button
+                    class="btn btn-primary"
+                    ng-click="relationships.save()"
+                    ng-show="relationships.editing(type)">
+                    Done
+                </button>
+            </div>
+            <div class="col-4">
+                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
+                    Remove
+                </button>
+                <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
+                    <span class="spinner-border spinner-border-sm"></span>
+                    Removing...
+                </button>
+            </div>
+        </div>        <div ng-show="!groups.never.length">
             <p style="padding-left:2em">Drag items here.</p>
         </div>
     </div>
