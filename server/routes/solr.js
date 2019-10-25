@@ -10,7 +10,8 @@ const SOLR = (process.env.SOLR ? process.env.SOLR : 'http://localhost:8983/solr'
 const collections = [{
     dbName: db.datasets,
     collectionName: 'web-datasets',
-    solrize: true
+    solrize: true,
+    config: 'sbn'
 },{
     dbName: db.targets,
     collectionName: 'web-targets'
@@ -59,7 +60,8 @@ router.post('/sync', async function(req, res){
     let createRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
         action: 'CREATE',
         name: `${collection.collectionName}-${suffix}`,
-        numShards: 1
+        numShards: 1,
+        ['collection.configName']: collection.config ? collection.config : '_default'
     }))
     try{ await Promise.all(createRequests) }
     catch(err) {
