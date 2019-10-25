@@ -66,22 +66,14 @@ app.directive('relationshipsForm', () => {
                 sometimes: [],
                 never: [],
             }
-            
-            $scope.$watch('types',types => {
-                $scope.groups = {
-                    always: [],
-                    sometimes: [],
-                    never: [],
+            $scope.types.map(type => {
+                if (type.order < 100) {
+                    $scope.groups.always.push(type)
+                } else if (100 <= type.order && type.order < 1000) {
+                    $scope.groups.sometimes.push(type)
+                } else {
+                    $scope.groups.never.push(type)
                 }
-                types.map(type => {
-                    if (type.order < 100) {
-                        $scope.groups.always.push(type)
-                    } else if (100 <= type.order && type.order < 1000) {
-                        $scope.groups.sometimes.push(type)
-                    } else {
-                        $scope.groups.never.push(type)
-                    }
-                })
             })
             
             $scope.relationships = {
@@ -151,14 +143,16 @@ app.directive('relationshipsForm', () => {
                 },
             }
             
+            $scope.className = type => `${type} sortable`
+            
             $scope.options = {
                 target: {
-                    connectWith: '.sortable',
+                    connectWith: '.target.sortable',
                     items: '.sortable-item',
                     stop: $scope.relationships.save,
                 },
                 instrument: {
-                    connectWith: '.sortable',
+                    connectWith: '.instrument.sortable',
                     items: '.sortable-item',
                     stop: $scope.relationships.save,
                 }
