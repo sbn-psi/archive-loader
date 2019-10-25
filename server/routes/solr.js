@@ -11,6 +11,7 @@ const collections = [{
     dbName: db.datasets,
     collectionName: 'web-datasets',
     solrize: true,
+    solrizeAttr: 'dataset',
     config: 'sbn'
 },{
     dbName: db.targets,
@@ -75,7 +76,7 @@ router.post('/sync', async function(req, res){
     for (collection of collections) {
         let documents = await db.find({}, collection.dbName)
         completionStatus[collection.dbName] = documents.length
-        let request = httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents) : documents)
+        let request = httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents, collection.solrizeAttr) : documents)
         fillRequests.push(request)
     }
     try { 
