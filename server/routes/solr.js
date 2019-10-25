@@ -130,4 +130,31 @@ router.get('/last-index', async (req, res) => {
     res.status(200).json(successfulIndexes.length > 0 ? successfulIndexes.last() : {})
 })
 
+router.delete('/cleanup/:suffix', async (req, res) => {
+    let bailed = false
+    try {
+        assert(req.params.suffix, "Expected collection suffix to be specified")
+    } catch(err) {
+        res.status(400).send(err.message)
+        bailed = true
+    }
+    if(bailed) {return}
+
+    let suffix = req.params.suffix
+
+    let deleteRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
+        action: 'DELETE',
+        name: `${collection.collectionName}-${suffix}`
+    }))
+    try{ await Promise.all(deleteRequests) }
+    catch(err) {
+        res.status(400).send("Error deleting collections in Solr: " + err.message)
+        bailed = true
+    }
+    if(bailed) {return}
+    else {
+        res.status(204).send()
+    }
+})
+
 module.exports = router
