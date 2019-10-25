@@ -1,35 +1,44 @@
 <form>
-    <div class="form-group" ui-sortable ng-model="types">
-        <div ng-repeat="type in types track by $index" class="form-row" style="margin-bottom:1em">
-            <div class="col-1" style="cursor:pointer;">
-                <img src="img/noun_sorting_347858.png" style="height:2em" alt="Click and drag to sort items" title="Sort">
-            </div>
-            <div class="col-4">
-                <span class="rownowrap"><input type="text" id="{{type.relationshipId}}" ng-disabled="relationships.modifyingRelationship.relationshipId !== type.relationshipId" class="form-control" ng-class="{'text-primary':$index <= 2,'text-secondary':$index > 2}" ng-model="type.name" ng-model-options="{updateOn:'submit'}"></span>
-            </div>
-            <div class="col-3">
-                <button class="btn btn-secondary" type="button" ng-click="relationships.modifyRelationship(type)" ng-show="relationships.modifyingRelationship.relationshipId !== type.relationshipId">Edit Name</button>
-                <button class="btn btn-primary" ng-click="relationships.saveState(types)" ng-show="relationships.modifyingRelationship.relationshipId === type.relationshipId">Done</button>
-            </div>
-            <div class="col-4">
-                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
-                    Remove
-                </button>
-                <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
-                    <span class="spinner-border spinner-border-sm"></span>
-                    Removing...
-                </button>
-            </div>
+    <div class="form-group" ng-class="className(relationshipType)" ui-sortable="options[relationshipType]" ng-model="groups.always">
+        <h5>Show Always</h5>
+        <relationship-row ng-repeat="type in groups.always"></relationship-row>
+        <div ng-show="!groups.always.length">
+            <p style="padding-left:2em">Drag items here.</p>
         </div>
+    </div>
+    
+    <div class="form-group" ng-class="className(relationshipType)" ui-sortable="options[relationshipType]" ng-model="groups.sometimes">
+        <h5>Show Sometimes</h5>
+        <relationship-row ng-repeat="type in groups.sometimes"></relationship-row>
+        <div ng-show="!groups.sometimes.length">
+            <p style="padding-left:2em">Drag items here.</p>
+        </div>
+    </div>
+    
+    <div class="form-group" ng-class="className(relationshipType)" ui-sortable="options[relationshipType]" ng-model="groups.never">
+        <h5>Show Never</h5>
+        <relationship-row ng-repeat="type in groups.never"></relationship-row>
+        <div ng-show="!groups.never.length">
+            <p style="padding-left:2em">Drag items here.</p>
+        </div>
+    </div>
+    
+    <div class="form-group">
         <div class="row">
-            <div class="col-1"></div>
-            <div class="col-5">
+            <div class="col-4">
                 <span class="rownowrap">
-                    <input type="text" ng-model="relationships.newType" class="form-control" autofocus>
+                    <input type="text" ng-model="relationships.new.name" class="form-control" autofocus>
                 </span>
             </div>
-            <div class="col-6">
-                <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.addRelationship()">
+            <div class="col-4">
+                <select name="group" class="form-control" id="group" ng-model="relationships.new.group">
+                    <option value="never">Never</option>
+                    <option value="sometimes">Sometimes</option>
+                    <option value="always">Always</option>
+                </select>
+            </div>
+            <div class="col-1">
+                <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.add()">
             </div>
         </div>
     </div>

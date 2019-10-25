@@ -101,3 +101,6 @@ ui-view {
   color: grey;
   font-size: 0.9em;
 }
+.ui-sortable-helper {
+    width: 100% !important;
+}
