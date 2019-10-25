@@ -41,12 +41,6 @@ app.config(function($stateProvider) {
     })
 })
 
-app.directive('relationshipRow', () => {
-    return {
-        templateUrl: 'directives/relationship-row.html'
-    }
-})
-
 app.directive('relationshipsForm', () => {
     return {
         templateUrl: 'directives/relationships-form.html',
@@ -148,12 +142,10 @@ app.directive('relationshipsForm', () => {
             $scope.options = {
                 target: {
                     connectWith: '.target.sortable',
-                    items: '.sortable-item',
                     stop: $scope.relationships.save,
                 },
                 instrument: {
                     connectWith: '.instrument.sortable',
-                    items: '.sortable-item',
                     stop: $scope.relationships.save,
                 }
             }
