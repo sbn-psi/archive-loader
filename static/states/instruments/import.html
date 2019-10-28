@@ -9,6 +9,11 @@
             <relationship-selector from="instrument" to="spacecraft" model="model.spacecraft" lid="model.instrument.logical_identifier" relationship-types="instrumentRelationships"></relationship-selector>
         </div>
     </div>
+    <div class="row">
+        <div class="col tab-container">
+            <related-tool-selector model="model.instrument.tools" tools="tools"></relationship-selector>
+        </div>
+    </div>
     <div class="row d-flex justify-content-center">
         <input class="btn btn-primary" type="submit" value="Submit" ng-click="submit()" ng-if="!state.loading">
         <loading ng-if="state.loading"></loading>

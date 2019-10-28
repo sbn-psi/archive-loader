@@ -104,3 +104,19 @@ ui-view {
 .ui-sortable-helper {
     width: 100% !important;
 }
+.related-tools {
+  display: flex;
+  flex-flow: row wrap;
+}
+.related-tool-container {
+  padding: 10px;
+}
+.related-tools img {
+  max-height: 120px;
+  opacity: 0.3;
+}
+.related-tools img.highlighted {
+  opacity: 1.0;
+  border: 1px solid rgb(94, 158, 214);
+  box-shadow: 0 0 3px 1px rgb(94, 158, 214);
+}

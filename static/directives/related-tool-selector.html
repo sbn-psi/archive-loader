@@ -1,0 +1,6 @@
+<h2>Related Tools</h2>
+<div class="related-tools">
+    <div ng-repeat="tool in tools" class="related-tool-container">
+        <img ng-src="{{tool.image_url}}.png" ng-class="{highlighted: selected.includes(tool.toolId)}" ng-click="toolClicked(tool)">
+    </div>
+</div>

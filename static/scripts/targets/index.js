@@ -26,7 +26,10 @@ app.config(function($stateProvider) {
             targetRelationships: function($http) {
                 return $http.get('./relationship-types/target').then(result => result.data)
             },
-            instrumentRelationships: () => null
+            instrumentRelationships: () => null,
+            tools: function($http) {
+                return $http.get('./status/tools').then(result => result.data)
+            }
         },
         controller: 'ContextObjectImportController'
     })

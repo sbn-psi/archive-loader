@@ -101,10 +101,11 @@ app.controller('FormController', function($scope) {
     }
 })
 
-app.controller('ContextObjectImportController', function($scope, $http, sanitizer, prepForForm, lidCheck, isPopulated, existing, tags, targetRelationships, instrumentRelationships) {
+app.controller('ContextObjectImportController', function($scope, $http, sanitizer, prepForForm, lidCheck, isPopulated, existing, tags, targetRelationships, instrumentRelationships, tools) {
     $scope.tags = tags
     $scope.targetRelationships = targetRelationships
     $scope.instrumentRelationships = instrumentRelationships
+    $scope.tools = tools
     $scope.config = {}
     const validate = function() {
         const requiredFieldsPresent = $scope.config.requiredFields.every(field => isPopulated($scope.model[$scope.config.modelName][field]))

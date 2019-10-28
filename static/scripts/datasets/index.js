@@ -24,6 +24,9 @@ app.config(function($stateProvider) {
                 } else {
                     return null
                 }
+            },
+            tools: function($http) {
+                return $http.get('./status/tools').then(result => result.data)
             }
         },
         controller: 'DatasetImportController'

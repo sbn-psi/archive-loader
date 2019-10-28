@@ -113,3 +113,22 @@ app.directive('relationshipSelector', function() {
         }
     }   
 });
+
+app.directive('relatedToolSelector', function() {
+    return {
+        templateUrl: './directives/related-tool-selector.html',
+        scope: {
+            tools: '<',
+            selected: '=model'
+        },
+        controller: function($scope) {
+            if(!$scope.selected) { $scope.selected = []}
+
+            $scope.toolClicked = function(tool) {
+                if($scope.selected.includes(tool.toolId)) { $scope.selected.splice($scope.selected.indexOf(tool.toolId), 1); }
+                else { $scope.selected.push(tool.toolId); }
+            }
+            
+        }
+    }   
+});
