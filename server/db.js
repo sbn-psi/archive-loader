@@ -68,7 +68,9 @@ module.exports = {
             if(!!doc.logical_identifier) {
                 bulkOperation.find({logical_identifier: doc.logical_identifier}).upsert().replaceOne(doc)
             } else if (!!doc.relationshipId) {
-                bulkOperation.find({relationshipId:doc.relationshipId}).upsert(true).replaceOne(doc)
+                bulkOperation.find({relationshipId:doc.relationshipId}).upsert().replaceOne(doc)
+            } else if (!!doc.toolId) {
+                bulkOperation.find({toolId:doc.toolId}).upsert().replaceOne(doc)
             } else {
                 bulkOperation.insert(doc)
             }

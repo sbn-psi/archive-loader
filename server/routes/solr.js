@@ -40,6 +40,9 @@ const collections = [{
 },{
     dbName: db.instrumentSpacecraftRelationshipTypes,
     collectionName: 'web-instrumentspacecraftrelationshiptypes'
+},{
+    dbName: db.tools,
+    collectionName: 'web-tools'
 }]
 
 router.post('/sync', async function(req, res){
