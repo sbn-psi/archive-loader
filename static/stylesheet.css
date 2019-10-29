@@ -114,6 +114,7 @@ ui-view {
 .related-tools img {
   max-height: 120px;
   opacity: 0.3;
+  cursor: pointer;
 }
 .related-tools img.highlighted {
   opacity: 1.0;
