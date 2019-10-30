@@ -1,4 +1,6 @@
-export default function($scope, $http, constants, existingDataset, sanitizer, prepForForm) {
+export default function($scope, $http, constants, existingDataset, sanitizer, prepForForm, tools, tags) {
+    $scope.tools = tools
+    $scope.tags = tags
     $scope.allDatasets = function() {
         let themAll = []
         if(!!$scope.model.bundle) { themAll.push($scope.model.bundle) }
@@ -8,9 +10,9 @@ export default function($scope, $http, constants, existingDataset, sanitizer, pr
     const templateModel = function() {
         return {
             tags: [],
+            tools: [],
             publication: {},
             example: {},
-            related_tools: [],
             related_data: [],
             superseded_data: [],
             download_packages: [],

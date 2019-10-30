@@ -10,7 +10,8 @@
             <button class="btn btn-danger" ui-sref="datasets">Cancel</button>
         </div>
         <div class="col tab-container">
-            <dataset-import-form dataset="view.active" type="view.type" autocomplete="autocomplete"></import-form>
+            <dataset-import-form dataset="view.active" type="view.type" autocomplete="autocomplete" tags="tags"></dataset-import-form>
+            <related-tool-selector model="view.active.tools" tools="tools"></relationship-selector>
         </div>
     </div>
     <div class="row d-flex justify-content-center">

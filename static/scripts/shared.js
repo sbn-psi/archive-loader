@@ -52,7 +52,12 @@ app.constant('prepForForm', function(model, templateFn) {
     })
 
     // prep tags, specifically
-    if(!!prepped.tags) { prepped.tags = prepped.tags.map(tag => { return {name: tag}})}
+    if(!!prepped.tags) { 
+        prepped.tags = prepped.tags.map(tag => { 
+            if(tag.constructor === Object && !!tag.name) { return tag }
+            return {name: tag}
+        })
+    }
 
     return prepped;
 })

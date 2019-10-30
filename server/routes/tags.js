@@ -14,6 +14,9 @@ router.get('/spacecraft', async function(req, res) {
 router.get('/instruments', async function(req, res) {
     await tagLookupRequest(req, res, db.instruments)    
 })
+router.get('/datasets', async function(req, res) {
+    await tagLookupRequest(req, res, db.datasets)    
+})
 
 async function tagLookupRequest(req, res, type) {
     await db.connect()

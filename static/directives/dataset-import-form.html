@@ -45,18 +45,8 @@
             <label>Example Display Name: </label><input class="form-control" type="text" ng-model="dataset.example.title" uib-typeahead="val for val in autocomplete('title', $viewValue, 'example')">
             <label>Example Filename: </label><input class="form-control" type="text" ng-model="dataset.example.filename" uib-typeahead="val for val in autocomplete('filename', $viewValue, 'example')">
             <label>Example URL: </label><input class="form-control" type="url" ng-model="dataset.example.url" uib-typeahead="val for val in autocomplete('url', $viewValue, 'example')">
-            <label>Example Thumbnail URL: </label><input class="form-control" type="url" ng-model="dataset.example.thumbnail_url" uib-typeahead="val for val in autocomplete('thumbnail_url', $viewValue, 'example')">
+            <label>Example Thumbnail: </label><image-upload model="dataset.example.thumbnail_url" error="error"/>
         </div>
-
-        <section id="related-tools" class="repeating-group">
-            <h2>Related Tools</h2>
-            <div class="form-group animated" ng-repeat="tool in groupRepeater(dataset.related_tools)">
-                <label>Tool Name: </label><input class="form-control" type="text" ng-model="tool.name" uib-typeahead="val for val in autocomplete('name', $viewValue, 'related_tools')">
-                <label>Description: </label><textarea class="form-control" ng-model="tool.description" uib-typeahead="val for val in autocomplete('description', $viewValue, 'related_tools')"></textarea>
-                <label>URL: </label><input class="form-control" type="url" ng-model="tool.url" uib-typeahead="val for val in autocomplete('url', $viewValue, 'related_tools')">
-                <label>Icon URL: </label><input class="form-control" type="url" ng-model="tool.icon_url" uib-typeahead="val for val in autocomplete('icon_url', $viewValue, 'related_tools')">
-            </div>
-        </section>
 
         <section id="related-data" class="repeating-group">
             <h2>Related Data</h2>

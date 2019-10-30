@@ -25,6 +25,9 @@ app.config(function($stateProvider) {
                     return null
                 }
             },
+            tags: function($http) {
+                return $http.get('./tags/datasets').then(result => result.data)
+            },
             tools: function($http) {
                 return $http.get('./status/tools').then(result => result.data)
             }
@@ -63,6 +66,7 @@ app.directive('datasetImportForm', function () {
         scope: {
             dataset: '=',
             type: '<',
+            tags: '=',
             autocomplete: '='
         },
         controller: 'FormController'

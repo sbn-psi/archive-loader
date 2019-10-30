@@ -44,18 +44,33 @@ router.post('/datasets', async function(req, res) {
     }
 
     let toInsert = []
+    let newTags = []
     for(dataset of [req.body.bundle, ...req.body.collections]) {
         if(!dataset || bailed) { continue }
 
         validateDataset(dataset)
         toInsert.push(dataset)
+
+        // pull out any new tags
+        if(!!dataset.tags) {
+            let associatedTags = dataset.tags
+            let allTags = await db.find({ "type": db.datasets }, db.tags)
+            console.log(allTags)
+            for (associatedTag of associatedTags) {
+                if(!allTags.find(tag => tag.name === associatedTag)) {
+                    newTags.push({name: associatedTag, type: db.datasets})
+                }
+            }
+        }
     }
 
     if(bailed) { return }
 
     // insert and return
     await db.connect()
+
     try {
+        if(newTags.length > 0) { await db.insert(newTags, db.tags)}
         const result = await db.insert(toInsert, db.datasets)
         res.status(201).send( result.ops )
     } catch(err) {
