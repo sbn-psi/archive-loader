@@ -121,3 +121,6 @@ ui-view {
   border: 1px solid rgb(94, 158, 214);
   box-shadow: 0 0 3px 1px rgb(94, 158, 214);
 }
+.error {
+  color: red;
+}

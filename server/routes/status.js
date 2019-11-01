@@ -7,7 +7,11 @@ async function statusRequest(req, res, type) {
     const result = await db.find({}, type)
     res.status(200).send({
         count: result.length,
-        results: result.map(item => { return { name: item.display_name, lid: item.logical_identifier }})
+        results: result.map(item => { return { 
+            name: item.display_name, 
+            lid: item.logical_identifier,
+            tags: item.tags
+        }})
     })
 }
 router.get('/datasets', async function(req, res) {
