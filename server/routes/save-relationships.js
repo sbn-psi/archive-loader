@@ -33,7 +33,6 @@ router.post('/relationships', async function(req, res) {
     }
 
     if(bailed) { return }
-    await db.connect()
 
     // insert and return
     try {

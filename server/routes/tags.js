@@ -19,7 +19,6 @@ router.get('/datasets', async function(req, res) {
 })
 
 async function tagLookupRequest(req, res, type) {
-    await db.connect()
     const result = await db.find({ "type": type }, db.tags)
     res.status(200).send( result.map(tag => tag.name) )
 }

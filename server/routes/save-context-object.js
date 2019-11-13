@@ -42,7 +42,6 @@ async function processContextObject(req, res, type, fieldList) {
     if(!bailed) {validate(object)}
 
     if(bailed) { return }
-    await db.connect()
 
     // pull out any new tags
     let newTags = []

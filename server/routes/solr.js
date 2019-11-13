@@ -58,7 +58,6 @@ router.post('/sync', async function(req, res){
 
     let suffix = req.body.suffix
     let completionStatus = {suffix}
-    await db.connect()
 
     // STEP 1: Create collections
     let createRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
@@ -110,7 +109,6 @@ router.post('/sync', async function(req, res){
 })
 
 router.get('/suffix-suggestion', async (req, res) => {
-    await db.connect()
     let latest = await db.find({}, db.successfulIndexes)
     let defaultSuffix = new Date().toISOString().slice(0,-14).replaceAll('-','')
     let defaultIndex = 0
@@ -129,7 +127,6 @@ router.get('/suffix-suggestion', async (req, res) => {
 })
 
 router.get('/last-index', async (req, res) => {
-    await db.connect()
     let successfulIndexes = await db.find({}, db.successfulIndexes)
     res.status(200).json(successfulIndexes.length > 0 ? successfulIndexes.last() : {})
 })

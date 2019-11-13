@@ -15,11 +15,13 @@ const app = express()
 const bodyParser = require('body-parser')
 app.use(bodyParser.json())
 
+// called once file server is bootstrapped; starts the actual listening process
 function expressSetup(minioHandler) {
     app.use('/image/upload', minioHandler)
     app.use(express.static('static'))
-    app.listen(8989)
-    console.log('running on port 8989...')
+    app.listen(8989, () => {
+        console.log('running on port 8989...')
+    })
 }
 
 

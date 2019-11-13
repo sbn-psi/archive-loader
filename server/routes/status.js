@@ -3,7 +3,6 @@ const router = express.Router()
 const db = require('../db.js')
 
 async function statusRequest(req, res, type) {
-    await db.connect()
     const result = await db.find({}, type)
     res.status(200).send({
         count: result.length,
@@ -31,7 +30,6 @@ router.get('/instruments', async function(req, res) {
 })
 
 router.get('/target-relationships', async function(req, res) {
-    await db.connect()
     const relationships = await db.find({}, db.targetRelationships)
     const targets = await db.find({}, db.targets)
     res.status(200).send({
@@ -41,7 +39,6 @@ router.get('/target-relationships', async function(req, res) {
 })
 
 router.get('/tools', async function(req, res) {
-    await db.connect()
     const tools = await db.find({}, db.tools)
     res.status(200).send(tools)
 })

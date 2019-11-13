@@ -4,37 +4,30 @@ const db = require('../db.js')
 const solrize = require('../solrize.js')
 
 router.get('/datasets', async function(req, res) {
-    await db.connect()
     let stream = streamHelper(res, solrizedChunk("dataset"))
     db.find({}, db.datasets, stream.data, stream.end)
 })
 router.get('/targets', async function(req, res) {
-    await db.connect()
     let stream = streamHelper(res, standardChunk)
     db.find({}, db.targets, stream.data, stream.end)
 })
 router.get('/instruments', async function(req, res) {
-    await db.connect()
     let stream = streamHelper(res, standardChunk)
     db.find({}, db.instruments, stream.data, stream.end)
 })
 router.get('/missions', async function(req, res) {
-    await db.connect()
     let stream = streamHelper(res, standardChunk)
     db.find({}, db.missions, stream.data, stream.end)
 })
 router.get('/spacecraft', async function(req, res) {
-    await db.connect()
     let stream = streamHelper(res, standardChunk)
     db.find({}, db.spacecraft, stream.data, stream.end)
 })
 router.get('/target-relationships', async function(req, res) {
-    await db.connect()
     let stream = streamHelper(res, standardChunk)
     db.find({}, db.targetRelationships, stream.data, stream.end)
 })
 router.get('/relationships', async function(req, res) {
-    await db.connect()
     let stream = streamHelper(res, standardChunk)
     db.find({}, db.objectRelationships, stream.data, stream.end)
 })
@@ -42,7 +35,6 @@ router.get('/relationships', async function(req, res) {
 router.get('/all', async (req, res) => {
     res.set('Content-Type', 'json')
     res.write('{')
-    await db.connect()
     let databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments, db.targetRelationships, db.targetSpacecraftRelationshipTypes, db.instrumentSpacecraftRelationshipTypes, db.tags, db.objectRelationships, db.tools]
     let index = 0
     for (database of databases) {
