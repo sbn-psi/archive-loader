@@ -46,6 +46,7 @@ passport.deserializeUser((user, done) => {
 // // // COOKIE MANAGEMENT // // //
 const session = require('express-session')
 const MongoStore = require('connect-mongo')(session);
+app.set('trust proxy', 1)
 app.use(session({
     name: 'archive-loader',
     secret: process.env.AUTH_SECRET,
@@ -54,12 +55,15 @@ app.use(session({
     resave: false,
     saveUninitialized: false,
     rolling: true,
+    cookie: {
+        httpOnly: false
+    }
 }))
     
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.post('/login', passport.authenticate('local', { successRedirect: '/', failureRedirect: '/login' }))
+app.post('/login', passport.authenticate('local', { successRedirect: '/' }))
 app.use(express.static('static'))
 
 // // // SECURE ROUTES // // //

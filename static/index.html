@@ -49,7 +49,7 @@
         </button>
 
         <div class="collapse navbar-collapse" uib-collapse="isNavCollapsed" id="navbarSupportedContent">
-            <ul class="navbar-nav mr-auto">
+            <ul class="navbar-nav mr-auto" ng-if="state.loggedIn">
                 <li class="nav-item dropdown" uib-dropdown ui-sref-active="active">
                     <a class="nav-link dropdown-toggle" uib-dropdown-toggle href="#" id="datasetsDropdown" role="button"
                         data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
@@ -113,6 +113,9 @@
                     </div>
                 </li>
             </ul>
+            <form class="form-inline" ng-if="state.loggedIn">
+                <button class="btn btn-sm btn-outline-secondary" type="button" ng-click="logout()">Logout</button>
+            </form>
         </div>
     </nav>
 

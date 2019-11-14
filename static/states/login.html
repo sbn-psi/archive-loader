@@ -1,0 +1,12 @@
+<form class="form-group">
+    <div id="primary-input" class="form-group">
+        <label>Username:</label>
+        <input class="form-control" type="text" ng-model="model.username"><br/>
+        <label>Password:</label>
+        <input class="form-control" type="password" ng-model="model.password"><br/>
+        <p>
+            <input class="btn btn-primary" type="submit" value="Log In" ng-click="login()" ng-if="!state.loading">
+            <loading ng-if="state.loading"></loading>
+        </p>
+    </div>
+</form>
