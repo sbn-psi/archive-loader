@@ -33,6 +33,7 @@ let connect = async function() {
             try {
                 client = await MongoClient.connect(url, { 
                     useNewUrlParser: true,
+                    useUnifiedTopology: true,
                     poolSize: 10
                 });
                 console.log("connected successfully to database server");
@@ -61,6 +62,10 @@ module.exports = {
     objectRelationships: objectRelationshipsCollection,
     tools: toolsCollection,
     successfulIndexes: successfulIndexesCollection,
+    client: new Promise(async (resolve, reject) => {
+            try{await connect()} catch(err) {reject(err)}
+            resolve(client)
+        }),
     insert: async function(documents, type) {
         await connect()
         assert(documents.constructor === Array, "First argument must be an array of documents to insert")
