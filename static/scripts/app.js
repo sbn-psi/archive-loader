@@ -1,4 +1,4 @@
-var app = angular.module('app', ['ui.bootstrap', 'ui.router', 'textAngular', 'ngFileUpload', 'ui.sortable']);
+var app = angular.module('app', ['ui.bootstrap', 'ui.router', 'textAngular', 'ngFileUpload', 'ngCookies', 'ui.sortable']);
 
 app.controller('RootController', function($scope, constants, $state, $transitions) {
     // set initial state
@@ -42,6 +42,28 @@ app.controller('RootController', function($scope, constants, $state, $transition
     // go to root state
     $state.go('root');
 });
+
+app.config(function($provide, $httpProvider) {
+    $provide.factory('noAuthInterceptor', ($q, $cookies, $state) => {
+        return {
+            responseError: err => {
+                if (err.status == 403) {
+                    // remove browser session cookie
+                    $cookies.remove('archive-loader');
+
+                    // redirect to login
+                    $state.go('root')
+                    return $q.reject('Please log in');
+                };
+
+                // If not a 403, do nothing
+                return $q.reject(err)
+            }
+        };
+    });
+
+    $httpProvider.interceptors.push('noAuthInterceptor');
+})
 
 // provide custom image uploader
 app.config(function($provide) {
