@@ -65,7 +65,7 @@ router.post('/sync', async function(req, res){
         name: `${collection.collectionName}-${suffix}`,
         numShards: 1,
         ['collection.configName']: collection.config ? collection.config : '_default'
-    }))
+    }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
     try{ await Promise.all(createRequests) }
     catch(err) {
         res.status(400).send("Error creating collections in Solr: " + err.message)
@@ -78,7 +78,7 @@ router.post('/sync', async function(req, res){
     for (collection of collections) {
         let documents = await db.find({}, collection.dbName)
         completionStatus[collection.dbName] = documents.length
-        let request = httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents, collection.solrizeAttr) : documents)
+        let request = httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents, collection.solrizeAttr) : documents, process.env.SOLR_USER, process.env.SOLR_PASS)
         fillRequests.push(request)
     }
     try { 
@@ -95,7 +95,7 @@ router.post('/sync', async function(req, res){
         action: 'CREATEALIAS',
         name: `${collection.collectionName}-alias`,
         collections: `${collection.collectionName}-${suffix}`
-    }))
+    }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
     try{ await Promise.all(aliasRequests) }
     catch(err) {
         res.status(400).send("Error modifying aliases in Solr: " + err.message)
@@ -146,7 +146,7 @@ router.delete('/cleanup/:suffix', async (req, res) => {
     let deleteRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
         action: 'DELETE',
         name: `${collection.collectionName}-${suffix}`
-    }))
+    }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
     try{ await Promise.all(deleteRequests) }
     catch(err) {
         res.status(400).send("Error deleting collections in Solr: " + err.message)

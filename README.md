@@ -9,6 +9,8 @@ First, you will need to configure the services.env file that configures all the 
 ### services.env
 - HARVEST: The URL for your deployment of the [PDS Harvest Server](https://github.com/sbn-psi/harvest-server)
 - SOLR: The URL for your deployment of the [PDS Registry (Solr) Build 9b or higher](https://pds-engineering.jpl.nasa.gov/content/pds4-software)
+- SOLR_USER: The user, if any, for your running solr instance
+- SOLR_PASS: The password, if any, for your running solr instance
 - AUTH_SECRET: A randomized string for encrypting cookies
 - ADMIN_USER: Your preferred username for the admin user
 - ADMIN_PASS: Your preferred password for the admin user
