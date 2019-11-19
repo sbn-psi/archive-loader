@@ -4,8 +4,25 @@ The archive loader is a database, web server and client application used to load
 
 ## Installation and Deployment
 
-First, you will need a services.env file that lists the locations of the other services that this application requires. See the services-EXAMPLE.env file for how these should be configured. Set the URLs for your deployments of the [PDS Harvest Server](https://github.com/sbn-psi/harvest-server) and [PDS Registry Build 9b or higher](https://pds-engineering.jpl.nasa.gov/content/pds4-software) in this file.
+First, you will need to configure the services.env file that configures all the related services as part of this application stack. Start from the services-EXAMPLE.env file, and see below for explanation:
 
+### services.env
+- HARVEST: The URL for your deployment of the [PDS Harvest Server](https://github.com/sbn-psi/harvest-server)
+- SOLR: The URL for your deployment of the [PDS Registry (Solr) Build 9b or higher](https://pds-engineering.jpl.nasa.gov/content/pds4-software)
+- SOLR_USER: The user, if any, for your running solr instance
+- SOLR_PASS: The password, if any, for your running solr instance
+- AUTH_SECRET: A randomized string for encrypting cookies
+- ADMIN_USER: Your preferred username for the admin user
+- ADMIN_PASS: Your preferred password for the admin user
+- MINIO_ACCESS_KEY: A randomized username for the Minio server
+- MINIO_SECRET_KEY: A randomized password for the Minio server
+- MINIO_ENDPOINT: The host domain for the deployed minio server (This should be an IP address for development, or simply the domain without a path or scheme e.g. pdsregistryimages.psi.edu)
+- MINIO_PORT: The port for the deployed minio server (Used primarily in development -- Optional)
+- MINIO_SECURITY: true/false depending on whether or not the deployment uses https
+- MINIO_BUCKET: the name of the bucket for uploading images on minio
+- MINIO_UPLOADS_FOLDER_NAME: the name of the folder inside the bucket to place uploaded images
+
+### Docker deployment
 This application is hosted as a docker container, and should be instantiated along with the database by using docker-compose:
 
 ```bash
@@ -50,8 +67,19 @@ From there you can [run commands on the database as documented here](https://doc
 
 ## Usage
 
+Log in using the username and password specified in the services.env file. Then, you will be able to import and manage datasets and context objects, and sync them to your solr registries
+
+### Importing datasets
 Paste the URL for a PDS4 Bundle directory, or toggle to Collection and paste a URL for a PDS4 Collection directory. Currently, this is whitelisted to these domains:
 * pdssbn.astro.umd.edu
 * sbnarchive.psi.edu
 
 Once fetched, fill in the web form for each of the discovered bundles and collections, then submit. 
+
+### Importing context objects
+Add a target, instrument, mission or spacecraft. Paste the LID for the object into the first field, and the application will fetch the name, description, and relationships for that object. Then, fill out the rest of the form, adding custom values, tags, and specifying the nature of those relationships.
+
+### Syncing data
+The solr registry (and anything that uses it) is not automatically updated with changes in Archive Loader; they must be manually pushed, which is a somewhat heavy process. Therefore, the process in place requires us to create new collections in solr, push over the data, and then atomically update aliases to tell solr to use those new collections. As such, a unique name is required for these new collections, and Archive Loader will suggest one for you.
+
+I tell you that to tell you this: Just click the button, and wait for the sync to finish. If there are any errors, or if the sync process seems to be taking too long (a few minutes or more), contact an administrator/developer.

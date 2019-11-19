@@ -18,7 +18,36 @@ const toolsCollection = 'tools'
 const successfulIndexesCollection = 'successfulIndexes'
 
 let db
+let client
 let connectionPromise
+
+let connect = async function() {
+    if(!!connectionPromise) { 
+        // if we're already building the db connection, just wait for that to finish
+        await connectionPromise
+        return
+    }
+    if(!db) {
+        // if db hasn't been spun up, do so
+        connectionPromise = new Promise(async (resolve, reject) => {
+            try {
+                client = await MongoClient.connect(url, { 
+                    useNewUrlParser: true,
+                    useUnifiedTopology: true,
+                    poolSize: 10
+                });
+                console.log("connected successfully to database server");
+    
+                db = client.db(APP_NAME);
+                resolve()
+            } catch (err) {reject(err)}
+        })
+        await connectionPromise
+        connectionPromise = null
+    }
+    // if we get here, db connection is established
+}
+
 
 module.exports = {
     datasets: datasetsCollection,
@@ -33,32 +62,12 @@ module.exports = {
     objectRelationships: objectRelationshipsCollection,
     tools: toolsCollection,
     successfulIndexes: successfulIndexesCollection,
-    connect: async function() {
-        if(!!connectionPromise) { 
-            // if we're already building the db connection, just wait for that to finish
-            await connectionPromise
-            return
-        }
-        if(!db) {
-            // if db hasn't been spun up, do so
-            connectionPromise = new Promise(async (resolve, reject) => {
-                try {
-                    const client = await MongoClient.connect(url, { 
-                        useNewUrlParser: true,
-                        poolSize: 10
-                    });
-                    console.log("connected successfully to database server");
-        
-                    db = client.db(APP_NAME);
-                    resolve()
-                } catch (err) {reject(err)}
-            })
-            await connectionPromise
-            connectionPromise = null
-        }
-        // if we get here, db connection is established
-    },
+    client: new Promise(async (resolve, reject) => {
+            try{await connect()} catch(err) {reject(err)}
+            resolve(client)
+        }),
     insert: async function(documents, type) {
+        await connect()
         assert(documents.constructor === Array, "First argument must be an array of documents to insert")
         const collection = db.collection(type)
         const bulkOperation = collection.initializeUnorderedBulkOp()
@@ -80,6 +89,7 @@ module.exports = {
         return result
     },
     find: async function(inputFilter, type, stream, end) {
+        await connect()
         const collection = db.collection(type)
         let activeFilter = { _isActive: true }
         Object.assign(activeFilter, inputFilter)
@@ -98,6 +108,7 @@ module.exports = {
         }
     },
     deleteOne: async function(doc, type) {
+        await connect()
         const collection = db.collection(type);
         const toUpdate = (doc.relationshipId) ? { 'relationshipId': doc.relationshipId } : { '_id': doc.id };
         // do a soft delete
@@ -106,6 +117,7 @@ module.exports = {
     },
     insertRelationships: async function(documents) {
         assert(documents.constructor === Array, "First argument must be an array of documents to insert")
+        await connect()
         const collection = db.collection(objectRelationshipsCollection)
         const bulkOperation = collection.initializeUnorderedBulkOp()
 
@@ -120,6 +132,20 @@ module.exports = {
         var result = await bulkOperation.execute();
         assert(result.result.ok)
         return result
+    },
+    join: async function(primaryType, foreignType, idField, foreignField, intoField) {
+        await connect()
+        const collection = db.collection(primaryType)
+
+        const docs = await collection.aggregate([{
+            $lookup: {
+                from: foreignType,
+                localField: idField,
+                foreignField: foreignField,
+                as: intoField
+            }
+        }]).toArray()
+        return docs.map(hideInternalProperties)
     }
 }
 

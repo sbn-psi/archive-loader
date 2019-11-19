@@ -35,7 +35,6 @@ async function editLookupRequest(req, res, type) {
         return
     }
 
-    await db.connect()
     const object = await db.find({ "logical_identifier": req.query.logical_identifier }, type)
     const relationships = await db.find({ [dbToFieldMap[type]]: req.query.logical_identifier }, db.objectRelationships)
     res.status(200).send( {

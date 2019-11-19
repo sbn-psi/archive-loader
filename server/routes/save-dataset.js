@@ -67,8 +67,6 @@ router.post('/datasets', async function(req, res) {
     if(bailed) { return }
 
     // insert and return
-    await db.connect()
-
     try {
         if(newTags.length > 0) { await db.insert(newTags, db.tags)}
         const result = await db.insert(toInsert, db.datasets)

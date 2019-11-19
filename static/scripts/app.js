@@ -1,6 +1,6 @@
-var app = angular.module('app', ['ui.bootstrap', 'ui.router', 'textAngular', 'ngFileUpload', 'ui.sortable']);
+var app = angular.module('app', ['ui.bootstrap', 'ui.router', 'textAngular', 'ngFileUpload', 'ngCookies', 'ui.sortable']);
 
-app.controller('RootController', function($scope, constants, $state, $transitions) {
+app.controller('RootController', function($scope, constants, $state, $transitions, auth) {
     // set initial state
     $scope.constants = constants;
     $scope.state = {
@@ -23,8 +23,15 @@ app.controller('RootController', function($scope, constants, $state, $transition
         loading: false,
         transitioning: false,
         error: null,
-        alerts: []
+        alerts: [],
+        loggedIn: auth.loggedIn
     };
+
+    $scope.logout = auth.logout
+
+    $scope.$on(auth.broadcast, (event) => {
+        $scope.state.loggedIn = auth.loggedIn()
+    })
 
     // handle transitions
     function beginTransitioning() {
@@ -42,6 +49,79 @@ app.controller('RootController', function($scope, constants, $state, $transition
     // go to root state
     $state.go('root');
 });
+
+app.service('auth', function($cookies, $state, $rootScope) {
+    const broadcast = 'auth'
+    let user = null
+    return {
+        broadcast,
+        login: response => {
+            user = response
+            $rootScope.$broadcast(broadcast, user)
+            $state.go('root')
+        },
+        logout: () => {
+            user = null
+            $rootScope.$broadcast(broadcast, user)
+            
+            // remove browser session cookie
+            $cookies.remove('archive-loader');
+
+            $state.go('login')
+        },
+        loggedIn: () => !!user,
+        user: () => user
+    }
+})
+
+app.config(function($stateProvider) {
+    $stateProvider.state({
+        name: 'root',
+        url: '/',
+        controller: function($scope, $http, $state) {
+            $http.get('./status/datasets').then(response => {
+                $state.go('datasets.manage')
+            }, err => {
+                //not logged in, go to login
+                $state.go('login')
+            })
+        }
+    })
+    .state({
+        name: 'login',
+        url: '/login',
+        templateUrl: './states/login.html',
+        controller: function($scope, auth, $http) {
+            $scope.model = {}
+            $scope.login = function() {
+                $http.post('./login', $scope.model).then((response) => {
+                    $scope.state.error = null
+                    auth.login(response)
+                }, err => {
+                    $scope.state.error = err.data
+                })
+            }
+        }
+    })
+})
+
+app.config(function($provide, $httpProvider) {
+    $provide.factory('noAuthInterceptor', ($q, auth) => {
+        return {
+            responseError: err => {
+                if (err.status == 403) {
+                    auth.logout()
+                    return $q.reject('Please log in');
+                };
+
+                // otherwise, just pass along the error
+                return $q.reject(err)
+            }
+        };
+    });
+
+    $httpProvider.interceptors.push('noAuthInterceptor');
+})
 
 // provide custom image uploader
 app.config(function($provide) {

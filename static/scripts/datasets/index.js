@@ -1,10 +1,5 @@
 app.config(function($stateProvider) {
     $stateProvider.state({
-        name: 'root',
-        url: '/',
-        redirectTo: 'datasets.load'
-    })
-    $stateProvider.state({
         name: 'datasets',
         url: '/Datasets',
         redirectTo: 'datasets.load'

@@ -3,7 +3,6 @@ const router = express.Router()
 const db = require('../db.js')
 
 async function statusRequest(req, res, type) {
-    await db.connect()
     const result = await db.find({}, type)
     res.status(200).send({
         count: result.length,
@@ -27,11 +26,22 @@ router.get('/spacecraft', async function(req, res) {
     await statusRequest(req, res, db.spacecraft)
 })
 router.get('/instruments', async function(req, res) {
-    await statusRequest(req, res, db.instruments)
+    const instruments = await db.join(db.instruments, db.objectRelationships, 'logical_identifier', 'instrument', 'relationships')
+    res.status(200).send({
+        count: instruments.length,
+        results: instruments.map(instrument => { 
+            const relationship = instrument.relationships.find(rel => !!rel.instrument_host)
+            return { 
+                name: instrument.display_name, 
+                lid: instrument.logical_identifier,
+                tags: instrument.tags,
+                spacecraft: relationship ? relationship.instrument_host : null
+            }
+        })
+    })
 })
 
 router.get('/target-relationships', async function(req, res) {
-    await db.connect()
     const relationships = await db.find({}, db.targetRelationships)
     const targets = await db.find({}, db.targets)
     res.status(200).send({
@@ -41,7 +51,6 @@ router.get('/target-relationships', async function(req, res) {
 })
 
 router.get('/tools', async function(req, res) {
-    await db.connect()
     const tools = await db.find({}, db.tools)
     res.status(200).send(tools)
 })

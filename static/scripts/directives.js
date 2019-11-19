@@ -25,9 +25,45 @@ app.directive('manageList', function() {
     return {
         scope: {
             edit: '<',
-            list: '<'
+            list: '<',
+            groupBy: '@?'
         },
-        templateUrl: './directives/manage-list.html'
+        templateUrl: './directives/manage-list.html',
+        controller: function($scope, lidCheck) {
+            $scope.view = {}
+            $scope.$watch('list', list => {
+                let groups = []
+                let ungrouped = []
+                if(!!$scope.groupBy && !!list) {
+                    list.forEach(item => {
+                        let groupLid = item[$scope.groupBy]
+                        if(!!groupLid) {
+                            if(!groups.some(group => group.lid == groupLid)) {
+                                groups.push({lid:groupLid})
+                            }
+                        } else {
+                            ungrouped.push(item)
+                        }
+                    })
+                } else {
+                    // if not grouping, just throw everything into one group
+                    groups = [{}]
+                }
+                $scope.groups = groups.sort((a, b) => (a.lid > b.lid) ? 1 : -1)
+                $scope.ungrouped = ungrouped
+            })
+
+            $scope.$watch('groups', groups => {
+                let groupsWithLids = groups.filter(group => !!group.lid)
+                let lookups = groupsWithLids.map(group => lidCheck(group.lid, 'title'))
+                Promise.all(lookups).then(results => {
+                    results.forEach((result, index) => {
+                        groupsWithLids[index].name = result.title
+                    })
+                    $scope.$digest();
+                })
+            })
+        }
     }   
 });
 
