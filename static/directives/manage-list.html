@@ -1,9 +1,25 @@
-<loading ng-if="list.count === undefined"></loading>
-<table class="table table-responsive-sm">
-    <tr ng-repeat="item in list.results track by $index">
-        <td class="align-middle">{{item.name}}</td>
-        <td class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
-        <td class="align-middle text-note">{{item.lid}}</td>
-        <td><button class="btn btn-link" ng-click="edit(item.lid)">Edit</button></td>
-    </tr>
-</table>
+<loading ng-if="list === undefined"></loading>
+<div ng-if="list != undefined">
+    <table class="table table-responsive-sm">
+        <!-- Ungrouped items -->
+        <tr ng-if="!!ungrouped && ungrouped.length > 0">
+            <th colspan="4" class="error">Need {{groupBy}} assigned!</th>
+        </tr>
+        <tr ng-repeat="item in ungrouped | filter:group.lid track by $index">
+            <td class="align-middle">{{item.name}}</td>
+            <td class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
+            <td class="align-middle text-note">{{item.lid}}</td>
+            <td><button class="btn btn-link" ng-click="edit(item.lid)">Edit</button></td>
+        </tr>
+        <!-- Grouped items -->
+        <tr ng-show="!!group.lid" ng-repeat-start="group in groups">
+            <th colspan="4">{{group.name ? group.name : group.lid}}</th>
+        </tr>
+        <tr ng-repeat-end ng-repeat="item in list | filter:group.lid track by $index">
+            <td class="align-middle">{{item.name}}</td>
+            <td class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
+            <td class="align-middle text-note">{{item.lid}}</td>
+            <td><button class="btn btn-link" ng-click="edit(item.lid)">Edit</button></td>
+        </tr>
+    </table>
+</div>

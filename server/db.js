@@ -132,6 +132,20 @@ module.exports = {
         var result = await bulkOperation.execute();
         assert(result.result.ok)
         return result
+    },
+    join: async function(primaryType, foreignType, idField, foreignField, intoField) {
+        await connect()
+        const collection = db.collection(primaryType)
+
+        const docs = await collection.aggregate([{
+            $lookup: {
+                from: foreignType,
+                localField: idField,
+                foreignField: foreignField,
+                as: intoField
+            }
+        }]).toArray()
+        return docs.map(hideInternalProperties)
     }
 }
 
