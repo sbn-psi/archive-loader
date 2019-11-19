@@ -1,11 +1,17 @@
 <div>
-    <div class="row d-flex justify-content-center">
+    <div class="col mt-2" ng-if="unavailable"> 
+        <h2 class="error">Sync service is unavailable right now</h2>
+        <p>Please contact <a href="mailto:mdrum@psi.edu">Mike Drum &lt;mdrum@psi.edu&gt;</a> for assistance.</p>
+    </div>
+
+    <div class="row d-flex justify-content-center" ng-if="!unavailable">
         <div class="col-sm-5">
-            <p>Set a unique name for this data submission. We've provided a default below</p>
+            <p>Set a unique name for this data submission. We've provided a default below.</p>
+            <p>(If you're not sure what this means, just click submit)</p>
             <input ng-disabled="state.loading" class="form-control input-sm" type="text" ng-model="model.suffix">            
         </div>
     </div>
-    <div class="row d-flex justify-content-center mt-2">
+    <div class="row d-flex justify-content-center mt-2" ng-if="!unavailable"> 
         <input class="btn btn-primary" type="submit" value="Submit" ng-click="submit()" ng-disabled="state.loading">
     </div>
     <div class="row d-flex justify-content-center" ng-if="state.loading">

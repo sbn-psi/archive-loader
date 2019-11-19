@@ -45,6 +45,28 @@ const collections = [{
     collectionName: 'web-tools'
 }]
 
+// Checks with solr instance to ensure that there is not more than one set of collections. 
+// We do this because registering too many collections with Solr can cause instability issues, and a failed sync might leave some remnants
+function checkAvailability() {
+    return new Promise(async (resolve, reject) => {
+        try{ 
+            let solrCollections = await httpRequest(`${SOLR}/admin/collections`, { action: 'LIST' }, null, process.env.SOLR_USER, process.env.SOLR_PASS) 
+            let webCollections = solrCollections.collections.filter(collection => collection.startsWith('web-'))
+            if(webCollections.length === 0 || webCollections.length === collections.length) { resolve() } else { reject() }
+        }
+        catch(err) {
+            console.log(err)
+            reject("Error fetching collections in Solr: " + err.message)
+        }
+    })
+}
+
+router.get('/status', async function(req, res) {
+    checkAvailability().then(
+        () => res.sendStatus(200),
+        () => res.sendStatus(503))
+})
+
 router.post('/sync', async function(req, res){
     let bailed = false
     try {
@@ -58,6 +80,19 @@ router.post('/sync', async function(req, res){
 
     let suffix = req.body.suffix
     let completionStatus = {suffix}
+
+    let successfulIndexes = await db.find({}, db.successfulIndexes)
+    let previousSync = successfulIndexes.length > 0 ? successfulIndexes.last().suffix : null
+
+    // STEP 0: Ensure clean state in Solr
+    if(!req.body.force === true) {
+        await checkAvailability().catch(err => {
+            res.status(500).send("Sync service unavailable. Please contact an administator.")
+            bailed = true
+        })
+    }
+
+    if(bailed) {return}
 
     // STEP 1: Create collections
     let createRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
@@ -103,9 +138,17 @@ router.post('/sync', async function(req, res){
     }
     if(bailed) {return}
 
+    // STEP 4: Write successful sync to db
     completionStatus._timestamp = new Date()
     await db.insert([completionStatus], db.successfulIndexes)
-    res.status(200).json(completionStatus)
+
+    // STEP 4: Cleanup previous sync
+    try {
+        await cleanup(previousSync)
+        res.status(200).json(completionStatus)
+    } catch (err) {
+        res.status(500).send("Error cleaning up previous sync: " + err)
+    }
 })
 
 router.get('/suffix-suggestion', async (req, res) => {
@@ -131,6 +174,22 @@ router.get('/last-index', async (req, res) => {
     res.status(200).json(successfulIndexes.length > 0 ? successfulIndexes.last() : {})
 })
 
+function cleanup(suffix) {
+    return new Promise(async (resolve, reject) => {
+        
+        let deleteRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
+            action: 'DELETE',
+            name: `${collection.collectionName}-${suffix}`
+        }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
+        try{ await Promise.all(deleteRequests) }
+        catch(err) {
+            reject("Error deleting collections in Solr: " + err.message)
+            return
+        }
+        resolve()
+    })
+}
+
 router.delete('/cleanup/:suffix', async (req, res) => {
     let bailed = false
     try {
@@ -141,21 +200,7 @@ router.delete('/cleanup/:suffix', async (req, res) => {
     }
     if(bailed) {return}
 
-    let suffix = req.params.suffix
-
-    let deleteRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
-        action: 'DELETE',
-        name: `${collection.collectionName}-${suffix}`
-    }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
-    try{ await Promise.all(deleteRequests) }
-    catch(err) {
-        res.status(400).send("Error deleting collections in Solr: " + err.message)
-        bailed = true
-    }
-    if(bailed) {return}
-    else {
-        res.status(204).send()
-    }
+    cleanup(req.params.suffix).then(() => res.sendStatus(204), err => res.status(500).send(err))
 })
 
 module.exports = router
