@@ -63,10 +63,10 @@ app.constant('prepForForm', function(model, templateFn) {
 })
 
 app.service('lidCheck', function($http) {
-    return function(lid) {
+    return function(lid, fields) {
         return new Promise(function(resolve, reject) {
             if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:nasa')) {
-                $http.get('./lookup?lid=' + lid).then(function(res) {
+                $http.get('./lookup', {params: {lid, fields}}).then(function(res) {
                     resolve(res.data)
                 }, function(err) {
                     reject(err)
@@ -172,7 +172,8 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
         $scope.$watch(`model.${modelName}.logical_identifier`, function(lid) {
             if(!!existing) { return }
             $scope.state.loading = true;
-            lidCheck(lid).then(function(doc) {
+            let registryFields = $scope.config.lookupReplacements.map(replacement => replacement.registryField)
+            lidCheck(lid, registryFields).then(function(doc) {
                 $scope.state.loading = false;
                 const replace = (scopeKey, docKey) => {
                     if(!isPopulated($scope.model[$scope.config.modelName][scopeKey])) { $scope.model[$scope.config.modelName][scopeKey] = doc[docKey][0] }

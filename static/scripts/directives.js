@@ -55,7 +55,7 @@ app.directive('manageList', function() {
 
             $scope.$watch('groups', groups => {
                 let groupsWithLids = groups.filter(group => !!group.lid)
-                let lookups = groupsWithLids.map(group => lidCheck(group.lid))
+                let lookups = groupsWithLids.map(group => lidCheck(group.lid, 'title'))
                 Promise.all(lookups).then(results => {
                     results.forEach((result, index) => {
                         groupsWithLids[index].name = result.title
