@@ -63,7 +63,7 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.post('/login', passport.authenticate('local', { successRedirect: '/' }))
+app.post('/login', passport.authenticate('local', { successRedirect: './' }))
 app.use(express.static('static'))
 
 // // // SECURE ROUTES // // //
