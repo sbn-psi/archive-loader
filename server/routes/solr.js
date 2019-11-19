@@ -161,7 +161,8 @@ router.get('/suffix-suggestion', async (req, res) => {
     }
     latest = latest.last()
     let lastSuffix = latest.suffix
-    let lastIndex = latest.suffix.charAt(latest.suffix.length-1)
+    
+    let lastIndex = lastSuffix.slice(defaultSuffix.length)
     if(lastSuffix === (defaultSuffix + lastIndex)) {
         res.status(200).send(defaultSuffix + (parseInt(lastIndex) + 1))
     } else {
