@@ -64,12 +64,12 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 app.post('/login', passport.authenticate('local', { successRedirect: './' }))
+app.use('/export', require('./routes/export'))
 app.use(express.static('static'))
 
 // // // SECURE ROUTES // // //
 app.all('*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
 app.use('/relationship-types', require('./routes/relationship-types'))
-app.use('/export', require('./routes/export'))
 app.use('/tags', require('./routes/tags'))
 app.use('/status', require('./routes/status'))
 app.use('/related', require('./routes/related'))

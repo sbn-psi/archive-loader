@@ -68,3 +68,7 @@ data/
 
 # services environment config
 services.env
+github.env
+
+# ephemeral repos
+backup/repo/

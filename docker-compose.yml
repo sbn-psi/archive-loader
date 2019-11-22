@@ -31,6 +31,20 @@ services:
     command: server /data
     env_file:
       - ./services.env
+  backup-manager:
+    container_name: archiveloader-backup
+    restart: always
+    build: ./backup
+    links:
+      - "app:archiveloader"
+    environment:
+      - NODE_ENV=production
+    env_file:
+      - ./backup/github.env
+    depends_on:
+      - app
+
+
 volumes: 
   archiveloader-data:
   archiveloader-images:
