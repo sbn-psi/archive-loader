@@ -48,7 +48,7 @@ router.get('/all', async (req, res) => {
 })
 
 function standardChunk(chunk) {
-    return JSON.stringify(chunk)
+    return JSON.stringify(chunk, null, "\t")
 }
 function solrizedChunk(attr) {
     return chunk => standardChunk(solrize(chunk, attr))
