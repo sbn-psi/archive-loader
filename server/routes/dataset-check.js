@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const httpRequest = require('./httpRequest.js')
+const httpRequest = require('../httpRequest.js')
 const assert = require('assert')
 
 const HARVESTWRAPPER = (process.env.HARVEST ? process.env.HARVEST : 'http://localhost:3009') + '/extract'
