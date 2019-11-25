@@ -1,6 +1,6 @@
 var app = angular.module('app', ['ui.bootstrap', 'ui.router', 'textAngular', 'ngFileUpload', 'ngCookies', 'ui.sortable']);
 
-app.controller('RootController', function($scope, constants, $state, $transitions, auth) {
+app.controller('RootController', function($scope, constants, $state, $transitions, loginState, logout) {
     // set initial state
     $scope.constants = constants;
     $scope.state = {
@@ -24,13 +24,13 @@ app.controller('RootController', function($scope, constants, $state, $transition
         transitioning: false,
         error: null,
         alerts: [],
-        loggedIn: auth.loggedIn
+        loggedIn: loginState.loggedIn
     };
 
-    $scope.logout = auth.logout
+    $scope.logout = logout
 
-    $scope.$on(auth.broadcast, (event) => {
-        $scope.state.loggedIn = auth.loggedIn()
+    $scope.$on(loginState.broadcast, (event) => {
+        $scope.state.loggedIn = loginState.loggedIn()
     })
 
     // handle transitions
@@ -50,8 +50,8 @@ app.controller('RootController', function($scope, constants, $state, $transition
     $state.go('root');
 });
 
-app.service('auth', function($cookies, $state, $rootScope) {
-    const broadcast = 'auth'
+app.service('loginState', function($cookies, $state, $rootScope) {
+    const broadcast = 'loginState'
     let user = null
     return {
         broadcast,
@@ -74,6 +74,18 @@ app.service('auth', function($cookies, $state, $rootScope) {
     }
 })
 
+app.factory('logout', function($http, loginState) {
+    return function() {
+        $http.get('./logout').then(response => {
+            loginState.logout()
+        }, error => {
+            // failed to logout via server... do it locally anyway
+            loginState.logout()
+            console.log(error)
+        })
+    }
+})
+
 app.config(function($stateProvider) {
     $stateProvider.state({
         name: 'root',
@@ -90,13 +102,16 @@ app.config(function($stateProvider) {
     .state({
         name: 'login',
         url: '/login',
+        data: {
+            title: 'Login'
+        },
         templateUrl: './states/login.html',
-        controller: function($scope, auth, $http) {
+        controller: function($scope, loginState, $http) {
             $scope.model = {}
             $scope.login = function() {
                 $http.post('./login', $scope.model).then((response) => {
                     $scope.state.error = null
-                    auth.login(response)
+                    loginState.login(response)
                 }, err => {
                     $scope.state.error = err.data
                 })
@@ -106,11 +121,11 @@ app.config(function($stateProvider) {
 })
 
 app.config(function($provide, $httpProvider) {
-    $provide.factory('noAuthInterceptor', ($q, auth) => {
+    $provide.factory('noAuthInterceptor', ($q, loginState) => {
         return {
             responseError: err => {
                 if (err.status == 403) {
-                    auth.logout()
+                    loginState.logout()
                     return $q.reject('Please log in');
                 };
 

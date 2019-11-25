@@ -68,6 +68,10 @@ app.use('/export', require('./routes/export'))
 app.use(express.static('static'))
 
 // // // SECURE ROUTES // // //
+app.get('/logout', (req, res) => {
+    req.logout()
+    res.sendStatus(204)
+})
 app.all('*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
 app.use('/relationship-types', require('./routes/relationship-types'))
 app.use('/tags', require('./routes/tags'))
