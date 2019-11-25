@@ -17,6 +17,8 @@ const objectRelationshipsCollection = 'objectRelationships'
 const toolsCollection = 'tools'
 const successfulIndexesCollection = 'successfulIndexes'
 
+const usersCollection = 'users'
+
 let db
 let client
 let connectionPromise
@@ -62,6 +64,7 @@ module.exports = {
     objectRelationships: objectRelationshipsCollection,
     tools: toolsCollection,
     successfulIndexes: successfulIndexesCollection,
+    users: usersCollection,
     client: new Promise(async (resolve, reject) => {
             try{await connect()} catch(err) {reject(err)}
             resolve(client)

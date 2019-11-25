@@ -27,13 +27,28 @@ function expressSetup(minioHandler) {
 }
 
 // // // AUTH MANAGEMENT // // // 
-const adminUser = 'admin'
+const adminUser = 'Admin'
 const passport = require('passport')
 const LocalStrategy = require('passport-local').Strategy
+const bcrypt = require('bcrypt')
 passport.use('local', new LocalStrategy(
-    function(username, password, done) {
+    async function(username, password, done) {
         if(username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) { return done(null, adminUser)}
-        else return done(null, false, { message: 'Invalid password'})
+        else {
+            let user = await db.find({username}, db.users)
+            if(!!user && user.length > 0) {
+                user = user[0]
+                const match = await bcrypt.compare(password, user.password)
+                if(match) {
+                    return done(null, user.username)
+                }
+                else {
+                    return done(null, false, { message: 'Invalid password'})   
+                }
+            }
+            else return done(null, false, { message: 'Invalid username'})
+        }
+
     }
 ))
 passport.serializeUser((user, done) => {
@@ -63,16 +78,22 @@ app.use(session({
 app.use(passport.initialize())
 app.use(passport.session())
 
-app.post('/login', passport.authenticate('local', { successRedirect: './' }))
+// // // PUBLIC ROUTES // // //
+app.post('/login', passport.authenticate('local'), (req, res) => {
+    res.status(200).send({user: req.user})
+})
 app.use('/export', require('./routes/export'))
 app.use(express.static('static'))
 
 // // // SECURE ROUTES // // //
+app.all('*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
 app.get('/logout', (req, res) => {
     req.logout()
     res.sendStatus(204)
 })
-app.all('*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
+app.get('/user', (req, res) => {
+    res.status(200).send({user: req.user})
+})
 app.use('/relationship-types', require('./routes/relationship-types'))
 app.use('/tags', require('./routes/tags'))
 app.use('/status', require('./routes/status'))
@@ -84,3 +105,12 @@ app.use('/save', require('./routes/save-dataset'))
 app.use('/save', require('./routes/save-context-object'))
 app.use('/save', require('./routes/save-relationships'))
 app.use('/solr', require('./routes/solr'))
+
+// // // SUPER SECURE ROUTES // // //
+app.all('*', (req, res, next) => req.user === adminUser ? next() : res.sendStatus(403))
+app.post('/admin/create-user', async function(req, res) {
+    const { username, password } = req.body
+    const hash = await bcrypt.hash(password, 10)
+    db.insert([{ username, password: hash }], db.users)
+    res.sendStatus(201)
+})

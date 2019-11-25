@@ -116,6 +116,7 @@
                 </li>
             </ul>
             <form class="form-inline" ng-if="state.loggedIn">
+                <label class="mr-2">{{state.user}}</label>
                 <button class="btn btn-sm btn-outline-secondary" type="button" ng-click="logout()">Logout</button>
             </form>
         </div>

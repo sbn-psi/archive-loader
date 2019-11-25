@@ -24,13 +24,15 @@ app.controller('RootController', function($scope, constants, $state, $transition
         transitioning: false,
         error: null,
         alerts: [],
-        loggedIn: loginState.loggedIn
+        loggedIn: loginState.loggedIn,
+        user: loginState.user()
     };
 
     $scope.logout = logout
 
     $scope.$on(loginState.broadcast, (event) => {
         $scope.state.loggedIn = loginState.loggedIn()
+        $scope.state.user = loginState.user()
     })
 
     // handle transitions
@@ -56,7 +58,7 @@ app.service('loginState', function($cookies, $state, $rootScope) {
     return {
         broadcast,
         login: response => {
-            user = response
+            user = response.user
             $rootScope.$broadcast(broadcast, user)
             $state.go('root')
         },
@@ -90,8 +92,9 @@ app.config(function($stateProvider) {
     $stateProvider.state({
         name: 'root',
         url: '/',
-        controller: function($scope, $http, $state) {
-            $http.get('./status/datasets').then(response => {
+        controller: function($scope, $http, $state, loginState) {
+            $http.get('./user').then(response => {
+                loginState.login(response.data)
                 $state.go('datasets.manage')
             }, err => {
                 //not logged in, go to login
@@ -111,7 +114,7 @@ app.config(function($stateProvider) {
             $scope.login = function() {
                 $http.post('./login', $scope.model).then((response) => {
                     $scope.state.error = null
-                    loginState.login(response)
+                    loginState.login(response.data)
                 }, err => {
                     $scope.state.error = err.data
                 })
