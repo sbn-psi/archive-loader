@@ -55,4 +55,9 @@ router.get('/tools', async function(req, res) {
     res.status(200).send(tools)
 })
 
+router.get('/relationships', async function(req, res) {
+    const tools = await db.find({}, db.objectRelationships)
+    res.status(200).send(tools)
+})
+
 module.exports = router

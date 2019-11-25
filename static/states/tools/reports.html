@@ -1,0 +1,10 @@
+<div ng-repeat="type in model">
+    <h3>{{type.name}}</h3>
+    <table class="table table-responsive-sm">
+        <tr ng-repeat="rel in type.relationships">
+            <td ng-if="rel.target">Target: {{rel.target}}</td>
+            <td ng-if="rel.instrument">Instrument: {{rel.instrument}}</td>
+            <td ng-if="rel.instrument_host">Spacecraft: {{rel.instrument_host}}</td>
+        </tr>
+    </table>
+</div>
