@@ -1,6 +1,6 @@
 # Archive Loader
 
-The archive loader is a database, web server and client application used to load and manage the metadata used by the PDS Registry and Web UI services
+The archive loader is a database, web server and client application used to load and manage the metadata used by the PDS Registry and Context Browser services. The front-end for the Context Browser can be found here: [https://github.com/sbn-psi/archive-viewer](https://github.com/sbn-psi/archive-viewer)
 
 ## Installation and Deployment
 
