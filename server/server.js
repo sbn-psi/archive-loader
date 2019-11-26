@@ -43,10 +43,10 @@ passport.use('local', new LocalStrategy(
                     return done(null, user.username)
                 }
                 else {
-                    return done(null, false, { message: 'Invalid password'})   
+                    return done(null, false, { message: 'Invalid login'})   
                 }
             }
-            else return done(null, false, { message: 'Invalid username'})
+            else return done(null, false, { message: 'Invalid login'})
         }
 
     }
@@ -113,4 +113,7 @@ app.post('/admin/create-user', async function(req, res) {
     const hash = await bcrypt.hash(password, 10)
     db.insert([{ username, password: hash }], db.users)
     res.sendStatus(201)
+})
+app.get('/admin/permission', async function(req, res) {
+    res.status(200).send("Yep you're an admin")
 })
