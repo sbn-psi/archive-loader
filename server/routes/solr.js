@@ -87,6 +87,7 @@ router.post('/sync', async function(req, res){
     // STEP 0: Ensure clean state in Solr
     if(!req.body.force === true) {
         await checkAvailability().catch(err => {
+            console.log(err)
             res.status(500).send("Sync service unavailable. Please contact an administator.")
             bailed = true
         })
