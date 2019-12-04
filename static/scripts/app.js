@@ -47,9 +47,6 @@ app.controller('RootController', function($scope, constants, $state, $transition
     $transitions.onStart({}, beginTransitioning)
     $transitions.onSuccess({}, endTransitioning)
     $transitions.onError({}, endTransitioning)
-
-    // go to root state
-    $state.go('root');
 });
 
 app.service('loginState', function($cookies, $state, $rootScope) {
@@ -91,7 +88,7 @@ app.factory('logout', function($http, loginState) {
 app.config(function($stateProvider) {
     $stateProvider.state({
         name: 'root',
-        url: '/',
+        url: '',
         controller: function($scope, $http, $state, loginState) {
             $http.get('./user').then(response => {
                 loginState.login(response.data)
