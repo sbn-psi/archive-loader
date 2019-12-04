@@ -85,8 +85,7 @@ router.post('/missions', async function(req, res) {
 router.post('/spacecraft', async function(req, res) {
     await processContextObject(req, res, db.spacecraft, [
         'logical_identifier',
-        'display_name',
-        'display_description'],
+        'display_name'],
         'urn:nasa:pds:context:instrument_host:')
 })
 
