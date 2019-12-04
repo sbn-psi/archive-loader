@@ -1,6 +1,6 @@
 var app = angular.module('app', ['ui.bootstrap', 'ui.router', 'textAngular', 'ngFileUpload', 'ngCookies', 'ui.sortable']);
 
-app.controller('RootController', function($scope, constants, $state, $transitions, loginState, logout) {
+app.controller('RootController', function($scope, constants, $state, $transitions, loginState, logout, verifyLogin) {
     // set initial state
     $scope.constants = constants;
     $scope.state = {
@@ -47,6 +47,8 @@ app.controller('RootController', function($scope, constants, $state, $transition
     $transitions.onStart({}, beginTransitioning)
     $transitions.onSuccess({}, endTransitioning)
     $transitions.onError({}, endTransitioning)
+
+    verifyLogin.then(() => {}, () => {})
 });
 
 app.service('loginState', function($cookies, $state, $rootScope) {
@@ -57,7 +59,6 @@ app.service('loginState', function($cookies, $state, $rootScope) {
         login: response => {
             user = response.user
             $rootScope.$broadcast(broadcast, user)
-            $state.go('root')
         },
         logout: () => {
             user = null
@@ -85,18 +86,28 @@ app.factory('logout', function($http, loginState) {
     }
 })
 
+app.factory('verifyLogin', function($http, $state, loginState) {
+    return new Promise((resolve, reject) => {
+        $http.get('./user').then(response => {
+            loginState.login(response.data)
+            resolve()
+        }, err => {
+            //not logged in, go to login
+            $state.go('login')
+            reject()
+        })
+    })
+})
+
 app.config(function($stateProvider) {
     $stateProvider.state({
         name: 'root',
         url: '',
-        controller: function($scope, $http, $state, loginState) {
-            $http.get('./user').then(response => {
-                loginState.login(response.data)
+        controller: function(verifyLogin, $state) {
+            verifyLogin.then(() => {
+                console.log('in root for some reason')
                 $state.go('datasets.manage')
-            }, err => {
-                //not logged in, go to login
-                $state.go('login')
-            })
+            }, () => {})
         }
     })
     .state({
@@ -106,12 +117,17 @@ app.config(function($stateProvider) {
             title: 'Login'
         },
         templateUrl: './states/login.html',
-        controller: function($scope, loginState, $http) {
+        controller: function($scope, loginState, $http, $state) {
+            if(loginState.loggedIn()) {
+                $state.go('root')
+            }
             $scope.model = {}
             $scope.login = function() {
                 $http.post('./login', $scope.model).then((response) => {
                     $scope.state.error = null
                     loginState.login(response.data)
+                    $state.go('root')
+
                 }, err => {
                     $scope.state.error = err.data
                 })
