@@ -3,7 +3,7 @@ const router = express.Router()
 const db = require('../db.js')
 const assert = require('assert')
 
-async function processContextObject(req, res, type, fieldList) {
+async function processContextObject(req, res, type, fieldList, lidPrefix) {
     let bailed = false
     // ensure input
     try {
@@ -29,7 +29,7 @@ async function processContextObject(req, res, type, fieldList) {
         }
         try {
             require(fieldList)
-    
+            assert(object.logical_identifier.startsWith(lidPrefix), `Expected ${object.logical_identifier} to start with ${lidPrefix}`)
         } catch (err) {
             res.status(400).send(err.message)
             bailed = true
@@ -70,28 +70,32 @@ router.post('/targets', async function(req, res) {
     await processContextObject(req, res, db.targets, [
         'logical_identifier',
         'display_name',
-        'display_description'])
+        'display_description'],
+        'urn:nasa:pds:context:target:')
 })
 
 router.post('/missions', async function(req, res) {
     await processContextObject(req, res, db.missions, [
         'logical_identifier',
         'display_name',
-        'display_description'])
+        'display_description'],
+        'urn:nasa:pds:context:investigation:')
 })
 
 router.post('/spacecraft', async function(req, res) {
     await processContextObject(req, res, db.spacecraft, [
         'logical_identifier',
         'display_name',
-        'display_description'])
+        'display_description'],
+        'urn:nasa:pds:context:instrument_host:')
 })
 
 router.post('/instruments', async function(req, res) {
     await processContextObject(req, res, db.instruments, [
         'logical_identifier',
         'display_name',
-        'display_description'])
+        'display_description'],
+        'urn:nasa:pds:context:instrument:')
 })
 
 router.post('/target-relationships', async function(req, res) {
