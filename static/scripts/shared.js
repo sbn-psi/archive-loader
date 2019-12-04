@@ -112,6 +112,8 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
     $scope.instrumentRelationships = instrumentRelationships
     $scope.tools = tools
     $scope.config = {}
+    $scope.editing = existing ? true : false
+
     const validate = function() {
         const object = $scope.model[$scope.config.modelName]
         
@@ -131,28 +133,36 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
         let validation = validate()
         if(validation === true) {
             $scope.state.error = null;
-            $scope.state.loading = true;  
+            $scope.state.loading = true; 
             
-            let postablePrimary = sanitizer($scope.model[$scope.config.modelName], templateModel)
-            let primaryPost = $http.post($scope.config.primaryPostEndpoint, postablePrimary)
-            let backendRequests = [primaryPost]
-
-            let postableRelationships = []
-            $scope.config.relationshipModelNames.forEach(relName => {
-                postableRelationships = postableRelationships.concat($scope.model[relName].map(rel => $scope.config.relationshipTransformer(rel, relName)))
-            })
-            if(postableRelationships.length > 0) {
-                backendRequests.push($http.post('./save/relationships', postableRelationships))
-            }
-
-            Promise.all(backendRequests).then(function(res) {
-                $scope.state.progress();
+            const object = $scope.model[$scope.config.modelName]
+            verifyNew(object.logical_identifier).then(() => {
+                let postablePrimary = sanitizer(object, templateModel)
+                let primaryPost = $http.post($scope.config.primaryPostEndpoint, postablePrimary)
+                let backendRequests = [primaryPost]
+    
+                let postableRelationships = []
+                $scope.config.relationshipModelNames.forEach(relName => {
+                    postableRelationships = postableRelationships.concat($scope.model[relName].map(rel => $scope.config.relationshipTransformer(rel, relName)))
+                })
+                if(postableRelationships.length > 0) {
+                    backendRequests.push($http.post('./save/relationships', postableRelationships))
+                }
+    
+                Promise.all(backendRequests).then(function(res) {
+                    $scope.state.progress();
+                    $scope.state.loading = false;
+                }, function(err) {
+                    $scope.state.error = err.data;
+                    $scope.state.loading = false;
+                    console.log(err);
+                })
+            }, error => {
                 $scope.state.loading = false;
-            }, function(err) {
-                $scope.state.error = err.data;
-                $scope.state.loading = false;
-                console.log(err);
+                $scope.state.error = error
+                $scope.$apply()
             })
+            
         } else {
             $scope.state.error = validation;
         }
@@ -172,22 +182,55 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
             $scope.model[relName] = $scope.model[relName].concat(relationships)
         })
         
-        $scope.$watch(`model.${modelName}.logical_identifier`, function(lid) {
-            if(!!existing) { return }
-            $scope.state.loading = true;
-            let registryFields = $scope.config.lookupReplacements.map(replacement => replacement.registryField)
-            lidCheck(lid, registryFields).then(function(doc) {
-                $scope.state.loading = false;
-                const replace = (scopeKey, docKey) => {
-                    if(!isPopulated($scope.model[$scope.config.modelName][scopeKey])) { $scope.model[$scope.config.modelName][scopeKey] = doc[docKey][0] }
-                }
-                $scope.config.lookupReplacements.forEach(replacement => replace(replacement.formField, replacement.registryField))
-            }, function(err) { 
-                $scope.state.loading = false;
-                // don't care about errors
+        if(!$scope.editing) {
+            $scope.$watch(`model.${modelName}.logical_identifier`, function(lid) {
+                if(!lid) { return }
+                $scope.state.loading = true;
+                
+                verifyNew(lid).then(() => {
+                    checkLid(lid)
+                }, error => {
+                    $scope.state.loading = false;
+                    $scope.state.error = error
+                    $scope.$apply()
+                })
+                
             })
-        })
+        }
     })
+
+    function verifyNew(lid) {
+        if($scope.editing) {
+            return Promise.resolve()
+        }
+
+        return new Promise((resolve, reject) => {
+            $http.get('./edit/' + $scope.config.modelName, { params: { logical_identifier: lid }}).then(
+                (response) => {
+                    if(!!response.data && !!response.data.object) {
+                        reject(`${lid} already exists. It should be edited instead of added.`)
+                    } else {
+                        resolve()
+                    }
+                }, resolve)
+        })
+    }
+
+    function checkLid(lid) {
+        let registryFields = $scope.config.lookupReplacements.map(replacement => replacement.registryField)
+        lidCheck(lid, registryFields).then(function(doc) {
+            $scope.state.loading = false;
+            const replace = (scopeKey, docKey) => {
+                if(!isPopulated($scope.model[$scope.config.modelName][scopeKey])) { $scope.model[$scope.config.modelName][scopeKey] = doc[docKey][0] }
+            }
+            $scope.config.lookupReplacements.forEach(replacement => replace(replacement.formField, replacement.registryField))
+            $scope.$apply()
+        }, function(err) { 
+            $scope.state.loading = false;
+            $scope.$apply()
+            // don't care about errors
+        })
+    }
 })
 
 app.filter('pluralizeDumb', function() {

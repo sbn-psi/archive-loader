@@ -7,16 +7,16 @@ router.get('/datasets', async function(req, res) {
     await editLookupRequest(req, res, db.datasets)    
 })
 
-router.get('/targets', async function(req, res) {
+router.get('/target', async function(req, res) {
     await editLookupRequest(req, res, db.targets)    
 })
-router.get('/missions', async function(req, res) {
+router.get('/mission', async function(req, res) {
     await editLookupRequest(req, res, db.missions)    
 })
 router.get('/spacecraft', async function(req, res) {
     await editLookupRequest(req, res, db.spacecraft)    
 })
-router.get('/instruments', async function(req, res) {
+router.get('/instrument', async function(req, res) {
     await editLookupRequest(req, res, db.instruments)    
 })
 

@@ -15,7 +15,7 @@ app.config(function($stateProvider) {
         resolve: {
             existing: function($http, $stateParams) {
                 if(!!$stateParams.edit) {
-                    return $http.get('./edit/targets', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data })
+                    return $http.get('./edit/target', { params: { logical_identifier: $stateParams.edit }}).then(function(res) { return res.data })
                 } else {
                     return null
                 }
