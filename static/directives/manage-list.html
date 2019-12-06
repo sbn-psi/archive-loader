@@ -7,7 +7,7 @@
         </tr>
         <tr ng-repeat="item in ungrouped | filter:group.lid track by $index">
             <td class="align-middle">{{item.name}}</td>
-            <td class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
+            <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
             <td><button class="btn btn-link" ng-click="edit(item.lid)">Edit</button></td>
         </tr>
@@ -17,7 +17,7 @@
         </tr>
         <tr ng-repeat-end ng-repeat="item in list | filter:group.lid track by $index">
             <td class="align-middle">{{item.name}}</td>
-            <td class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
+            <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
             <td><button class="btn btn-link" ng-click="edit(item.lid)">Edit</button></td>
         </tr>

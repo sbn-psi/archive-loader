@@ -26,7 +26,8 @@ app.directive('manageList', function() {
         scope: {
             edit: '<',
             list: '<',
-            groupBy: '@?'
+            groupBy: '@?',
+            usesTags: '@?tags'
         },
         templateUrl: './directives/manage-list.html',
         controller: function($scope, lidCheck) {

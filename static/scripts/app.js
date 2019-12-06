@@ -105,7 +105,6 @@ app.config(function($stateProvider) {
         url: '',
         controller: function(verifyLogin, $state) {
             verifyLogin.then(() => {
-                console.log('in root for some reason')
                 $state.go('datasets.manage')
             }, () => {})
         }
