@@ -6,6 +6,6 @@ export default function($scope, $http, $state) {
     })
 
     $scope.edit = function(lidvid) {
-        $state.go('targets.import', {edit: lidvid})
+        return $state.href('targets.import', {edit: lidvid})
     }
 }
