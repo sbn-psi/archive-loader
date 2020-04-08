@@ -15,16 +15,24 @@ const collections = [{
     config: 'sbn'
 },{
     dbName: db.targets,
-    collectionName: 'web-targets'
+    collectionName: 'web-targets',
+    solrize: true,
+    solrizeAttr: 'target',
 },{
     dbName: db.missions,
-    collectionName: 'web-investigations'
+    collectionName: 'web-investigations',
+    solrize: true,
+    solrizeAttr: 'mission',
 },{
     dbName: db.spacecraft,
-    collectionName: 'web-instrumenthosts'
+    collectionName: 'web-instrumenthosts',
+    solrize: true,
+    solrizeAttr: 'spacecraft',
 },{
     dbName: db.instruments,
-    collectionName: 'web-instruments'
+    collectionName: 'web-instruments',
+    solrize: true,
+    solrizeAttr: 'instrument',
 },{
     dbName: db.targetRelationships,
     collectionName: 'web-targetrelationships'
