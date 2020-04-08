@@ -29,7 +29,7 @@ async function processContextObject(req, res, type, fieldList, lidPrefix) {
         }
         try {
             require(fieldList)
-            assert(object.logical_identifier.startsWith(lidPrefix), `Expected ${object.logical_identifier} to start with ${lidPrefix}`)
+            assert(!object.logical_identifier || object.logical_identifier.startsWith(lidPrefix), `Expected ${object.logical_identifier} to start with ${lidPrefix}`)
         } catch (err) {
             res.status(400).send(err.message)
             bailed = true
@@ -105,7 +105,8 @@ router.post('/tool', async function(req, res) {
     await processContextObject(req, res, db.tools, [
         'display_name',
         'url',
-        'image_url'
+        'image_url',
+        'toolId'
     ])
 })
 
