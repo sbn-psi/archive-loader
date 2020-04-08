@@ -161,16 +161,15 @@ app.directive('relatedToolSelector', function() {
         controller: function($scope) {
             // initial model prep
             if(!$scope.selected) { $scope.selected = []}
-            else {
-                $scope.selected.forEach(sel => {
-                    let tool = $scope.tools.find(tool => sel.toolId === tool.toolId)
-                    tool.selected = true
-                    tool.directUrl = sel.directUrl
-                })
-            }
-            if($scope.selected.length > 0 && $scope.selected[0] && !angular.isObject($scope.selected[0])) {
+            else if($scope.selected.length > 0 && $scope.selected[0] && !angular.isObject($scope.selected[0])) {
                 $scope.selected = $scope.selected.map(id => { return { toolId: id }})
             }
+
+            $scope.selected.forEach(sel => {
+                let tool = $scope.tools.find(tool => sel.toolId === tool.toolId)
+                tool.selected = true
+                tool.directUrl = sel.directUrl
+            })
 
             // map internal model to return model
             $scope.$watch('tools', function() {
