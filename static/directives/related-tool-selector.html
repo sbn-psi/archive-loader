@@ -1,6 +1,17 @@
 <h2>Related Tools</h2>
 <div class="related-tools">
     <div ng-repeat="tool in tools" class="related-tool-container">
-        <img ng-src="{{tool.image_url}}" alt="{{tool.name}}" tabIndex="{{tool.toolId}}" ng-keydown="($event.keyCode === 13 || $event.keyCode === 32) && toolClicked(tool)" role="button" aria-pressed="{{selected.includes(tool.toolId)}}" ng-class="{highlighted: selected.includes(tool.toolId)}" ng-click="toolClicked(tool)">
+        <img ng-src="{{tool.image_url}}" 
+            alt="{{tool.name}}" 
+            tabIndex="{{tool.toolId}}" 
+            ng-keydown="($event.keyCode === 13 || $event.keyCode === 32) && toolClicked(tool)" 
+            role="button" 
+            aria-pressed="{{!!tool.selected}}" 
+            ng-class="{highlighted: !!tool.selected}" ng-click="toolClicked(tool)">
+        <div class="tool-supplemental">
+            <strong>{{tool.name}}</strong>
+            <label>Direct Link: (optional)</label>
+            <input class="form-control" type="url" ng-model="tool.directUrl" ng-keydown="urlTyped(tool)">
+        </div>
     </div>
 </div>
