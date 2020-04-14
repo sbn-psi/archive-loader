@@ -106,10 +106,12 @@ ui-view {
 }
 .related-tools {
   display: flex;
-  flex-flow: row wrap;
+  flex-flow: column nowrap;
 }
 .related-tool-container {
   padding: 10px;
+  display: flex;
+  flex-flow: row nowrap;
 }
 .related-tools img {
   max-height: 120px;
@@ -120,6 +122,14 @@ ui-view {
   opacity: 1.0;
   border: 1px solid rgb(94, 158, 214);
   box-shadow: 0 0 3px 1px rgb(94, 158, 214);
+}
+.related-tools .tool-supplemental {
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+}
+.related-tools .tool-supplemental input {
+  min-width: 400px;
 }
 .error {
   color: red;

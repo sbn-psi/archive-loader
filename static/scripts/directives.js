@@ -159,13 +159,32 @@ app.directive('relatedToolSelector', function() {
             selected: '=model'
         },
         controller: function($scope) {
+            // initial model prep
             if(!$scope.selected) { $scope.selected = []}
-
-            $scope.toolClicked = function(tool) {
-                if($scope.selected.includes(tool.toolId)) { $scope.selected.splice($scope.selected.indexOf(tool.toolId), 1); }
-                else { $scope.selected.push(tool.toolId); }
+            else if($scope.selected.length > 0 && $scope.selected[0] && !angular.isObject($scope.selected[0])) {
+                $scope.selected = $scope.selected.map(id => { return { toolId: id }})
             }
-            
+
+            $scope.selected.forEach(sel => {
+                let tool = $scope.tools.find(tool => sel.toolId === tool.toolId)
+                tool.selected = true
+                tool.directUrl = sel.directUrl
+            })
+
+            // map internal model to return model
+            $scope.$watch('tools', function() {
+                $scope.selected = $scope.tools.filter(tool => tool.selected).map(tool => { return {toolId: tool.toolId, directUrl: tool.directUrl}})
+            }, true)
+
+            // event handling
+            $scope.toolClicked = function(tool) {
+                tool.selected = !tool.selected
+            }
+            $scope.urlTyped = function(tool) {
+                if(!!tool.directUrl && !tool.selected) {
+                    tool.selected = true
+                }
+            }
         }
     }   
 });
