@@ -10,7 +10,13 @@ if(!process.env.MINIO_ACCESS_KEY) {
 
 // express, minio setup
 console.log('connecting to file server...')
-require('./minio.js').bootstrap().then(expressSetup, console.log)
+require('./minio.js').bootstrap().then(expressSetup, error => {
+    console.log("############# ERROR #################")
+    console.log("##### Couldn't connect to Minio #####")
+    console.log(error)
+    console.log("###### Starting server anyway #######")
+    startServer()
+});
 const express = require('express')
 const app = express()
 const bodyParser = require('body-parser')
@@ -21,6 +27,10 @@ app.use(helmet())
 // called once file server is bootstrapped; starts the actual listening process
 function expressSetup(minioHandler) {
     app.use('/image/upload', minioHandler)
+    startServer()
+}
+
+function startServer() {
     app.listen(8989, () => {
         console.log('running on port 8989...')
     })
