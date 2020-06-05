@@ -18,8 +18,8 @@
         <section>
             <h2>PDS3 Search</h2>
             <div class="form-group empty">
-                <label>Instrument ID: </label><input class="form-control" type="text" ng-model="instrument.pds3_instrument_id">
-                <label>Spacecraft ID: </label><input class="form-control" type="text" ng-model="instrument.pds3_instrument_host_id">
+                <label>Instrument ID: </label><input class="form-control" type="text" ng-model="instrument.pds3_instrument_id" uib-typeahead="val for val in instrumentIds | filter: $viewValue | limitTo: 8" >
+                <label>Spacecraft ID: </label><input class="form-control" type="text" ng-model="instrument.pds3_instrument_host_id" uib-typeahead="val for val in spacecraftIds | filter: $viewValue | limitTo: 8" >
             </div>
         </section>
 
