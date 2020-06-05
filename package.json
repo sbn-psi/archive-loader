@@ -18,6 +18,7 @@
     "express": "^4.17.1",
     "express-middleware-minio": "^3.1.0",
     "express-session": "^1.17.0",
+    "got": "^11.3.0",
     "helmet": "^3.21.2",
     "minio": "^7.0.16",
     "mongodb": "^3.3.4",
