@@ -1,14 +1,14 @@
-const request = require('request-promise-native')
+const request = require('got')
 module.exports = async function httpRequest(baseUrl, params, body, username, password) {
     const options = {
-        uri: baseUrl,
-        json: true
+        responseType: 'json'
     };
-    if(!!params) { options.qs = params }
-    if(!!body) { options.body = body }
-    if(!!username) { options.auth = {
-        user: username,
-        pass: password
-    } }
-    return await request(options)
+    if(!!params) { options.searchParams = params }
+    if(!!body) { 
+        options.json = body
+        options.method = 'POST'
+     }
+    if(!!username) { options.username = username }
+    if(!!password) { options.password = password }
+    return await request(baseUrl, options).json()
 }
