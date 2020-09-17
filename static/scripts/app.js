@@ -48,7 +48,7 @@ app.controller('RootController', function($scope, constants, $state, $transition
     $transitions.onSuccess({}, endTransitioning)
     $transitions.onError({}, endTransitioning)
 
-    verifyLogin.then(() => {}, () => {})
+    verifyLogin().then(() => {}, () => {})
 });
 
 app.service('loginState', function($cookies, $state, $rootScope) {
@@ -87,7 +87,7 @@ app.factory('logout', function($http, loginState) {
 })
 
 app.factory('verifyLogin', function($http, $state, loginState) {
-    return new Promise((resolve, reject) => {
+    return () => new Promise((resolve, reject) => {
         $http.get('./user').then(response => {
             loginState.login(response.data)
             resolve()
@@ -104,7 +104,7 @@ app.config(function($stateProvider) {
         name: 'root',
         url: '',
         controller: function(verifyLogin, $state) {
-            verifyLogin.then(() => {
+            verifyLogin().then(() => {
                 $state.go('datasets.manage')
             }, () => {})
         }

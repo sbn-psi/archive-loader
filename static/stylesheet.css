@@ -134,3 +134,7 @@ ui-view {
 .error {
   color: red;
 }
+
+.page-link {
+  cursor: pointer;
+}

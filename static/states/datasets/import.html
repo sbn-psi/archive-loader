@@ -3,14 +3,14 @@
         <div class="col" ng-if="allDatasets().length > 0">
             <nav aria-label="Dataset selection" id="dataset-nav" class="sticky-top">
                 <ul class="pagination flex-column">
-                    <li class="page-item" ng-if="model.bundle" ng-class="{active: view.active === model.bundle}"><a class="page-link" href="#" ng-click="view.active = model.bundle; view.type = constants.bundleType">{{model.bundle.logical_identifier}}</a></li>
-                    <li class="page-item" ng-repeat="collection in model.collections" ng-class="{active: view.active.logical_identifier === collection.logical_identifier}"><a class="page-link" href="#" ng-click="view.active = collection; view.type = constants.collectionType">{{collection.logical_identifier}}</a></li>
+                    <li class="page-item" ng-if="model.bundle" ng-class="{active: view.active === model.bundle}" ng-click="view.active = model.bundle; view.type = constants.bundleType;"><span class="page-link">{{model.bundle.logical_identifier}}</span></li>
+                    <li class="page-item" ng-repeat="collection in model.collections" ng-class="{active: view.active.logical_identifier === collection.logical_identifier}" ng-click="console.log($event); view.active = collection; view.type = constants.collectionType;"><span class="page-link">{{collection.logical_identifier}}</span></li>
                 </ul>
             </nav>
             <button class="btn btn-danger" ui-sref="datasets">Cancel</button>
         </div>
         <div class="col tab-container">
-            <dataset-import-form dataset="view.active" type="view.type" autocomplete="autocomplete" tags="tags"></dataset-import-form>
+            <dataset-import-form loaded="true" dataset="view.active" type="view.type" autocomplete="autocomplete" tags="tags"></dataset-import-form>
             <related-tool-selector model="view.active.tools" tools="tools"></relationship-selector>
         </div>
     </div>

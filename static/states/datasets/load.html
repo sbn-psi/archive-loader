@@ -1,13 +1,14 @@
 <form class="form-group" ng-controller="DatasetLoaderController">
-    <div>
-        <input type="radio" id="bundle-radio" ng-model="state.datasetType" name="dataset-type" value="Bundle">
-        <label for="bundle-radio">Bundle</label>
-    </div>
-    <div>
-        <input type="radio" id="collection-radio" ng-model="state.datasetType" name="dataset-type" value="Collection">
-        <label for="collection-radio">Collection</label>
-    </div>
     <div id="primary-input" class="form-group">
+        <h2>PDS4 Dataset type: </h2>
+        <div>
+            <input type="radio" id="bundle-radio" ng-model="state.datasetType" name="dataset-type" value="Bundle">
+            <label for="bundle-radio">Bundle</label>
+        </div>
+        <div>
+            <input type="radio" id="collection-radio" ng-model="state.datasetType" name="dataset-type" value="Collection">
+            <label for="collection-radio">Collection</label>
+        </div>
         <h2>{{state.datasetType}} URL: </h2>
         <input class="form-control" type="url" ng-model="state.datasetUrl"><br/>
         <p>
