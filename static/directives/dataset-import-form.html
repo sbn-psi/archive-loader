@@ -2,7 +2,7 @@
 
     <form id="dataset-form">
         <div class="form-group">
-            <label>LIDVID:</label> <input class="form-control" type="text" ng-model="dataset.logical_identifier" disabled>
+            <label>LIDVID:</label> <input class="form-control" type="text" ng-model="dataset.logical_identifier" ng-disabled="loaded">
             <label>Dataset Display Name: </label><input class="form-control" type="text" ng-model="dataset.display_name" uib-typeahead="val for val in autocomplete('display_name', $viewValue)">
             <label>DOI: </label><input class="form-control" type="text" ng-model="dataset.doi" uib-typeahead="val for val in autocomplete('doi', $viewValue)">
             <label>Display Description: </label><textarea class="form-control" ng-model="dataset.display_description" uib-typeahead="val for val in autocomplete('display_description', $viewValue)"></textarea>

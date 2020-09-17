@@ -62,7 +62,8 @@ app.directive('datasetImportForm', function () {
             dataset: '=',
             type: '<',
             tags: '=',
-            autocomplete: '='
+            autocomplete: '=',
+            loaded: '<'
         },
         controller: 'FormController'
     };
