@@ -117,7 +117,7 @@ app.use('/save', require('./routes/save-relationships'))
 app.use('/solr', require('./routes/solr'))
 
 // // // SUPER SECURE ROUTES // // //
-app.all('*', (req, res, next) => req.user === adminUser ? next() : res.sendStatus(403))
+app.all('/admin/*', (req, res, next) => req.user === adminUser ? next() : res.sendStatus(403))
 app.post('/admin/create-user', async function(req, res) {
     const { username, password } = req.body
     const hash = await bcrypt.hash(password, 10)
