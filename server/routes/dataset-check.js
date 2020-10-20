@@ -16,6 +16,8 @@ const fieldMapper = dataset => { return {
     instrument_lid: dataset.instrument_lid
 }}
 router.get('/bundle', async function(req, res) {
+    req.setTimeout(5 * 60 * 1000) // 5 minute timeout
+    
     let bundleUrl = req.query.url;
     let discovered;
     
@@ -39,6 +41,7 @@ router.get('/bundle', async function(req, res) {
 
 
 router.get('/collection', async function(req, res) {
+    req.setTimeout(5 * 60 * 1000) // 5 minute timeout
     
     let bundleUrl = req.query.url;
     let discovered;

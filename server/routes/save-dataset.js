@@ -55,7 +55,6 @@ router.post('/datasets', async function(req, res) {
         if(!!dataset.tags) {
             let associatedTags = dataset.tags
             let allTags = await db.find({ "type": db.datasets }, db.tags)
-            console.log(allTags)
             for (associatedTag of associatedTags) {
                 if(!allTags.find(tag => tag.name === associatedTag)) {
                     newTags.push({name: associatedTag, type: db.datasets})
