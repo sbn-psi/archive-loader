@@ -10,6 +10,9 @@
             <label>Display Description: </label><textarea class="form-control" ng-model="mission.display_description"></textarea>
         </div>
         <div class="form-group">
+            <label>Mission Bundle LID:</label> <input class="form-control" type="text" placeholder="Optional -- only applies to missions with a traditional bundle structure" ng-model="mission.mission_bundle">
+        </div>
+        <div class="form-group">
             <label>Mission Badge Image: </label>
             <div>
                 <image-upload model="mission.image_url" error="error"/>
