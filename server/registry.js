@@ -32,7 +32,7 @@ async function contextObjectLookupRequest(lid, fields) {
         wt: 'json',
         identifier: lid,
         rows: 1,
-        fl: (fields && fields.constructor === Array) ? fields.join(',') : fields
+        fl: fields ? ( (fields && fields.constructor === Array) ? fields.join(',') : fields) : null
     })
     assert(solrResponse.response.numFound != 0, "Could not find context object with that identifier")
     assert(solrResponse.response.numFound == 1, "Found more than one context object with that identifier")

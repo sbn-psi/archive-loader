@@ -9,7 +9,7 @@
             <td class="align-middle">{{item.name}}</td>
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
-            <td><button class="btn btn-link" ng-click="edit(item.lid)">Edit</button></td>
+            <td><a class="btn btn-link" ng-href="{{edit(item.lid)}}">Edit</a></td>
         </tr>
         <!-- Grouped items -->
         <tr ng-show="!!group.lid" ng-repeat-start="group in groups">

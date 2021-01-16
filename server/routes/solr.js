@@ -11,8 +11,7 @@ const collections = [{
     dbName: db.datasets,
     collectionName: 'web-datasets',
     solrize: true,
-    solrizeAttr: 'dataset',
-    config: 'sbn'
+    solrizeAttr: 'dataset'
 },{
     dbName: db.targets,
     collectionName: 'web-targets',
