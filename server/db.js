@@ -130,6 +130,7 @@ module.exports = {
                 target: doc.target,
                 instrument_host: doc.instrument_host,
                 instrument: doc.instrument,
+                bundle: doc.bundle
             }).upsert().replaceOne(doc)
         }
         var result = await bulkOperation.execute();

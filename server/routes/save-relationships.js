@@ -16,7 +16,7 @@ router.post('/relationships', async function(req, res) {
     }
     
     let objects = req.body
-    let possibleFields = ['target', 'instrument_host', 'instrument']
+    let possibleFields = ['target', 'instrument_host', 'instrument', 'bundle']
     for(doc of objects) {
         let fieldsPresent = 0
         for(field of possibleFields) {
@@ -24,7 +24,7 @@ router.post('/relationships', async function(req, res) {
         }
         try {
             assert(fieldsPresent === 2, `Expected ${JSON.stringify(doc)} to contain exactly two of [${possibleFields.join(', ')}]`)
-            assert(doc.relationshipId, `Expected relationshipId to be specified on ${JSON.stringify(doc)}`)
+            assert((doc.relationshipId || doc.label), `Expected relationshipId or label to be specified on ${JSON.stringify(doc)}`)
         } catch (err) {
             res.status(400).send(err.message)
             bailed = true

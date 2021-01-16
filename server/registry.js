@@ -8,20 +8,23 @@ const type = {
     mission: 'mission',
     instrument: 'instrument',
     target: 'target',
+    bundle: 'bundle'
 }
 
 const referenceField = {
     [type.spacecraft]: 'instrument_host_ref',
     [type.mission]: 'investigation_ref',
     [type.instrument]: 'instrument_ref',
-    [type.target]: 'target_ref'
+    [type.target]: 'target_ref',
+    [type.bundle]: 'bundle_ref' // not actually a thing
 }
 
 const relatedTypeVal = {
     [type.spacecraft]: 'instrument_Host',
     [type.mission]: 'Investigation',
     [type.instrument]: 'Instrument',
-    [type.target]: 'Target'
+    [type.target]: 'Target',
+    [type.bundle]: 'Product_Bundle'
 }
 
 async function contextObjectLookupRequest(lid, fields) {
@@ -52,7 +55,7 @@ async function lookupRelated(sourceType, desiredType, lid) {
 async function foreignReferences(sourceType, desiredType, lid) {
     let solrResponse = await httpRequest(registryUrl, {
         wt: 'json',
-        q: `${referenceField[sourceType]}:${new LID(lid).escapedLid}\\:\\:* AND data_class:"${relatedTypeVal[desiredType]}"`,
+        q: `${referenceField[sourceType]}:${new LID(lid).escapedLid}\\:\\:* AND (data_class:"${relatedTypeVal[desiredType]}" OR product_class:"${relatedTypeVal[desiredType]}")`,
         fl: 'identifier',
         rows: 100
     })

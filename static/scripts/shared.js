@@ -118,7 +118,7 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
         
         const lidValid = isPopulated(object.logical_identifier) && object.logical_identifier.startsWith($scope.config.lidPrefix)
         const requiredFieldsPresent = $scope.config.requiredFields.every(field => isPopulated($scope.model[$scope.config.modelName][field]))
-        const relationshipsHaveValues = $scope.config.relationshipModelNames.every(modelName => $scope.model[modelName].every(rel => !!rel.relationshipId))
+        const relationshipsHaveValues = $scope.config.relationshipModelNames.every(modelName => $scope.model[modelName].every(rel => !!rel.relationshipId || !!rel.label))
         return lidValid ? requiredFieldsPresent ? relationshipsHaveValues ? true : 'All relationships must have types set' : 'Some required fields are missing' : 'LID does not start with ' + $scope.config.lidPrefix
     }
 
