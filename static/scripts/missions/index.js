@@ -23,7 +23,9 @@ app.config(function($stateProvider) {
             tags: function($http) {
                 return $http.get('./tags/missions').then(result => result.data)
             },
-            targetRelationships: () => null, 
+            targetRelationships: function($http) {
+                return $http.get('./relationship-types/target').then(result => result.data)
+            },
             instrumentRelationships: () => null,
             tools: function($http) {
                 return $http.get('./status/tools').then(result => result.data)

@@ -11,6 +11,7 @@ const spacecraftCollection = 'spacecraft'
 const instrumentsCollection = 'instruments'
 const targetRelationshipsCollection = 'targetRelationships'
 const targetSpacecraftRelationshipTypesCollection = 'targetSpacecraftRelationshipTypes'
+const targetMissionRelationshipTypesCollection = 'targetMissionRelationshipTypes'
 const instrumentSpacecraftRelationshipTypes = 'instrumentSpacecraftRelationshipTypes'
 const tagsCollection = 'tags'
 const objectRelationshipsCollection = 'objectRelationships'
@@ -59,6 +60,7 @@ module.exports = {
     instruments: instrumentsCollection,
     targetRelationships: targetRelationshipsCollection,
     targetSpacecraftRelationshipTypes: targetSpacecraftRelationshipTypesCollection,
+    targetMissiontRelationshipTypes: targetMissionRelationshipTypesCollection,
     instrumentSpacecraftRelationshipTypes: instrumentSpacecraftRelationshipTypes,
     tags: tagsCollection,
     objectRelationships: objectRelationshipsCollection,

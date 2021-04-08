@@ -10,7 +10,7 @@ export default function($scope) {
                 registryField: 'instrument_host_name'
             }
         ],
-        relationshipModelNames: ['target', 'instrument'],
+        relationshipModelNames: ['instrument'],
         relationshipTransformer: function(relationship, domain) {
             return {
                 instrument_host: $scope.model.spacecraft.logical_identifier,

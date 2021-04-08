@@ -2,6 +2,7 @@ const express = require('express')
 const router = express.Router()
 const db = require('../db.js')
 const assert = require('assert')
+const registry = require('../registry.js')
 
 router.post('/relationships', async function(req, res) {
     let bailed = false
@@ -16,7 +17,7 @@ router.post('/relationships', async function(req, res) {
     }
     
     let objects = req.body
-    let possibleFields = ['target', 'instrument_host', 'instrument', 'bundle']
+    let possibleFields = ['target', 'instrument_host', 'instrument', 'bundle', 'investigation']
     for(doc of objects) {
         let fieldsPresent = 0
         for(field of possibleFields) {
@@ -40,6 +41,46 @@ router.post('/relationships', async function(req, res) {
         res.status(201).send( result.ops )
     } catch(err) {
         res.status(500).send('Unexpected database error while saving')
+        console.log(err);
+    }
+})
+
+router.post('/migrate-spacecraft-target-relationships', async function(req, res) {
+    let existing = await db.find({}, db.objectRelationships)
+
+    // filter for only spacecraft-target relationships
+    existing = existing.filter(rel => !!rel.instrument_host && !!rel.target)
+
+    let response = {
+        modified: 0,
+        ignored: []
+    }
+
+    const toAdd = await Promise.all(existing.map(async rel => {
+        const missionLookup = await registry.lookupRelated(registry.type.spacecraft, registry.type.mission, rel.instrument_host)
+        const mission = missionLookup && missionLookup.length >= 1 ? missionLookup[0].identifier : null
+
+        if(!!mission) {
+            response.modified += 1
+            return {
+                investigation: mission,
+                target: rel.target,
+                relationshipId: rel.relationshipId
+            }
+        } else {
+            console.log('Could not find mission for spacecraft ' + rel.instrument_host)
+            response.ignored.push(rel.instrument_host)
+            return rel
+        }
+    }))
+
+    try {
+        const saveResponse = await db.insertRelationships(toAdd)
+        response.ops = saveResponse.ops
+        res.status(201).send( response )
+    } catch(err) {
+        response.error = err
+        res.status(500).send(response)
         console.log(err);
     }
 })

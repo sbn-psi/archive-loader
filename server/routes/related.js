@@ -24,7 +24,8 @@ const registryToFieldMap = {
     [registry.type.target]: 'target',
     [registry.type.spacecraft]: 'instrument_host',
     [registry.type.instrument]: 'instrument',
-    [registry.type.bundle]: 'bundle'
+    [registry.type.bundle]: 'bundle',
+    [registry.type.mission]: 'investigation'
 }
 
 async function related(desiredType, req, res) {

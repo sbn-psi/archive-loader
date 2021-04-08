@@ -26,9 +26,7 @@ app.config(function($stateProvider) {
             instrumentRelationships: function($http) {
                 return $http.get('./relationship-types/instrument').then(result => result.data)
             },
-            targetRelationships: function($http) {
-                return $http.get('./relationship-types/target').then(result => result.data)
-            },
+            targetRelationships: () => null,
             tools: function($http) {
                 return $http.get('./status/tools').then(result => result.data)
             }

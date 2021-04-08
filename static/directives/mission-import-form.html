@@ -18,9 +18,23 @@
                 <image-upload model="mission.image_url" error="error"/>
             </div>
         </div>
-        <div class="form-group">
-            <label>Funding Level: </label><input class="form-control" type="text" ng-model="mission.funding_level">
-        </div>
         
+        <section class="repeating-group">
+            <h2>Tags</h2>
+            <div class="form-group empty" ng-repeat="tag in groupRepeater(mission.tags)">
+                <input class="form-control" type="text" ng-model="tag.name" uib-typeahead="val for val in tags | filter: $viewValue | limitTo: 8">
+            </div>
+        </section>
+
+        <section>
+            <h2>Additional Content</h2>
+            <div class="form-group">
+                <label>Supplemental HTML - Top</label><text-angular ng-model="mission.html1"></text-angular>
+            </div>
+            <hr/>
+            <div class="form-group">
+                <label>Supplemental HTML - Bottom</label><text-angular ng-model="mission.html2"></text-angular>
+            </div>
+        </section>
     </form>
 </div>

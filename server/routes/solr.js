@@ -42,8 +42,8 @@ const collections = [{
     dbName: db.objectRelationships,
     collectionName: 'web-objectrelationships'
 },{
-    dbName: db.targetSpacecraftRelationshipTypes,
-    collectionName: 'web-targetspacecraftrelationshiptypes'
+    dbName: db.targetMissiontRelationshipTypes,
+    collectionName: 'web-targetMissiontRelationshipTypes'
 },{
     dbName: db.instrumentSpacecraftRelationshipTypes,
     collectionName: 'web-instrumentspacecraftrelationshiptypes'
