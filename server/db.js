@@ -91,7 +91,7 @@ module.exports = {
         }
         var result = await bulkOperation.execute();
         assert(result.result.ok)
-        return result
+        return result.result.upserted
     },
     find: async function(inputFilter, type, stream, end) {
         await connect()
@@ -118,7 +118,7 @@ module.exports = {
         const toUpdate = (doc.relationshipId) ? { 'relationshipId': doc.relationshipId } : { '_id': doc.id };
         // do a soft delete
         const result = await collection.updateOne(toUpdate, { $set: { _isActive: false }});
-        return result;
+        return result.ops;
     },
     insertRelationships: async function(documents) {
         assert(documents.constructor === Array, "First argument must be an array of documents to insert")
@@ -137,7 +137,7 @@ module.exports = {
         }
         var result = await bulkOperation.execute();
         assert(result.result.ok)
-        return result
+        return result.ops
     },
     join: async function(primaryType, foreignType, idField, foreignField, intoField) {
         await connect()

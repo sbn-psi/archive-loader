@@ -69,7 +69,7 @@ router.post('/datasets', async function(req, res) {
     try {
         if(newTags.length > 0) { await db.insert(newTags, db.tags)}
         const result = await db.insert(toInsert, db.datasets)
-        res.status(201).send( result.ops )
+        res.status(201).send( result )
     } catch(err) {
         res.status(500).send('Unexpected database error while saving')
         console.log(err);

@@ -14,12 +14,12 @@ router.post('/target', async function(req, res) {
         if (!doc.relationshipId) doc.relationshipId = uuid4()
         return doc
     }), db.targetMissiontRelationshipTypes)
-    res.status(201).send( result.ops )
+    res.status(201).send( result )
 })
 router.post('/target/remove', async function(req, res) {
     const toRemove = req.body
     const result = await db.deleteOne(toRemove, db.targetMissiontRelationshipTypes)
-    res.status(202).send( result.ops )
+    res.status(202).send( result )
 })
 
 // INSTRUMENTS //
@@ -33,12 +33,12 @@ router.post('/instrument', async function(req, res) {
         if (!doc.relationshipId) doc.relationshipId = uuid4()
         return doc
     }), db.instrumentSpacecraftRelationshipTypes)
-    res.status(201).send( result.ops )
+    res.status(201).send( result )
 })
 router.post('/instrument/remove', async function(req, res) {
     const toRemove = req.body
     const result = await db.deleteOne(toRemove, db.instrumentSpacecraftRelationshipTypes)
-    res.status(202).send( result.ops )
+    res.status(202).send( result )
 })
 
 module.exports = router;

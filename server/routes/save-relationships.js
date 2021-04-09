@@ -38,7 +38,7 @@ router.post('/relationships', async function(req, res) {
     // insert and return
     try {
         const result = await db.insertRelationships(objects)
-        res.status(201).send( result.ops )
+        res.status(201).send( result )
     } catch(err) {
         res.status(500).send('Unexpected database error while saving')
         console.log(err);
@@ -76,7 +76,7 @@ router.post('/migrate-spacecraft-target-relationships', async function(req, res)
 
     try {
         const saveResponse = await db.insertRelationships(toAdd)
-        response.ops = saveResponse.ops
+        response.response = saveResponse
         res.status(201).send( response )
     } catch(err) {
         response.error = err
