@@ -60,7 +60,7 @@ module.exports = {
     instruments: instrumentsCollection,
     targetRelationships: targetRelationshipsCollection,
     targetSpacecraftRelationshipTypes: targetSpacecraftRelationshipTypesCollection,
-    targetMissiontRelationshipTypes: targetMissionRelationshipTypesCollection,
+    targetMissionRelationshipTypes: targetMissionRelationshipTypesCollection,
     instrumentSpacecraftRelationshipTypes: instrumentSpacecraftRelationshipTypes,
     tags: tagsCollection,
     objectRelationships: objectRelationshipsCollection,

@@ -5,7 +5,7 @@ const db = require('../db.js')
 
 // TARGETS //
 router.get('/target', async function(req, res) {
-    const result = await db.find({}, db.targetMissiontRelationshipTypes)
+    const result = await db.find({}, db.targetMissionRelationshipTypes)
     res.status(200).send( result.sort((a,b) => a.order > b.order) )
 })
 router.post('/target', async function(req, res) {
@@ -13,12 +13,12 @@ router.post('/target', async function(req, res) {
     const result = await db.insert(toInsert.map(doc => {
         if (!doc.relationshipId) doc.relationshipId = uuid4()
         return doc
-    }), db.targetMissiontRelationshipTypes)
+    }), db.targetMissionRelationshipTypes)
     res.status(201).send( result )
 })
 router.post('/target/remove', async function(req, res) {
     const toRemove = req.body
-    const result = await db.deleteOne(toRemove, db.targetMissiontRelationshipTypes)
+    const result = await db.deleteOne(toRemove, db.targetMissionRelationshipTypes)
     res.status(202).send( result )
 })
 
