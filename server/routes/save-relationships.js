@@ -85,4 +85,43 @@ router.post('/migrate-spacecraft-target-relationships', async function(req, res)
     }
 })
 
+router.post('/migrate-spacecraft-mission-tools', async function(req, res) {
+    const spacecraft = await db.find({}, db.spacecraft)
+
+    let response = {
+        modified: 0,
+        ignored: []
+    }
+
+    let modified = []
+
+    await Promise.all(spacecraft.map(async sp => {
+        const missionLookup = await registry.lookupRelated(registry.type.spacecraft, registry.type.mission, sp.logical_identifier)
+        const missionLid = missionLookup && missionLookup.length >= 1 ? missionLookup[0].identifier : null
+
+        const missions = await db.find({ "logical_identifier": missionLid }, db.missions)
+        let mission = missions && missions.length >= 1 ? missions[0] : null
+
+
+        if(!!mission) {
+            response.modified += 1
+            mission.tools = sp.tools
+            modified.push(mission)
+        } else {
+            console.log('Could not find mission for spacecraft ' + sp.logical_identifier)
+            response.ignored.push(sp.logical_identifier)
+        }
+    }))
+
+    try {
+        const saveResponse = await db.insert(modified, db.missions)
+        response.response = saveResponse
+        res.status(201).send( response )
+    } catch(err) {
+        response.error = err
+        res.status(500).send(response)
+        console.log(err);
+    }
+})
+
 module.exports = router
