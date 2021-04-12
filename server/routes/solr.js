@@ -43,7 +43,7 @@ const collections = [{
     collectionName: 'web-objectrelationships'
 },{
     dbName: db.targetMissionRelationshipTypes,
-    collectionName: 'web-targetMissionRelationshipTypes'
+    collectionName: 'web-targetmissionrelationshiptypes'
 },{
     dbName: db.instrumentSpacecraftRelationshipTypes,
     collectionName: 'web-instrumentspacecraftrelationshiptypes'
