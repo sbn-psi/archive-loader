@@ -28,12 +28,15 @@ const relatedTypeVal = {
 }
 
 async function contextObjectLookupRequest(lid, fields) {
-    let solrResponse = await httpRequest(registryUrl, {
+    let params = {
         wt: 'json',
-        identifier: lid,
-        rows: 1,
-        fl: fields ? ( (fields && fields.constructor === Array) ? fields.join(',') : fields) : null
-    })
+        q: `identifier:"${new LID(lid).escapedLid}"`,
+        rows: 1
+    }
+    if(!!fields) { 
+        params.fl = (fields && fields.constructor === Array) ? fields.join(',') : fields
+    }
+    let solrResponse = await httpRequest(registryUrl, params)
     assert(solrResponse.response.numFound != 0, "Could not find context object with that identifier")
     assert(solrResponse.response.numFound == 1, "Found more than one context object with that identifier")
     return solrResponse.response.docs[0]
@@ -62,7 +65,7 @@ async function foreignReferences(sourceType, desiredType, lid) {
     return solrResponse.response.docs.map(doc => doc.identifier)
 }
 async function ownedReferneces(sourceType, desiredType, lid) {
-    let doc = await contextObjectLookupRequest(lid)
+    let doc = await contextObjectLookupRequest(lid, referenceField[desiredType])
     let owned = doc[referenceField[desiredType]]
     return owned ? owned : []
 }
