@@ -52,7 +52,7 @@ router.post('/migrate-spacecraft-target-relationships', async function(req, res)
     existing = existing.filter(rel => !!rel.instrument_host && !!rel.target)
 
     let response = {
-        modified: 0,
+        modified: [],
         ignored: []
     }
 
@@ -60,8 +60,9 @@ router.post('/migrate-spacecraft-target-relationships', async function(req, res)
         const missionLookup = await registry.lookupRelated(registry.type.spacecraft, registry.type.mission, rel.instrument_host)
         const mission = missionLookup && missionLookup.length >= 1 ? missionLookup[0].identifier : null
 
+        
         if(!!mission) {
-            response.modified += 1
+            response.modified.push(`${rel.target}: ${rel.instrument_host} -> ${mission} (${rel.relationshipId})`)
             return {
                 investigation: mission,
                 target: rel.target,

@@ -132,6 +132,7 @@ module.exports = {
                 target: doc.target,
                 instrument_host: doc.instrument_host,
                 instrument: doc.instrument,
+                investigation: doc.investigation,
                 bundle: doc.bundle
             }).upsert().replaceOne(doc)
         }
