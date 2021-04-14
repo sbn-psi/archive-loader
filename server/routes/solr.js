@@ -45,6 +45,9 @@ const collections = [{
     dbName: db.targetMissionRelationshipTypes,
     collectionName: 'web-targetmissionrelationshiptypes'
 },{
+    dbName: db.targetMissionRelationshipTypes, // sync this db to the old collection as well, during migration
+    collectionName: 'web-targetspacecraftrelationshiptypes'
+},{
     dbName: db.instrumentSpacecraftRelationshipTypes,
     collectionName: 'web-instrumentspacecraftrelationshiptypes'
 },{
