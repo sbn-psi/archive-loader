@@ -135,6 +135,9 @@ batchRouter.post('/spacecraft', async function(req, res) {
 batchRouter.post('/instruments', async function(req, res) {
     Promise.all(req.body.map(object => processContextObject(object, db.instruments, requiredInstrumentFields, 'urn:nasa:pds:context:instrument:'))).then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
+batchRouter.post('/target-relationships', async function(req, res) {
+    Promise.all(req.body.map(object => processContextObject(object, db.targetRelationships, []))).then(result => res.status(201).send(result), err => res.status(400).send(err))
+})
 batchRouter.post('/tool', async function(req, res) {
     Promise.all(req.body.map(object => processContextObject(object, db.tools, requiredToolFields))).then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
