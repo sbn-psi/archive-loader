@@ -2,7 +2,7 @@ export default function($scope) {
     let config = {
         modelName: 'mission',
         lidPrefix: 'urn:nasa:pds:context:investigation:',
-        requiredFields: ['logical_identifier', 'display_name', 'display_description'],
+        requiredFields: ['logical_identifier', 'display_name', 'display_description', 'start_date'],
         primaryPostEndpoint: './save/missions',
         lookupReplacements: [
             {
