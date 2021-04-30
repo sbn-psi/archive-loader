@@ -8,6 +8,7 @@
         <tr ng-repeat="item in ungrouped | filter:group.lid track by $index">
             <td class="align-middle">{{item.name}}</td>
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
+            <td ng-if="readyFlags" class="align-middle" ng-class="{error: !item.is_ready}">{{item.is_ready ? 'Ready' : 'Not Ready' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
             <td><a class="btn btn-link" ng-href="{{edit(item.lid)}}">Edit</a></td>
         </tr>
@@ -18,6 +19,7 @@
         <tr ng-repeat-end ng-repeat="item in list | filter:group.lid track by $index">
             <td class="align-middle">{{item.name}}</td>
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
+            <td ng-if="readyFlags" class="align-middle" ng-class="{error: !item.is_ready}">{{item.is_ready ? 'Ready' : 'Not Ready' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
             <td><a class="btn btn-link" ng-href="{{edit(item.lid)}}">Edit</a></td>
         </tr>

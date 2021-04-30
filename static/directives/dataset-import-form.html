@@ -7,8 +7,6 @@
             <label>DOI: </label><input class="form-control" type="text" ng-model="dataset.doi" uib-typeahead="val for val in autocomplete('doi', $viewValue)">
             <label>Display Description: </label><textarea class="form-control" ng-model="dataset.display_description" uib-typeahead="val for val in autocomplete('display_description', $viewValue)"></textarea>
             <label>Citation: </label><textarea class="form-control" ng-model="dataset.citation" uib-typeahead="val for val in autocomplete('citation', $viewValue)"></textarea>
-            <label class="collection-field" ng-if="type === 'Collection'">Is Document Collection: </label><input ng-if="type === 'Collection'" class="form-control collection-field"
-                type="checkbox" ng-model="dataset.document_flag" id="document_flag">
             <label>Permalink: </label><input class="form-control" type="url" ng-model="dataset.permalink" uib-typeahead="val for val in autocomplete('permalink', $viewValue)">
             <label>Browse URL: </label><input class="form-control" type="url" ng-model="dataset.browse_url" uib-typeahead="val for val in autocomplete('browse_url', $viewValue)">
             <label>Download URL: </label><input class="form-control" type="url" ng-model="dataset.download_url" uib-typeahead="val for val in autocomplete('download_url', $viewValue)">
