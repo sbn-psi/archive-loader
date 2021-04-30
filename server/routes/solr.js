@@ -153,7 +153,12 @@ router.post('/sync', async function(req, res){
     completionStatus._timestamp = new Date()
     await db.insert([completionStatus], db.successfulIndexes)
 
-    // STEP 4: Cleanup previous sync
+    // STEP 5: Flush cache of context browser
+    try {
+        await httpRequest('https://sbnarchivedemo.psi.edu/urn:nasa:pds:context:investigation:mission.orex', {flush: true})
+    } catch(err) {}
+
+    // STEP 6: Cleanup previous sync
     try {
         await cleanup(previousSync)
         res.status(200).json(completionStatus)
