@@ -1,7 +1,7 @@
 export default function($scope) {
     let config = {
         modelName: 'spacecraft',
-        lidPrefix: 'urn:nasa:pds:context:instrument_host:',
+        lidFragment: ':context:instrument_host:',
         requiredFields: ['logical_identifier', 'display_name'],
         primaryPostEndpoint: './save/spacecraft',
         lookupReplacements: [

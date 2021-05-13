@@ -29,7 +29,6 @@ const dbToFieldMap = {
 async function editLookupRequest(req, res, type) {
     try {
         assert(req.query.logical_identifier, 'Expected logical_identifier argument')
-        assert(req.query.logical_identifier.startsWith('urn:nasa:pds:'), 'Expected logical_identifier to start with urn:nasa:pds')
     } catch (err) {
         res.status(400).send(err.message)
         return

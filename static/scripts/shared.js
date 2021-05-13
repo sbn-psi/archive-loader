@@ -65,7 +65,7 @@ app.constant('prepForForm', function(model, templateFn) {
 app.service('lidCheck', function($http) {
     return function(lid, fields) {
         return new Promise(function(resolve, reject) {
-            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:nasa')) {
+            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:')) {
                 $http.get('./lookup', {params: {lid, fields}}).then(function(res) {
                     resolve(res.data)
                 }, function(err) {
@@ -81,7 +81,7 @@ app.service('lidCheck', function($http) {
 app.service('relatedLookup', function($http) {
     return function(from, to, lid) {
         return new Promise(function(resolve, reject) {
-            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:nasa')) {
+            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:')) {
                 $http.get(`./related/${to}?${from}=${lid}`).then(function(res) {
                     resolve(res.data)
                 }, function(err) {

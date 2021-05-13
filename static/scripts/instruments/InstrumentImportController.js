@@ -1,7 +1,7 @@
 export default function($scope) {
     let config = {
         modelName: 'instrument',
-        lidPrefix: 'urn:nasa:pds:context:instrument:',
+        lidFragment: ':context:instrument:',
         requiredFields: ['logical_identifier', 'display_name', 'display_description'],
         primaryPostEndpoint: './save/instruments',
         lookupReplacements: [

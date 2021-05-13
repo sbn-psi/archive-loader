@@ -4,7 +4,7 @@ const batchRouter = express.Router()
 const db = require('../db.js')
 const assert = require('assert')
 
-async function processContextObject(object, type, fieldList, lidPrefix) {
+async function processContextObject(object, type, fieldList, lidFragment) {
 
     return new Promise(async (resolve, reject) => {
         let bailed = false
@@ -30,7 +30,7 @@ async function processContextObject(object, type, fieldList, lidPrefix) {
             }
             try {
                 require(fieldList)
-                assert(!object.logical_identifier || object.logical_identifier.startsWith(lidPrefix), `Expected ${object.logical_identifier} to start with ${lidPrefix}`)
+                assert(!object.logical_identifier || object.logical_identifier.includes(lidFragment), `Expected ${object.logical_identifier} to include ${lidFragment}`)
             } catch (err) {
                 reject(err.message)
                 bailed = true
@@ -74,20 +74,20 @@ const requiredTargetFields = [
     'display_name',
     'display_description']
 router.post('/targets', async function(req, res) {
-    processContextObject(req.body, db.targets, requiredTargetFields, 'urn:nasa:pds:context:target:').then(result => res.status(201).send(result), err => res.status(400).send(err))
+    processContextObject(req.body, db.targets, requiredTargetFields, ':context:target:').then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
 
 const requiredMissionFields = ['logical_identifier',
 'display_name',
 'display_description']
 router.post('/missions', async function(req, res) {
-    processContextObject(req.body, db.missions, requiredMissionFields,'urn:nasa:pds:context:investigation:').then(result => res.status(201).send(result), err => res.status(400).send(err))
+    processContextObject(req.body, db.missions, requiredMissionFields,':context:investigation:').then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
 
 const requiredSpacecraftFields = ['logical_identifier',
 'display_name']
 router.post('/spacecraft', async function(req, res) {
-    processContextObject(req.body, db.spacecraft, requiredSpacecraftFields, 'urn:nasa:pds:context:instrument_host:').then(result => res.status(201).send(result), err => res.status(400).send(err))
+    processContextObject(req.body, db.spacecraft, requiredSpacecraftFields, ':context:instrument_host:').then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
 
 const requiredInstrumentFields = [
@@ -95,7 +95,7 @@ const requiredInstrumentFields = [
     'display_name',
     'display_description']
 router.post('/instruments', async function(req, res) {
-    processContextObject(req.body, db.instruments, requiredInstrumentFields, 'urn:nasa:pds:context:instrument:').then(result => res.status(201).send(result), err => res.status(400).send(err))
+    processContextObject(req.body, db.instruments, requiredInstrumentFields, ':context:instrument:').then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
 
 router.post('/target-relationships', async function(req, res) {
@@ -124,16 +124,16 @@ batchRouter.use(async function(req, res, next) {
     next()
 })
 batchRouter.post('/targets', async function(req, res) {
-    Promise.all(req.body.map(object => processContextObject(object, db.targets, requiredTargetFields, 'urn:nasa:pds:context:target:'))).then(result => res.status(201).send(result), err => res.status(400).send(err))
+    Promise.all(req.body.map(object => processContextObject(object, db.targets, requiredTargetFields, 'context:target:'))).then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
 batchRouter.post('/missions', async function(req, res) {
-    Promise.all(req.body.map(object => processContextObject(object, db.missions, requiredMissionFields,'urn:nasa:pds:context:investigation:'))).then(result => res.status(201).send(result), err => res.status(400).send(err))
+    Promise.all(req.body.map(object => processContextObject(object, db.missions, requiredMissionFields,':context:investigation:'))).then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
 batchRouter.post('/spacecraft', async function(req, res) {
-    Promise.all(req.body.map(object => processContextObject(object, db.spacecraft, requiredSpacecraftFields, 'urn:nasa:pds:context:instrument_host:'))).then(result => res.status(201).send(result), err => res.status(400).send(err))
+    Promise.all(req.body.map(object => processContextObject(object, db.spacecraft, requiredSpacecraftFields, ':context:instrument_host:'))).then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
 batchRouter.post('/instruments', async function(req, res) {
-    Promise.all(req.body.map(object => processContextObject(object, db.instruments, requiredInstrumentFields, 'urn:nasa:pds:context:instrument:'))).then(result => res.status(201).send(result), err => res.status(400).send(err))
+    Promise.all(req.body.map(object => processContextObject(object, db.instruments, requiredInstrumentFields, ':context:instrument:'))).then(result => res.status(201).send(result), err => res.status(400).send(err))
 })
 batchRouter.post('/target-relationships', async function(req, res) {
     Promise.all(req.body.map(object => processContextObject(object, db.targetRelationships, []))).then(result => res.status(201).send(result), err => res.status(400).send(err))

@@ -128,7 +128,7 @@ app.directive('relationshipSelector', function() {
             if(!$scope.model) { $scope.model = []}
 
             $scope.$watch('lid', function(lid) {
-                if(!!lid && lid.startsWith('urn:nasa')) {
+                if(!!lid && lid.startsWith('urn:')) {
                     relatedLookup($scope.from, $scope.to, lid).then(mergeIntoModel, function(err) { 
                         console.log(err)
                         // don't care about errors
