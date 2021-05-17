@@ -27,11 +27,11 @@ router.post('/datasets', async function(req, res) {
             assert(dataset[fieldname], `Expected ${fieldname} to be present`)
         }
         try {
-            require(
+            require([
                 'logical_identifier',
                 'display_name',
                 'display_description',
-                'publication',
+                'browse_url',]
                 )
     
         } catch (err) {

@@ -105,7 +105,7 @@ export default function($scope, $http, constants, existingDataset, sanitizer, pr
             $scope.state.progress();
             $scope.state.loading = false;
         }, function(err) {
-            $scope.state.error = 'There was a problem';
+            $scope.state.error = err.data || 'There was a problem';
             $scope.state.loading = false;
             console.log(err);
         })
