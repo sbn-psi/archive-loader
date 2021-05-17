@@ -120,7 +120,7 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
         const object = $scope.model[$scope.config.modelName]
 
         try {
-            if(!isPopulated(object.logical_identifier) && object.logical_identifier.startsWith($scope.config.lidPrefix)) throw 'LID does not start with ' + $scope.config.lidPrefix
+            if(!isPopulated(object.logical_identifier) && object.logical_identifier.includes($scope.config.lidFragment)) throw 'LID does not start with ' + $scope.config.lidFragment
             !$scope.config.requiredFields.forEach(field => {
                 const value = $scope.model[$scope.config.modelName][field]
                 if(!isPopulated(value)) throw field + ' is required'
