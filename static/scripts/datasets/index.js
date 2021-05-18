@@ -6,9 +6,9 @@ app.config(function($stateProvider) {
     })
     $stateProvider.state({
         name: 'datasets.import',
-        url: '/Import?edit',
+        url: '/Import?edit&type',
         templateUrl: 'states/datasets/import.html',
-        params: { edit: null },
+        params: { edit: null, type: null },
         data: {
             title: 'Load Datasets'
         },

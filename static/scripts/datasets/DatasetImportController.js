@@ -1,4 +1,4 @@
-export default function($scope, $http, constants, existingDataset, sanitizer, prepForForm, tools, tags) {
+export default function($scope, $stateParams, $http, constants, existingDataset, sanitizer, prepForForm, tools, tags) {
     $scope.tools = tools
     $scope.tags = tags
     $scope.allDatasets = function() {
@@ -54,12 +54,16 @@ export default function($scope, $http, constants, existingDataset, sanitizer, pr
             return dataset
         }
         return {
-            bundle: prep(datasets.bundle),
-            collections: datasets.collections ? datasets.collections.map(prep) : []
+            bundle: prep(datasets ? datasets.bundle : templateModel()),
+            collections: (datasets && datasets.collections) ? datasets.collections.map(prep) : []
         }
     }
 
-    $scope.model = existingDataset ? prepDatasetFromEdit(existingDataset) : prepDatasetsFromHarvest($scope.state.datasets)
+    $scope.model = existingDataset 
+                    ? prepDatasetFromEdit(existingDataset)
+                    : $scope.state.datasets 
+                        ? prepDatasetsFromHarvest($scope.state.datasets)
+                        : $stateParams.type === constants.bundleType ? { bundle: templateModel(), collections: [] } : { collections: [templateModel()]}
 
     $scope.view = {
         active: $scope.model.bundle ? $scope.model.bundle : $scope.model.collections[0],

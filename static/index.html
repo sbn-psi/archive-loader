@@ -59,7 +59,8 @@
                     <div class="dropdown-menu" uib-dropdown-menu aria-labelledby="datasetsDropdown">
                         <a class="dropdown-item" ui-sref="datasets.manage">Manage Datasets</a>
                         <a class="dropdown-item" ui-sref="datasets.load">Load Archived Datasets</a>
-                        <a class="dropdown-item" ui-sref="datasets.import">Add new Dataset</a>
+                        <a class="dropdown-item" ui-sref="datasets.import({type: 'Bundle'})">Add new Bundle</a>
+                        <a class="dropdown-item" ui-sref="datasets.import({type: 'Collection'})">Add new Collection</a>
                     </div>
                 </li>
                 <li class="nav-item dropdown" uib-dropdown ui-sref-active="active">
