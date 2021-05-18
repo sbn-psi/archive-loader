@@ -23,8 +23,9 @@ router.post('/datasets', async function(req, res) {
                 for(field of fieldname) {
                     require(field)
                 }
+            } else {
+                assert(dataset[fieldname], `Expected ${fieldname} to be present`)
             }
-            assert(dataset[fieldname], `Expected ${fieldname} to be present`)
         }
         try {
             require([
