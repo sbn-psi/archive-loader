@@ -71,5 +71,16 @@
                 <label>Download Size: </label><input ng-disabled="true" class="form-control" type="text" ng-model="package.download_size" uib-typeahead="val for val in autocomplete('download_size', $viewValue, 'download_packages')">
             </div>
         </section>
+
+        <section>
+            <h2>Additional Content</h2>
+            <div class="form-group">
+                <label>Supplemental HTML - Top</label><text-angular ng-model="dataset.html1"></text-angular>
+            </div>
+            <hr/>
+            <div class="form-group">
+                <label>Supplemental HTML - Bottom</label><text-angular ng-model="dataset.html2"></text-angular>
+            </div>
+        </section>
     </form>
 </div>
