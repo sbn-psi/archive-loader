@@ -10,7 +10,9 @@
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td ng-if="readyFlags" class="align-middle" ng-class="{error: !item.is_ready}">{{item.is_ready ? 'Ready' : 'Not Ready' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
-            <td><a class="btn btn-link" ng-href="{{edit(item.lid)}}">Edit</a></td>
+            <td><a class="btn btn-primary" ng-href="{{edit(item.lid)}}">Edit</a>
+                <button class="btn btn-danger" ng-click="delete(item)">Delete</button>
+            </td>
         </tr>
         <!-- Grouped items -->
         <tr ng-show="!!group.lid" ng-repeat-start="group in groups">
@@ -21,7 +23,9 @@
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td ng-if="readyFlags" class="align-middle" ng-class="{error: !item.is_ready}">{{item.is_ready ? 'Ready' : 'Not Ready' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
-            <td><a class="btn btn-link" ng-href="{{edit(item.lid)}}">Edit</a></td>
+            <td><a class="btn btn-primary" ng-href="{{edit(item.lid)}}">Edit</a>
+                <button class="btn btn-danger" ng-click="delete(item)">Delete</button>
+            </td>
         </tr>
     </table>
 </div>

@@ -25,6 +25,7 @@ app.directive('manageList', function() {
     return {
         scope: {
             edit: '<',
+            delete: '<',
             list: '<',
             groupBy: '@?',
             usesTags: '@?tags',
