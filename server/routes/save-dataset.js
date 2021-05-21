@@ -17,18 +17,30 @@ router.post('/datasets', async function(req, res) {
         return
     }
 
-    const validateDataset = function(dataset) {
-        const require = function(fieldname) {
-            if(fieldname.constructor === Array) {
-                for(field of fieldname) {
-                    require(field)
-                }
-            } else {
-                assert(dataset[fieldname], `Expected ${fieldname} to be present`)
+    const require = function(dataset, fieldname) {
+        if(fieldname.constructor === Array) {
+            for(field of fieldname) {
+                require(dataset, field)
             }
+        } else {
+            assert(dataset[fieldname], `Expected ${fieldname} to be present`)
         }
+    }
+    const validateBundle = function(bundle) {
         try {
-            require([
+            require(bundle, [
+                'primary_context',]
+                )
+    
+        } catch (err) {
+            res.status(400).send(err.message)
+            bailed = true
+            return
+        }
+    }
+    const validateDataset = function(dataset) {
+        try {
+            require(dataset, [
                 'logical_identifier',
                 'display_name',
                 'display_description',
@@ -46,6 +58,9 @@ router.post('/datasets', async function(req, res) {
 
     let toInsert = []
     let newTags = []
+    if(!!req.body.bundle) {
+        validateBundle(req.body.bundle)
+    }
     for(dataset of [req.body.bundle, ...req.body.collections]) {
         if(!dataset || bailed) { continue }
 

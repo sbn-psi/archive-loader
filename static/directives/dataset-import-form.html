@@ -4,6 +4,13 @@
         <div class="form-group">
             <label>LIDVID (required):</label> <input class="form-control" type="text" ng-model="dataset.logical_identifier">
             <label>Dataset Display Name (required): </label><input class="form-control" type="text" ng-model="dataset.display_name" uib-typeahead="val for val in autocomplete('display_name', $viewValue)">
+            <label ng-if="type === 'Bundle'">Primary Context (appearance location) (required)</label>
+            <select ng-if="type === 'Bundle'" class="form-control" ng-model="dataset.primary_context">
+                <option disabled selected value> -- Required -- </option>
+                <option ng-value="'target'">Target-oriented</option>
+                <option ng-value="'mission'">Mission-oriented</option>
+                <option ng-value="'both'">Both</option>
+            </select>
             <label>DOI: </label><input class="form-control" type="text" ng-model="dataset.doi" uib-typeahead="val for val in autocomplete('doi', $viewValue)">
             <label>Display Description (required): </label><textarea class="form-control" ng-model="dataset.display_description" uib-typeahead="val for val in autocomplete('display_description', $viewValue)"></textarea>
             <label>Citation: </label><textarea class="form-control" ng-model="dataset.citation" uib-typeahead="val for val in autocomplete('citation', $viewValue)"></textarea>
@@ -12,10 +19,12 @@
             <label>Download URL: </label><input class="form-control" type="url" ng-model="dataset.download_url" uib-typeahead="val for val in autocomplete('download_url', $viewValue)">
             <label>Download Size: </label><input class="form-control" type="text" ng-model="dataset.download_size" uib-typeahead="val for val in autocomplete('download_size', $viewValue)">
             <label>Checksum URL: </label><input ng-disabled="true" class="form-control" type="url" ng-model="dataset.checksum_url" uib-typeahead="val for val in autocomplete('checksum_url', $viewValue)">
-            <label>Mission Bundle LID: </label><input class="form-control" type="text" ng-model="dataset.mission_bundle" uib-typeahead="val for val in autocomplete('mission_bundle', $viewValue)">
+            <label>Mission Bundle LID: </label><input ng-disabled="true" class="form-control" type="text" ng-model="dataset.mission_bundle" uib-typeahead="val for val in autocomplete('mission_bundle', $viewValue)">
             <label ng-if="type === 'Collection'">Local Documents URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.local_documents_url" uib-typeahead="val for val in autocomplete('local_documents_url', $viewValue)">
             <label ng-if="type === 'Collection'">Other Instruments URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.other_instruments_url" uib-typeahead="val for val in autocomplete('other_instruments_url', $viewValue)">
             <label>PDS3 Version URL: </label><input ng-disabled="true" class="form-control" type="url" ng-model="dataset.pds3_version_url" uib-typeahead="val for val in autocomplete('pds3_version_url', $viewValue)">
+
+            
         </div>
         <section id="related-tools" class="repeating-group">
             <h2>Types (tags)</h2>
@@ -27,7 +36,7 @@
         <div class="form-group empty">
             <h2>Publication (Disabled)</h2>
             <label>Publish Status</label>
-            <select ng-disabled="true" class="form-control" ng-model="dataset.publication.publish_status" id="exampleFormControlSelect1">
+            <select ng-disabled="true" class="form-control" ng-model="dataset.publication.publish_status">
                 <option>Archived</option>
                 <option>Certified & Liens Resolution</option>
                 <option>Superseded</option>
