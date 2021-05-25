@@ -27,7 +27,7 @@ const relatedTypeVal = {
     [type.bundle]: 'Product_Bundle'
 }
 
-const defaultFetchSize = 50
+const defaultFetchSize = 20
 function lookupIdentifiers(identifiers) {
     if(!identifiers || identifiers.length === 0) return Promise.resolve([])
     
