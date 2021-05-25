@@ -46,8 +46,8 @@ function lookupIdentifiers(identifiers) {
     }
     requests.push(httpRequest(registryUrl, params))
     return Promise.all(requests).then(responses => {
-        console.log(responses.map(response => response.responseHeader))
-        return responses.map(response => (response.response && response.response.docs) ? response.response.docs : []).flat()
+        if(responses.length === 1) return responses[0].response.docs
+        else return [...responses[0], ...responses[1].response.docs]
     })
 }
 
