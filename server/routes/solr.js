@@ -4,11 +4,9 @@ const assert = require('assert')
 const db = require('../db.js')
 const solrize = require('../solrize.js')
 const httpRequest = require('../httpRequest.js')
-const registry = require('../registry.js')
-const LID = require('../LogicalIdentifier')
 
 const SOLR = (process.env.SOLR ? process.env.SOLR : 'http://localhost:8983/solr')
-const backupCollection = 'pds'
+
 const collections = [{
     dbName: db.datasets,
     collectionName: 'web-datasets',
@@ -73,156 +71,6 @@ function checkAvailability() {
     })
 }
 
-// runs through steps to push our database into solr registry format
-function sync(suffix, force) {
-    return new Promise(async (resolve, reject) => {
-
-        let completionStatus = {suffix}
-    
-        let successfulIndexes = await db.find({}, db.successfulIndexes)
-        let previousSync = successfulIndexes.length > 0 ? successfulIndexes.last().suffix : null
-    
-        let bailed
-        // STEP 0: Ensure clean state in Solr
-        if(!force === true) {
-            await checkAvailability().catch(err => {
-                reject("Sync service unavailable. Please contact an administator.")
-                console.log(err)
-                bailed = true
-            })
-        }
-    
-        if(bailed) {return}
-    
-        // STEP 1: Create collections
-        let createRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
-            action: 'CREATE',
-            name: `${collection.collectionName}-${suffix}`,
-            numShards: 1,
-            ['collection.configName']: collection.config ? collection.config : '_default'
-        }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
-        try{ await Promise.all(createRequests) }
-        catch(err) {
-            reject("Error creating collections in Solr: " + err.message)
-            return
-        }
-    
-        // STEP 2: Fill collections
-        let fillRequests = []
-        for (collection of collections) {
-            let documents = await db.find({}, collection.dbName)
-            completionStatus[collection.dbName] = documents.length
-            let request = httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents, collection.solrizeAttr) : documents, process.env.SOLR_USER, process.env.SOLR_PASS)
-            fillRequests.push(request)
-        }
-        try { 
-            await Promise.all(fillRequests)
-        }
-        catch(err) {
-            reject("Error posting to collections in Solr: " + err.message)
-            return
-        }
-    
-        // STEP 3: Modify aliases
-        let aliasRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
-            action: 'CREATEALIAS',
-            name: `${collection.collectionName}-alias`,
-            collections: `${collection.collectionName}-${suffix}`
-        }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
-        try{ await Promise.all(aliasRequests) }
-        catch(err) {
-            reject("Error modifying aliases in Solr: " + err.message)
-            return
-        }
-    
-        // STEP 4: Write successful sync to db
-        completionStatus._timestamp = new Date()
-        await db.insert([completionStatus], db.successfulIndexes)
-    
-        // STEP 5: Flush cache of context browser
-        try {
-            await httpRequest('https://sbnarchivedemo.psi.edu/urn:nasa:pds:context:investigation:mission.orex', {flush: true})
-        } catch(err) {}
-    
-        // STEP 6: Cleanup previous sync
-        try {
-            await cleanup(previousSync)
-        } catch (err) {
-            reject("Error cleaning up previous sync: " + err)
-        }
-        
-        resolve(completionStatus)
-    })
-}
-
-// pull supplemented lids from the core registry and back them up to our solr instance
-function backup(suffix) {
-    const databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments]
-
-    return new Promise(async (resolve, reject) => {
-        let identifiers = []
-        for (database of databases) {
-            let newLids = await db.find({}, database, ['logical_identifier'])
-            identifiers = [...identifiers, ...newLids.map(doc => new LID(doc.logical_identifier).lid)]
-        }
-        
-        const fromRegistry = await registry.lookupIdentifiers(identifiers)
-
-        // STEP 1: Create collection
-        try {
-            await httpRequest(`${SOLR}/admin/collections`, {
-                action: 'CREATE',
-                name: `${backupCollection}-${suffix}`,
-                numShards: 1,
-                ['collection.configName']: '_default'
-            }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
-        }
-        catch(err) {
-            reject("Error creating collection in Solr: " + err.message)
-            return
-        }
-    
-        // STEP 2: Fill collection
-        try { 
-            await httpRequest(`${SOLR}/${backupCollection}-${suffix}/update`, { commit: true }, fromRegistry, process.env.SOLR_USER, process.env.SOLR_PASS)
-        }
-        catch(err) {
-            reject("Error posting to collection in Solr: " + err.message)
-            return
-        }
-    
-        // STEP 3: Modify alias
-        try{ 
-            await httpRequest(`${SOLR}/admin/collections`, {
-                action: 'CREATEALIAS',
-                name: `${backupCollection}-alias`,
-                collections: `${backupCollection}-${suffix}`
-            }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
-        }
-        catch(err) {
-            reject("Error modifying alias in Solr: " + err.message)
-            return
-        }
-    
-        let successfulIndexes = await db.find({}, db.successfulIndexes)
-        let previousSync = successfulIndexes.length > 0 ? successfulIndexes.last().suffix : null
-
-        // delete previous collection
-        if(!!previousSync) {
-            try{ 
-                await httpRequest(`${SOLR}/admin/collections`, {
-                    action: 'DELETE',
-                    name: `${backupCollection}-${previousSync}`
-                }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
-            }
-            catch(err) {
-            }
-        }
-            
-        resolve(fromRegistry.length)
-    })
-}
-
 router.get('/status', async function(req, res) {
     checkAvailability().then(
         () => res.sendStatus(200),
@@ -230,30 +78,94 @@ router.get('/status', async function(req, res) {
 })
 
 router.post('/sync', async function(req, res){
+    let bailed = false
     try {
         assert(req.body, "Couldn't parse request")
         assert(req.body.suffix, "Expected collection suffix to be specified")
     } catch(err) {
         res.status(400).send(err.message)
-        return
+        bailed = true
+    }
+    if(bailed) {return}
+
+    let suffix = req.body.suffix
+    let completionStatus = {suffix}
+
+    let successfulIndexes = await db.find({}, db.successfulIndexes)
+    let previousSync = successfulIndexes.length > 0 ? successfulIndexes.last().suffix : null
+
+    // STEP 0: Ensure clean state in Solr
+    if(!req.body.force === true) {
+        await checkAvailability().catch(err => {
+            console.log(err)
+            res.status(500).send("Sync service unavailable. Please contact an administator.")
+            bailed = true
+        })
     }
 
-    Promise.allSettled([
-        sync(req.body.suffix, req.body.force),
-        backup(req.body.suffix)
-    ]).then(promiseResults => {
-        const [syncStatus, backupStatus] = promiseResults
-        if(syncStatus.status === "fulfilled") {
-            let completionStatus = syncStatus.value
-            completionStatus._backupStatus = backupStatus.value || backupStatus.reason
-            res.status(200).json(completionStatus)
-        } else {
-            res.status(500).send(syncStatus.reason)
-        }
-    })
+    if(bailed) {return}
+
+    // STEP 1: Create collections
+    let createRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
+        action: 'CREATE',
+        name: `${collection.collectionName}-${suffix}`,
+        numShards: 1,
+        ['collection.configName']: collection.config ? collection.config : '_default'
+    }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
+    try{ await Promise.all(createRequests) }
+    catch(err) {
+        res.status(400).send("Error creating collections in Solr: " + err.message)
+        bailed = true
+    }
+    if(bailed) {return}
+
+    // STEP 2: Fill collections
+    let fillRequests = []
+    for (collection of collections) {
+        let documents = await db.find({}, collection.dbName)
+        completionStatus[collection.dbName] = documents.length
+        let request = httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents, collection.solrizeAttr) : documents, process.env.SOLR_USER, process.env.SOLR_PASS)
+        fillRequests.push(request)
+    }
+    try { 
+        await Promise.all(fillRequests)
+    }
+    catch(err) {
+        res.status(400).send("Error posting to collections in Solr: " + err.message)
+        bailed = true
+    }
+    if(bailed) {return}
+
+    // STEP 3: Modify aliases
+    let aliasRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
+        action: 'CREATEALIAS',
+        name: `${collection.collectionName}-alias`,
+        collections: `${collection.collectionName}-${suffix}`
+    }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
+    try{ await Promise.all(aliasRequests) }
+    catch(err) {
+        res.status(400).send("Error modifying aliases in Solr: " + err.message)
+        bailed = true
+    }
+    if(bailed) {return}
+
+    // STEP 4: Write successful sync to db
+    completionStatus._timestamp = new Date()
+    await db.insert([completionStatus], db.successfulIndexes)
+
+    // STEP 5: Flush cache of context browser
+    try {
+        await httpRequest('https://sbnarchivedemo.psi.edu/urn:nasa:pds:context:investigation:mission.orex', {flush: true})
+    } catch(err) {}
+
+    // STEP 6: Cleanup previous sync
+    try {
+        await cleanup(previousSync)
+        res.status(200).json(completionStatus)
+    } catch (err) {
+        res.status(500).send("Error cleaning up previous sync: " + err)
+    }
 })
-
-
 
 router.get('/suffix-suggestion', async (req, res) => {
     let latest = await db.find({}, db.successfulIndexes)
