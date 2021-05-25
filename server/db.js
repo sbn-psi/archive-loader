@@ -93,24 +93,31 @@ module.exports = {
         assert(result.result.ok)
         return result.result.upserted
     },
-    find: async function(inputFilter, type, stream, end) {
+    find: async function(inputFilter, type, fields) {
+        await connect()
+        const collection = db.collection(type)
+        let activeFilter = { _isActive: true }
+        Object.assign(activeFilter, inputFilter)
+        const projection = fields ? fields.reduce((prev, current) => {
+            prev[current] = 1
+        }, { _id: 0}) : undefined
+
+        // bunch up all documents into array and return
+        const docs = await collection.find(activeFilter, projection).sort({$natural:1}).toArray()
+        return docs.map(hideInternalProperties)
+    },
+    findAndStream: async function(inputFilter, type, stream, end) {
         await connect()
         const collection = db.collection(type)
         let activeFilter = { _isActive: true }
         Object.assign(activeFilter, inputFilter)
 
-        if(!!stream && !!end) {
-            // stream documents instead of grouping them together
-            return new Promise((resolve, reject) => {
-                collection.find(activeFilter).sort({$natural:1})
-                    .on('data', data => stream(hideInternalProperties(data)))
-                    .on('end', () => { end(); resolve()})
-            })
-        } else {
-            // bunch up all documents into array and return
-            const docs = await collection.find(activeFilter).sort({$natural:1}).toArray()
-            return docs.map(hideInternalProperties)
-        }
+        // stream documents instead of grouping them together
+        return new Promise((resolve, reject) => {
+            collection.find(activeFilter).sort({$natural:1})
+                .on('data', data => stream(hideInternalProperties(data)))
+                .on('end', () => { end(); resolve()})
+        })
     },
     deleteOne: async function(doc, type) {
         await connect()

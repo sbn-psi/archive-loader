@@ -27,6 +27,27 @@ const relatedTypeVal = {
     [type.bundle]: 'Product_Bundle'
 }
 
+const defaultFetchSize = 50
+function lookupIdentifiers(identifiers) {
+    if(!identifiers || identifiers.length === 0) return Promise.resolve([])
+    
+    // if we have lots of identifiers, break it into multiple requests (recusrively!!)
+    let requests = []
+    if (identifiers.length > defaultFetchSize) {
+        requests.push(lookupIdentifiers(identifiers.slice(defaultFetchSize)))
+        identifiers = identifiers.slice(0, defaultFetchSize)
+    }
+
+    let params = {
+        wt: 'json',
+        q: identifiers.reduce((query, lid) => query + 'identifier:"' + new LID(lid).lid + '" ', ''),
+        rows: defaultFetchSize,
+        start: 0
+    }
+    requests.push(httpRequest(registryUrl, params))
+    return Promise.all(requests).then(responses => responses.map(response => response.response.docs).flat())
+}
+
 async function contextObjectLookupRequest(lid, fields) {
     let params = {
         wt: 'json',
@@ -83,5 +104,6 @@ async function fieldLookup(identifiers, fields) {
 module.exports = {
     type,
     contextObjectLookupRequest,
-    lookupRelated
+    lookupRelated,
+    lookupIdentifiers
 }
