@@ -45,7 +45,10 @@ function lookupIdentifiers(identifiers) {
         start: 0
     }
     requests.push(httpRequest(registryUrl, params))
-    return Promise.all(requests).then(responses => responses.map(response => response.response.docs).flat())
+    return Promise.all(requests).then(responses => {
+        console.log(responses.map(response => response.responseHeader))
+        return responses.map(response => (response.response && response.response.docs) ? response.response.docs : []).flat()
+    })
 }
 
 async function contextObjectLookupRequest(lid, fields) {
