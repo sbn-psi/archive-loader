@@ -204,17 +204,16 @@ function backup(suffix) {
             return
         }
     
-        let successfulIndexes = await db.find({}, db.successfulIndexes)
-        let previousSync = successfulIndexes.length > 0 ? successfulIndexes.last().suffix : null
+        // delete previous collections
+        const solrCollections = await httpRequest(`${SOLR}/admin/collections`, { action: 'LIST' }, null, process.env.SOLR_USER, process.env.SOLR_PASS) 
+        const oldPdsCollections = solrCollections.collections.filter(collection => collection.startsWith(`${backupCollection}-`) && collection !== `${backupCollection}-${suffix}`)
 
-        // delete previous collection
-        if(!!previousSync) {
-            try{ 
-                await httpRequest(`${SOLR}/admin/collections`, {
-                    action: 'DELETE',
-                    name: `${backupCollection}-${previousSync}`
-                }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
-            }
+        if(oldPdsCollections.length > 0) {
+            let deleteRequests = oldPdsCollections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
+                action: 'DELETE',
+                name: collection
+            }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
+            try{ await Promise.all(deleteRequests) }
             catch(err) {
             }
         }
