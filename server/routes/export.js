@@ -4,7 +4,7 @@ const db = require('../db.js')
 const solrize = require('../solrize.js')
 
 router.get('/datasets', async function(req, res) {
-    let stream = streamHelper(res, solrizedChunk("dataset"))
+    let stream = streamHelper(res, standardChunk)
     db.findAndStream({}, db.datasets, stream.data, stream.end)
 })
 router.get('/targets', async function(req, res) {

@@ -245,7 +245,7 @@ router.post('/sync', async function(req, res){
         const [syncStatus, backupStatus] = promiseResults
         if(syncStatus.status === "fulfilled") {
             let completionStatus = syncStatus.value
-            completionStatus._backupStatus = backupStatus.value || backupStatus.reason
+            completionStatus.coreBackup = backupStatus.value || backupStatus.reason
             res.status(200).json(completionStatus)
         } else {
             res.status(500).send(syncStatus.reason)
