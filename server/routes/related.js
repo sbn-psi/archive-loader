@@ -16,11 +16,16 @@ router.get('/mission/', async function(req, res) {
 router.get('/instrument/', async function(req, res) {
     related(registry.type.instrument, req, res)
 })
+router.get('/bundle/', async function(req, res) {
+    related(registry.type.bundle, req, res)
+})
 
 const registryToFieldMap = {
     [registry.type.target]: 'target',
     [registry.type.spacecraft]: 'instrument_host',
     [registry.type.instrument]: 'instrument',
+    [registry.type.bundle]: 'bundle',
+    [registry.type.mission]: 'investigation'
 }
 
 async function related(desiredType, req, res) {
@@ -43,7 +48,8 @@ async function related(desiredType, req, res) {
             return {
                 lid: rel.identifier,
                 name: rel.title,
-                relationshipId: existing ? existing.relationshipId : null
+                relationshipId: existing ? existing.relationshipId : null,
+                label: existing? existing.label : null
             }
         })
     } catch (err) {

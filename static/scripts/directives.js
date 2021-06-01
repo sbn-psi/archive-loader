@@ -25,9 +25,11 @@ app.directive('manageList', function() {
     return {
         scope: {
             edit: '<',
+            delete: '<',
             list: '<',
             groupBy: '@?',
-            usesTags: '@?tags'
+            usesTags: '@?tags',
+            readyFlags: '@?'
         },
         templateUrl: './directives/manage-list.html',
         controller: function($scope, lidCheck) {
@@ -52,6 +54,7 @@ app.directive('manageList', function() {
                 }
                 $scope.groups = groups.sort((a, b) => (a.lid > b.lid) ? 1 : -1)
                 $scope.ungrouped = ungrouped
+                $scope.list.sort((a, b) => (a.is_ready === b.is_ready) ? 0 : a.is_ready? 1 : -1)
             })
 
             $scope.$watch('groups', groups => {
@@ -126,7 +129,7 @@ app.directive('relationshipSelector', function() {
             if(!$scope.model) { $scope.model = []}
 
             $scope.$watch('lid', function(lid) {
-                if(!!lid && lid.startsWith('urn:nasa')) {
+                if(!!lid && lid.startsWith('urn:')) {
                     relatedLookup($scope.from, $scope.to, lid).then(mergeIntoModel, function(err) { 
                         console.log(err)
                         // don't care about errors

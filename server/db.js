@@ -11,6 +11,7 @@ const spacecraftCollection = 'spacecraft'
 const instrumentsCollection = 'instruments'
 const targetRelationshipsCollection = 'targetRelationships'
 const targetSpacecraftRelationshipTypesCollection = 'targetSpacecraftRelationshipTypes'
+const targetMissionRelationshipTypesCollection = 'targetMissionRelationshipTypes'
 const instrumentSpacecraftRelationshipTypes = 'instrumentSpacecraftRelationshipTypes'
 const tagsCollection = 'tags'
 const objectRelationshipsCollection = 'objectRelationships'
@@ -59,6 +60,7 @@ module.exports = {
     instruments: instrumentsCollection,
     targetRelationships: targetRelationshipsCollection,
     targetSpacecraftRelationshipTypes: targetSpacecraftRelationshipTypesCollection,
+    targetMissionRelationshipTypes: targetMissionRelationshipTypesCollection,
     instrumentSpacecraftRelationshipTypes: instrumentSpacecraftRelationshipTypes,
     tags: tagsCollection,
     objectRelationships: objectRelationshipsCollection,
@@ -89,34 +91,41 @@ module.exports = {
         }
         var result = await bulkOperation.execute();
         assert(result.result.ok)
-        return result
+        return result.result.upserted
     },
-    find: async function(inputFilter, type, stream, end) {
+    find: async function(inputFilter, type, fields) {
+        await connect()
+        const collection = db.collection(type)
+        let activeFilter = { _isActive: true }
+        Object.assign(activeFilter, inputFilter)
+        const projection = fields ? fields.reduce((prev, current) => {
+            prev[current] = 1
+        }, { _id: 0}) : undefined
+
+        // bunch up all documents into array and return
+        const docs = await collection.find(activeFilter, projection).sort({$natural:1}).toArray()
+        return docs.map(hideInternalProperties)
+    },
+    findAndStream: async function(inputFilter, type, stream, end) {
         await connect()
         const collection = db.collection(type)
         let activeFilter = { _isActive: true }
         Object.assign(activeFilter, inputFilter)
 
-        if(!!stream && !!end) {
-            // stream documents instead of grouping them together
-            return new Promise((resolve, reject) => {
-                collection.find(activeFilter).sort({$natural:1})
-                    .on('data', data => stream(hideInternalProperties(data)))
-                    .on('end', () => { end(); resolve()})
-            })
-        } else {
-            // bunch up all documents into array and return
-            const docs = await collection.find(activeFilter).sort({$natural:1}).toArray()
-            return docs.map(hideInternalProperties)
-        }
+        // stream documents instead of grouping them together
+        return new Promise((resolve, reject) => {
+            collection.find(activeFilter).sort({$natural:1})
+                .on('data', data => stream(hideInternalProperties(data)))
+                .on('end', () => { end(); resolve()})
+        })
     },
     deleteOne: async function(doc, type) {
         await connect()
         const collection = db.collection(type);
-        const toUpdate = (doc.relationshipId) ? { 'relationshipId': doc.relationshipId } : { '_id': doc.id };
+        const toUpdate = (doc.relationshipId) ? { 'relationshipId': doc.relationshipId } : { 'logical_identifier': doc.logical_identifier };
         // do a soft delete
         const result = await collection.updateOne(toUpdate, { $set: { _isActive: false }});
-        return result;
+        return result.ops;
     },
     insertRelationships: async function(documents) {
         assert(documents.constructor === Array, "First argument must be an array of documents to insert")
@@ -130,11 +139,13 @@ module.exports = {
                 target: doc.target,
                 instrument_host: doc.instrument_host,
                 instrument: doc.instrument,
+                investigation: doc.investigation,
+                bundle: doc.bundle
             }).upsert().replaceOne(doc)
         }
         var result = await bulkOperation.execute();
         assert(result.result.ok)
-        return result
+        return result.ops
     },
     join: async function(primaryType, foreignType, idField, foreignField, intoField) {
         await connect()

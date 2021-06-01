@@ -1,7 +1,7 @@
 export default function($scope) {
     let config = {
         modelName: 'spacecraft',
-        lidPrefix: 'urn:nasa:pds:context:instrument_host:',
+        lidFragment: ':context:instrument_host:',
         requiredFields: ['logical_identifier', 'display_name'],
         primaryPostEndpoint: './save/spacecraft',
         lookupReplacements: [
@@ -10,7 +10,7 @@ export default function($scope) {
                 registryField: 'instrument_host_name'
             }
         ],
-        relationshipModelNames: ['target', 'instrument'],
+        relationshipModelNames: ['instrument'],
         relationshipTransformer: function(relationship, domain) {
             return {
                 instrument_host: $scope.model.spacecraft.logical_identifier,

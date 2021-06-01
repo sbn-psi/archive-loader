@@ -48,6 +48,9 @@ app.constant('prepForForm', function(model, templateFn) {
         }
     })
 
+    if(!!model.start_date)  { prepped.start_date = new Date(prepped.start_date)}
+    if(!!model.end_date)    { prepped.end_date   = new Date(prepped.end_date)}
+
     // prep tags, specifically
     if(!!prepped.tags) { 
         prepped.tags = prepped.tags.map(tag => { 
@@ -62,7 +65,7 @@ app.constant('prepForForm', function(model, templateFn) {
 app.service('lidCheck', function($http) {
     return function(lid, fields) {
         return new Promise(function(resolve, reject) {
-            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:nasa')) {
+            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:')) {
                 $http.get('./lookup', {params: {lid, fields}}).then(function(res) {
                     resolve(res.data)
                 }, function(err) {
@@ -78,7 +81,7 @@ app.service('lidCheck', function($http) {
 app.service('relatedLookup', function($http) {
     return function(from, to, lid) {
         return new Promise(function(resolve, reject) {
-            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:nasa')) {
+            if(!!lid && lid.constructor === String && lid.split(':').length > 3 && lid.startsWith('urn:')) {
                 $http.get(`./related/${to}?${from}=${lid}`).then(function(res) {
                     resolve(res.data)
                 }, function(err) {
@@ -91,7 +94,7 @@ app.service('relatedLookup', function($http) {
     }
 })
 
-app.constant('isPopulated', (val) => val && val.length > 0)
+app.constant('isPopulated', (val) => val && (val.length > 0 || !!val))
 
 app.controller('FormController', function($scope, constants) {
     $scope.progress = {}
@@ -115,11 +118,19 @@ app.controller('ContextObjectImportController', function($scope, $http, sanitize
 
     const validate = function() {
         const object = $scope.model[$scope.config.modelName]
-        
-        const lidValid = isPopulated(object.logical_identifier) && object.logical_identifier.startsWith($scope.config.lidPrefix)
-        const requiredFieldsPresent = $scope.config.requiredFields.every(field => isPopulated($scope.model[$scope.config.modelName][field]))
-        const relationshipsHaveValues = $scope.config.relationshipModelNames.every(modelName => $scope.model[modelName].every(rel => !!rel.relationshipId))
-        return lidValid ? requiredFieldsPresent ? relationshipsHaveValues ? true : 'All relationships must have types set' : 'Some required fields are missing' : 'LID does not start with ' + $scope.config.lidPrefix
+
+        try {
+            if(!isPopulated(object.logical_identifier) && object.logical_identifier.includes($scope.config.lidFragment)) throw 'LID does not start with ' + $scope.config.lidFragment
+            !$scope.config.requiredFields.forEach(field => {
+                const value = $scope.model[$scope.config.modelName][field]
+                if(!isPopulated(value)) throw field + ' is required'
+            }) 
+            if(!$scope.config.relationshipModelNames.every(modelName => $scope.model[modelName].every(rel => !!rel.relationshipId || !!rel.label))) throw 'All relationships must have types set'
+
+        } catch(err) {
+            return err
+        }
+        return true
     }
 
     const templateModel = function() {

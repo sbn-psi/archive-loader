@@ -1,6 +1,6 @@
 <div>
     <div class="row">
-        <div class="col" ng-if="allDatasets().length > 0">
+        <div class="col" ng-if="allDatasets().length > 1">
             <nav aria-label="Dataset selection" id="dataset-nav" class="sticky-top">
                 <ul class="pagination flex-column">
                     <li class="page-item" ng-if="model.bundle" ng-class="{active: view.active === model.bundle}" ng-click="view.active = model.bundle; view.type = constants.bundleType;"><span class="page-link">{{model.bundle.logical_identifier}}</span></li>

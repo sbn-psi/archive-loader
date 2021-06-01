@@ -1,7 +1,7 @@
 export default function($scope) {
     let config = {
         modelName: 'target',
-        lidPrefix: 'urn:nasa:pds:context:target:',
+        lidFragment: ':context:target:',
         requiredFields: ['logical_identifier', 'display_name', 'display_description'],
         primaryPostEndpoint: './save/targets',
         lookupReplacements: [
@@ -14,17 +14,18 @@ export default function($scope) {
                 registryField: 'target_description'
             },
         ],
-        relationshipModelNames: ['spacecraft'],
+        relationshipModelNames: ['mission'],
         relationshipTransformer: function(relationship) {
             return {
                 target: $scope.model.target.logical_identifier,
-                instrument_host: relationship.lid,
+                investigation: relationship.lid,
                 relationshipId: relationship.relationshipId
             }
         },
         relationshipUnpacker: function(arr, relationship) {
+            if(!relationship.investigation) { return arr }
             return arr.concat({
-                lid: relationship.instrument_host,
+                lid: relationship.investigation,
                 relationshipId: relationship.relationshipId
             })
         }

@@ -4,6 +4,16 @@
             <mission-import-form mission="model.mission" error="state.error" tags="tags"></mission-import-form>
         </div>
     </div>
+    <div class="row">
+        <div class="col tab-container">
+            <relationship-selector from="mission" to="target" model="model.target" lid="model.mission.logical_identifier" relationship-types="targetRelationships"></relationship-selector>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col tab-container">
+            <related-tool-selector model="model.mission.tools" tools="tools"></relationship-selector>
+        </div>
+    </div>
     <div class="row d-flex justify-content-center">
         <input class="btn btn-primary" type="submit" value="Submit" ng-click="submit()" ng-if="!state.loading">
         <loading ng-if="state.loading"></loading>

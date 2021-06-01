@@ -1,7 +1,7 @@
 export default function($scope) {
     let config = {
         modelName: 'instrument',
-        lidPrefix: 'urn:nasa:pds:context:instrument:',
+        lidFragment: ':context:instrument:',
         requiredFields: ['logical_identifier', 'display_name', 'display_description'],
         primaryPostEndpoint: './save/instruments',
         lookupReplacements: [
@@ -14,18 +14,21 @@ export default function($scope) {
                 registryField: 'instrument_description'
             },
         ],
-        relationshipModelNames: ['spacecraft'],
-        relationshipTransformer: function(relationship) {
+        relationshipModelNames: ['spacecraft', 'bundle'],
+        relationshipTransformer: function(relationship, domain) {
             return {
                 instrument: $scope.model.instrument.logical_identifier,
-                instrument_host: relationship.lid,
-                relationshipId: relationship.relationshipId
+                [domain === 'spacecraft' ? 'instrument_host' : domain]: relationship.lid,
+                relationshipId: relationship.relationshipId,
+                label: relationship.label
             }
         },
-        relationshipUnpacker: function(arr, relationship) {
+        relationshipUnpacker: function(arr, relationship, domain) {
+            if(!relationship[domain]) return arr
             return arr.concat({            
-                lid: relationship.instrument_host,
-                relationshipId: relationship.relationshipId
+                lid: relationship[domain === 'spacecraft' ? 'instrument_host' : domain],
+                relationshipId: relationship.relationshipId,
+                label: relationship.label
             })
         }
     }

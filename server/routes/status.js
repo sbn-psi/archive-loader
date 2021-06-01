@@ -9,7 +9,8 @@ async function statusRequest(req, res, type) {
         results: result.map(item => { return { 
             name: item.display_name, 
             lid: item.logical_identifier,
-            tags: item.tags
+            tags: item.tags,
+            is_ready: item.is_ready
         }})
     })
 }

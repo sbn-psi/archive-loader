@@ -5,7 +5,7 @@ const db = require('../db.js')
 
 // TARGETS //
 router.get('/target', async function(req, res) {
-    const result = await db.find({}, db.targetSpacecraftRelationshipTypes)
+    const result = await db.find({}, db.targetMissionRelationshipTypes)
     res.status(200).send( result.sort((a,b) => a.order > b.order) )
 })
 router.post('/target', async function(req, res) {
@@ -13,13 +13,13 @@ router.post('/target', async function(req, res) {
     const result = await db.insert(toInsert.map(doc => {
         if (!doc.relationshipId) doc.relationshipId = uuid4()
         return doc
-    }), db.targetSpacecraftRelationshipTypes)
-    res.status(201).send( result.ops )
+    }), db.targetMissionRelationshipTypes)
+    res.status(201).send( result )
 })
 router.post('/target/remove', async function(req, res) {
     const toRemove = req.body
-    const result = await db.deleteOne(toRemove, db.targetSpacecraftRelationshipTypes)
-    res.status(202).send( result.ops )
+    const result = await db.deleteOne(toRemove, db.targetMissionRelationshipTypes)
+    res.status(202).send( result )
 })
 
 // INSTRUMENTS //
@@ -33,12 +33,12 @@ router.post('/instrument', async function(req, res) {
         if (!doc.relationshipId) doc.relationshipId = uuid4()
         return doc
     }), db.instrumentSpacecraftRelationshipTypes)
-    res.status(201).send( result.ops )
+    res.status(201).send( result )
 })
 router.post('/instrument/remove', async function(req, res) {
     const toRemove = req.body
     const result = await db.deleteOne(toRemove, db.instrumentSpacecraftRelationshipTypes)
-    res.status(202).send( result.ops )
+    res.status(202).send( result )
 })
 
 module.exports = router;

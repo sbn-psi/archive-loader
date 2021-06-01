@@ -7,11 +7,7 @@
     <div class="row">
         <div class="col tab-container">
             <relationship-selector from="instrument" to="spacecraft" model="model.spacecraft" lid="model.instrument.logical_identifier" relationship-types="instrumentRelationships"></relationship-selector>
-        </div>
-    </div>
-    <div class="row">
-        <div class="col tab-container">
-            <related-tool-selector model="model.instrument.tools" tools="tools"></relationship-selector>
+            <relationship-selector from="instrument" to="bundle" model="model.bundle" lid="model.instrument.logical_identifier"></relationship-selector>
         </div>
     </div>
     <div class="row d-flex justify-content-center">
