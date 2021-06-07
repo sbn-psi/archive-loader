@@ -21,7 +21,6 @@ router.delete('/instrument/:lid', async function(req, res) {
 })
 
 async function deleteRequest(req, res, type) {
-    console.log(req.params.lid)
     try {
         assert(req.params.lid, 'Invalid delete request')
         assert(req.params.lid.startsWith('urn'), 'Invalid lid ' + req.params.lid)
