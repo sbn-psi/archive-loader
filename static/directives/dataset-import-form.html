@@ -18,10 +18,8 @@
             <label>Browse URL (required): </label><input class="form-control" type="url" ng-model="dataset.browse_url" uib-typeahead="val for val in autocomplete('browse_url', $viewValue)">
             <label>Download URL: </label><input class="form-control" type="url" ng-model="dataset.download_url" uib-typeahead="val for val in autocomplete('download_url', $viewValue)">
             <label>Download Size: </label><input class="form-control" type="text" ng-model="dataset.download_size" uib-typeahead="val for val in autocomplete('download_size', $viewValue)">
+            <label>Dataset Info URL: </label><input class="form-control" type="url" ng-model="dataset.dataset_info_url" uib-typeahead="val for val in autocomplete('dataset_info_url', $viewValue)">
             <label>Checksum URL: </label><input ng-disabled="true" class="form-control" type="url" ng-model="dataset.checksum_url" uib-typeahead="val for val in autocomplete('checksum_url', $viewValue)">
-            <label>Mission Bundle LID: </label><input ng-disabled="true" class="form-control" type="text" ng-model="dataset.mission_bundle" uib-typeahead="val for val in autocomplete('mission_bundle', $viewValue)">
-            <label ng-if="type === 'Collection'">Local Documents URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.local_documents_url" uib-typeahead="val for val in autocomplete('local_documents_url', $viewValue)">
-            <label ng-if="type === 'Collection'">Other Instruments URL: </label><input ng-if="type === 'Collection'" class="form-control" type="url" ng-model="dataset.other_instruments_url" uib-typeahead="val for val in autocomplete('other_instruments_url', $viewValue)">
             <label>PDS3 Version URL: </label><input ng-disabled="true" class="form-control" type="url" ng-model="dataset.pds3_version_url" uib-typeahead="val for val in autocomplete('pds3_version_url', $viewValue)">
 
             
