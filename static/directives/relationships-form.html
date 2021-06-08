@@ -20,6 +20,7 @@
                 <button
                     class="btn btn-secondary"
                     type="button"
+                    ng-disabled="savingState || !!relationships.removing"
                     ng-click="relationships.modifyRelationship(type)"
                     ng-show="!relationships.editing(type)">
                     Edit Name
@@ -32,7 +33,7 @@
                 </button>
             </div>
             <div class="col-4">
-                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
+                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId" ng-disabled="savingState || !!relationships.removing">
                     Remove
                 </button>
                 <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
@@ -66,6 +67,7 @@
                 <button
                     class="btn btn-secondary"
                     type="button"
+                    ng-disabled="savingState || !!relationships.removing"
                     ng-click="relationships.modifyRelationship(type)"
                     ng-show="!relationships.editing(type)">
                     Edit Name
@@ -78,7 +80,7 @@
                 </button>
             </div>
             <div class="col-4">
-                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
+                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId" ng-disabled="savingState || !!relationships.removing">
                     Remove
                 </button>
                 <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
@@ -112,6 +114,7 @@
                 <button
                     class="btn btn-secondary"
                     type="button"
+                    ng-disabled="savingState || !!relationships.removing"
                     ng-click="relationships.modifyRelationship(type)"
                     ng-show="!relationships.editing(type)">
                     Edit Name
@@ -124,7 +127,7 @@
                 </button>
             </div>
             <div class="col-4">
-                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId">
+                <button class="btn btn-danger" type="button" ng-click="relationships.removeRelationship(type)" ng-show="relationships.removing !== type.relationshipId" ng-disabled="savingState || !!relationships.removing">
                     Remove
                 </button>
                 <button class="btn btn-danger" type="button" disabled ng-show="relationships.removing === type.relationshipId">
@@ -152,7 +155,7 @@
                 </select>
             </div>
             <div class="col-1">
-                <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.add()">
+                <input type="submit" value="Add" class="btn btn-primary" ng-click="relationships.add()" ng-disabled="savingState || !!relationships.removing">
             </div>
         </div>
     </div>

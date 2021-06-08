@@ -54,21 +54,28 @@ app.directive('relationshipsForm', () => {
         controller: function($scope,$http) {
             const cb = $scope.cb
             const endpoints = $scope.relationshipEndpoints
-            
-            $scope.groups = {
-                always: [],
-                sometimes: [],
-                never: [],
-            }
-            $scope.types.map(type => {
-                if (type.order < 100) {
-                    $scope.groups.always.push(type)
-                } else if (100 <= type.order && type.order < 1000) {
-                    $scope.groups.sometimes.push(type)
-                } else {
-                    $scope.groups.never.push(type)
+
+            const sortIntoGroups = () => {
+                $scope.groups = {
+                    always: [],
+                    sometimes: [],
+                    never: [],
                 }
-            })
+                $scope.types.map(type => {
+                    if (type.order < 100) {
+                        $scope.groups.always.push(type)
+                    } else if (100 <= type.order && type.order < 1000) {
+                        $scope.groups.sometimes.push(type)
+                    } else {
+                        $scope.groups.never.push(type)
+                    }
+                })
+                $scope.groups.always.sort((a, b) => a.order - b.order)
+                $scope.groups.sometimes.sort((a, b) => a.order - b.order)
+                $scope.groups.never.sort((a, b) => a.order - b.order)
+            }
+            sortIntoGroups()
+            $scope.$watch('types', sortIntoGroups)
             
             $scope.relationships = {
                 removing: null,
@@ -118,6 +125,7 @@ app.directive('relationshipsForm', () => {
                     setTimeout(() => {
                         $http.post(endpoints.save,relationships).then(res => console.log(res)).finally(() => {
                             cb($http).then(res => {
+                                $scope.types = res
                                 $scope.savingState = false;
                                 $scope.relationships.modifyRelationship(null)
                             })
@@ -125,15 +133,18 @@ app.directive('relationshipsForm', () => {
                     }, 800)
                 },
                 removeRelationship: function(doc) {
-                    $scope.relationships.removing = doc.relationshipId;
-                    setTimeout(() => {
-                        $http.post(endpoints.remove,doc).then(res => {
-                            cb($http).then(res => {
-                                $scope.types = res
-                                $scope.relationships.removing = null;
+                    if(confirm('Are you sure you want to remove ' + doc.name + '?')) { 
+                        $scope.relationships.removing = doc.relationshipId;
+                        setTimeout(() => {
+                            $http.post(endpoints.remove,doc).then(res => {
+                                console.log(res)
+                                cb($http).then(res => {
+                                    $scope.types = res
+                                    $scope.relationships.removing = null;
+                                })
                             })
-                        })
-                    },800)
+                        },800)
+                    }
                 },
             }
             
