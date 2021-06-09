@@ -138,3 +138,8 @@ ui-view {
 .page-link {
   cursor: pointer;
 }
+
+.ta-editor.ta-html {
+  font-family: monospace !important;
+  background-color: #fffedf !important;
+}
