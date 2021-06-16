@@ -57,9 +57,19 @@ const collections = [{
     collectionName: 'web-tools'
 }]
 
+// Checks integrity of both registries
+function checkAvailability() {
+    return new Promise(async (resolve, reject) => {
+        Promise.all([
+            checkSolrIntegrity(),
+            checkPDSAvailability()
+        ]).then(resolve, reject)
+    })
+}
+
 // Checks with solr instance to ensure that there is not more than one set of collections. 
 // We do this because registering too many collections with Solr can cause instability issues, and a failed sync might leave some remnants
-function checkAvailability() {
+function checkSolrIntegrity() {
     return new Promise(async (resolve, reject) => {
         try{ 
             let solrCollections = await httpRequest(`${SOLR}/admin/collections`, { action: 'LIST' }, null, process.env.SOLR_USER, process.env.SOLR_PASS) 
@@ -69,6 +79,20 @@ function checkAvailability() {
         catch(err) {
             console.log(err)
             reject("Error fetching collections in Solr: " + err.message)
+        }
+    })
+}
+
+// Checks if PDS registry is reachable and returning results
+function checkPDSAvailability() {
+    return new Promise(async (resolve, reject) => {
+        try{ 
+            let lookup = await registry.lookupIdentifiers(['urn:nasa:pds:context:instrument:ocams.orex'])
+            if(!!lookup && lookup.length > 0) { resolve() } else { reject() }
+        }
+        catch(err) {
+            console.log(err)
+            reject("PDS Registry does not appear to be running")
         }
     })
 }
