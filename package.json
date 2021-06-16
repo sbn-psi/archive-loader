@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server/server.js",
     "minio-dev": "docker run -p 8999:9000 -e \"MINIO_ACCESS_KEY=development_access\" -e \"MINIO_SECRET_KEY=development_secret\" -v archiveloader-images:/data minio/minio server /data",
-    "mongo-dev": "mongod --dbpath=data"
+    "mongo-dev": "mongod --dbpath=data",
+    "solr-dev": "docker run -p 8983:8983 solr:7 -DzkRun"
   },
   "author": "Mike Drum mdrum@psi.edu",
   "license": "ISC",
