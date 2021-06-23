@@ -19,8 +19,7 @@ require('./minio.js').bootstrap().then(expressSetup, error => {
 });
 const express = require('express')
 const app = express()
-const bodyParser = require('body-parser')
-app.use(bodyParser.json())
+app.use(express.json({ limit: '3MB' }))
 const helmet = require('helmet')
 app.use(helmet())
 
