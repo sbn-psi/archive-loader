@@ -151,12 +151,27 @@ module.exports = {
         await connect()
         const collection = db.collection(primaryType)
 
-        const docs = await collection.aggregate([{
+        const docs = await collection.aggregate([
+        {
+            $match: { _isActive: true }
+        },
+        {
             $lookup: {
                 from: foreignType,
-                localField: idField,
-                foreignField: foreignField,
-                as: intoField
+                as: intoField,
+                let: { 
+                    id: `$${idField}`
+                },
+                pipeline: [{
+                    $match: {
+                        $expr: {
+                            $and: [
+                                { $eq: ['$_isActive', true] },
+                                { $eq: [`$$id`, `$${foreignField}`] }
+                            ]
+                        }
+                    }
+                }]
             }
         }]).toArray()
         return docs.map(hideInternalProperties)
