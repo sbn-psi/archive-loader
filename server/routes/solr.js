@@ -198,7 +198,7 @@ function backup(suffix) {
                 action: 'CREATE',
                 name: `${backupCollection}-${suffix}`,
                 numShards: 1,
-                ['collection.configName']: '_default'
+                ['collection.configName']: 'pds'
             }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
         }
         catch(err) {
