@@ -190,7 +190,10 @@ function backup(suffix) {
             identifiers = [...identifiers, ...newLids.map(doc => new LID(doc.logical_identifier).lid)]
         }
         
-        const fromRegistry = await registry.lookupIdentifiers(identifiers)
+        let fromRegistry = await registry.lookupIdentifiers(identifiers)
+        fromRegistry.forEach( doc => {
+            delete doc.score
+        })
 
         // STEP 1: Create collection
         try {
