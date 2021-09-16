@@ -5,25 +5,29 @@
         <tr ng-if="!!ungrouped && ungrouped.length > 0">
             <th colspan="4" class="error">Need {{groupBy}} assigned!</th>
         </tr>
-        <tr ng-repeat="item in ungrouped | filter:group.lid track by $index">
+        <tr ng-repeat="item in ungrouped track by $index">
             <td class="align-middle">{{item.name}}</td>
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td ng-if="readyFlags" class="align-middle" ng-class="{error: !item.is_ready}">{{item.is_ready ? 'Ready' : 'Not Ready' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
-            <td style="width:150px;"><a class="btn btn-primary btn-sm" ng-href="{{edit(item.lid)}}">Edit</a>
+            <td style="width:150px;">
+                <a ng-if="!!sref" class="btn btn-primary btn-sm" ng-href="{{sref(item.lid)}}">Edit</a>
+                <button ng-if="!!edit" class="btn btn-primary btn-sm" ng-click="edit(item)">Edit</button>
                 <button class="btn btn-outline-danger btn-sm" ng-click="delete(item)">Delete</button>
             </td>
         </tr>
         <!-- Grouped items -->
-        <tr ng-show="!!group.lid" ng-repeat-start="group in groups">
+        <tr ng-show="!!group.name || !!group.lid" ng-repeat-start="group in groups">
             <th colspan="4">{{group.name ? group.name : group.lid}}</th>
         </tr>
-        <tr ng-repeat-end ng-repeat="item in list | filter:group.lid track by $index">
+        <tr ng-repeat-end ng-repeat="item in list | filter:grouper(group) track by $index">
             <td class="align-middle">{{item.name}}</td>
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td ng-if="readyFlags" class="align-middle" ng-class="{error: !item.is_ready}">{{item.is_ready ? 'Ready' : 'Not Ready' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
-            <td style="width:150px;"><a class="btn btn-primary btn-sm" ng-href="{{edit(item.lid)}}">Edit</a>
+            <td style="width:150px;">
+                <a ng-if="!!sref" class="btn btn-primary btn-sm" ng-href="{{sref(item.lid)}}">Edit</a>
+                <button ng-if="!!edit" class="btn btn-primary btn-sm" ng-click="edit(item)">Edit</button>
                 <button class="btn btn-outline-danger btn-sm" ng-click="delete(item)">Delete</button>
             </td>
         </tr>

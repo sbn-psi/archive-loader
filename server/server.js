@@ -114,6 +114,7 @@ app.use('/datasets/check', require('./routes/dataset-check'))
 app.use('/save', require('./routes/save-dataset'))
 app.use('/save', require('./routes/save-context-object'))
 app.use('/save', require('./routes/save-relationships'))
+app.use('/save', require('./routes/save-tags'))
 app.use('/solr', require('./routes/solr'))
 
 // // // SUPER SECURE ROUTES // // //

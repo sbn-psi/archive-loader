@@ -21,7 +21,7 @@ app.config(function($stateProvider) {
                 }
             },
             tags: function($http) {
-                return $http.get('./tags/datasets').then(result => result.data)
+                return $http.get('./tags/datasets').then(result => result.data?.map(tag => tag.name))
             },
             tools: function($http) {
                 return $http.get('./status/tools').then(result => result.data)

@@ -20,7 +20,7 @@ router.get('/datasets', async function(req, res) {
 
 async function tagLookupRequest(req, res, type) {
     const result = await db.find({ "type": type }, db.tags)
-    res.status(200).send( result.map(tag => tag.name) )
+    res.status(200).send( result )
 }
 
 module.exports = router

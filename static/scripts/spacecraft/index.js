@@ -21,7 +21,7 @@ app.config(function($stateProvider) {
                 }
             },
             tags: function($http) {
-                return $http.get('./tags/spacecraft').then(result => result.data)
+                return $http.get('./tags/spacecraft').then(result => result.data?.map(tag => tag.name))
             },
             instrumentRelationships: function($http) {
                 return $http.get('./relationship-types/instrument').then(result => result.data)
