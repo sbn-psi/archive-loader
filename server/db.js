@@ -60,7 +60,10 @@ function findPrimaryKey(type) {
         case spacecraftCollection:
         case instrumentsCollection: return 'logical_identifier'
         case tagsCollection: return 'name'
-        case objectRelationshipsCollection: return 'relationshipId'
+        case instrumentSpacecraftRelationshipTypes:
+        case targetMissionRelationshipTypesCollection:
+        case targetSpacecraftRelationshipTypesCollection:
+        case targetTargetRelationshipTypesCollection: return 'relationshipId'
         case toolsCollection: return 'toolId'
         default: return null
     }
@@ -133,11 +136,13 @@ module.exports = {
     deleteOne: async function(doc, type) {
         await connect()
         const collection = db.collection(type);
-        // const primaryKey = findPrimaryKey(type)
 
-        // const toUpdate = (doc.relationshipId) ? { 'relationshipId': doc.relationshipId } : { 'logical_identifier': doc.logical_identifier };
+        const toUpdate = {
+            _isActive: true,
+            ...doc
+        }
         // do a soft delete
-        const result = await collection.updateOne(doc, { $set: { _isActive: false }});
+        const result = await collection.updateOne(toUpdate, { $set: { _isActive: false }});
         return result.ops;
     },
     insertRelationships: async function(documents) {
