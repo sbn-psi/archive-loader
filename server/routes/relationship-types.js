@@ -1,6 +1,6 @@
 const express = require('express')
 const router = express.Router()
-const uuid4 = require('uuid/v4')
+const { v4: uuid4 } = require('uuid')
 const db = require('../db.js')
 
 // TARGETS //
