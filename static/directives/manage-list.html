@@ -17,10 +17,10 @@
             </td>
         </tr>
         <!-- Grouped items -->
-        <tr ng-show="!!group.name || !!group.lid" ng-repeat-start="group in groups">
-            <th colspan="4">{{group.name ? group.name : group.lid}}</th>
+        <tr ng-show="!!group.name" ng-repeat-start="group in groups">
+            <th colspan="4">{{group.display_name ? group.display_name : group.name}}</th>
         </tr>
-        <tr ng-repeat-end ng-repeat="item in list | filter:grouper(group) track by $index">
+        <tr ng-repeat-end ng-repeat="item in list | filter:group.name track by $index">
             <td class="align-middle">{{item.name}}</td>
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td ng-if="readyFlags" class="align-middle" ng-class="{error: !item.is_ready}">{{item.is_ready ? 'Ready' : 'Not Ready' }}</td>

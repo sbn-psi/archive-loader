@@ -63,18 +63,12 @@ app.directive('manageList', function() {
                 let lookups = groupsWithLids.map(group => lidCheck(group.name, 'title'))
                 Promise.all(lookups).then(results => {
                     results.forEach((result, index) => {
-                        groupsWithLids[index].name = result.title
+                        groupsWithLids[index].display_name = result.title
                     })
                     $scope.$digest();
                 })
             })
 
-            $scope.grouper = function(group) {
-                return function(value, index, array) {
-                    if(!!group.lid) return value[$scope.groupBy] === group.lid
-                    else return value[$scope.groupBy] === group.name
-                }
-            }
         }
     }   
 });
