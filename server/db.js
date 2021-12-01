@@ -62,8 +62,7 @@ function findPrimaryKey(type) {
         case tagsCollection: return 'name'
         case instrumentSpacecraftRelationshipTypes:
         case targetMissionRelationshipTypesCollection:
-        case targetSpacecraftRelationshipTypesCollection:
-        case targetTargetRelationshipTypesCollection: return 'relationshipId'
+        case targetSpacecraftRelationshipTypesCollection:return 'relationshipId'
         case toolsCollection: return 'toolId'
         default: return null
     }
