@@ -8,7 +8,7 @@ export default function($scope, $http, $state) {
     }
     load()
 
-    $scope.edit = function(lidvid) {
+    $scope.sref = function(lidvid) {
         return $state.href('missions.import', {edit: lidvid})
     }
 

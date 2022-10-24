@@ -52,6 +52,22 @@ let connect = async function() {
 }
 
 
+function findPrimaryKey(type) {
+    switch (type) {
+        case datasetsCollection:
+        case targetsCollection:
+        case missionsCollection:
+        case spacecraftCollection:
+        case instrumentsCollection: return 'logical_identifier'
+        case tagsCollection: return 'name'
+        case instrumentSpacecraftRelationshipTypes:
+        case targetMissionRelationshipTypesCollection:
+        case targetSpacecraftRelationshipTypesCollection:return 'relationshipId'
+        case toolsCollection: return 'toolId'
+        default: return null
+    }
+}
+
 module.exports = {
     datasets: datasetsCollection,
     targets: targetsCollection,
@@ -77,14 +93,11 @@ module.exports = {
         const collection = db.collection(type)
         const bulkOperation = collection.initializeUnorderedBulkOp()
 
+        const primaryKey = findPrimaryKey(type)
         for(doc of documents) {
             doc._isActive = true;
-            if(!!doc.logical_identifier) {
-                bulkOperation.find({logical_identifier: doc.logical_identifier}).upsert().replaceOne(doc)
-            } else if (!!doc.relationshipId) {
-                bulkOperation.find({relationshipId:doc.relationshipId}).upsert().replaceOne(doc)
-            } else if (!!doc.toolId) {
-                bulkOperation.find({toolId:doc.toolId}).upsert().replaceOne(doc)
+            if(!!primaryKey) {
+                bulkOperation.find({[primaryKey]: doc[primaryKey]}).upsert().replaceOne(doc)
             } else {
                 bulkOperation.insert(doc)
             }
@@ -122,7 +135,11 @@ module.exports = {
     deleteOne: async function(doc, type) {
         await connect()
         const collection = db.collection(type);
-        const toUpdate = (doc.relationshipId) ? { 'relationshipId': doc.relationshipId } : { 'logical_identifier': doc.logical_identifier };
+
+        const toUpdate = {
+            _isActive: true,
+            ...doc
+        }
         // do a soft delete
         const result = await collection.updateOne(toUpdate, { $set: { _isActive: false }});
         return result.ops;

@@ -97,8 +97,13 @@ app.use(express.static('static'))
 // // // SECURE ROUTES // // //
 app.all('*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
 app.get('/logout', (req, res) => {
-    req.logout()
-    res.sendStatus(204)
+    req.logout(err => {
+        if(err) {
+            console.log(err)
+            res.sendStatus(500)
+        }
+        else res.sendStatus(204)
+    })
 })
 app.get('/user', (req, res) => {
     res.status(200).send({user: req.user})
@@ -114,6 +119,7 @@ app.use('/datasets/check', require('./routes/dataset-check'))
 app.use('/save', require('./routes/save-dataset'))
 app.use('/save', require('./routes/save-context-object'))
 app.use('/save', require('./routes/save-relationships'))
+app.use('/save', require('./routes/save-tags'))
 app.use('/solr', require('./routes/solr'))
 
 // // // SUPER SECURE ROUTES // // //

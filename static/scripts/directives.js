@@ -24,7 +24,8 @@ app.directive('titleContainer', function() {
 app.directive('manageList', function() {
     return {
         scope: {
-            edit: '<',
+            sref: '<?',
+            edit: '<?',
             delete: '<',
             list: '<',
             groupBy: '@?',
@@ -39,10 +40,10 @@ app.directive('manageList', function() {
                 let ungrouped = []
                 if(!!$scope.groupBy && !!list) {
                     list.forEach(item => {
-                        let groupLid = item[$scope.groupBy]
-                        if(!!groupLid) {
-                            if(!groups.some(group => group.lid == groupLid)) {
-                                groups.push({lid:groupLid})
+                        let groupName = item[$scope.groupBy]
+                        if(!!groupName) {
+                            if(!groups.some(group => group.name == groupName)) {
+                                groups.push({name:groupName})
                             }
                         } else {
                             ungrouped.push(item)
@@ -52,21 +53,22 @@ app.directive('manageList', function() {
                     // if not grouping, just throw everything into one group
                     groups = [{}]
                 }
-                $scope.groups = groups.sort((a, b) => (a.lid > b.lid) ? 1 : -1)
+                $scope.groups = groups.sort((a, b) => (a.name > b.name) ? 1 : -1)
                 $scope.ungrouped = ungrouped
-                $scope.list.sort((a, b) => (a.is_ready === b.is_ready) ? 0 : a.is_ready? 1 : -1)
+                // $scope.list?.sort((a, b) => (a.is_ready === b.is_ready) ? 0 : a.is_ready? 1 : -1)
             })
 
             $scope.$watch('groups', groups => {
-                let groupsWithLids = groups.filter(group => !!group.lid)
-                let lookups = groupsWithLids.map(group => lidCheck(group.lid, 'title'))
+                let groupsWithLids = groups.filter(group => group.name?.startsWith('urn:'))
+                let lookups = groupsWithLids.map(group => lidCheck(group.name, 'title'))
                 Promise.all(lookups).then(results => {
                     results.forEach((result, index) => {
-                        groupsWithLids[index].name = result.title
+                        groupsWithLids[index].display_name = result.title
                     })
                     $scope.$digest();
                 })
             })
+
         }
     }   
 });

@@ -21,7 +21,7 @@ app.config(function($stateProvider) {
                 }
             },
             tags: function($http) {
-                return $http.get('./tags/targets').then(result => result.data)
+                return $http.get('./tags/targets').then(result => result.data?.map(tag => tag.name))
             },
             targetRelationships: function($http) {
                 return $http.get('./relationship-types/target').then(result => result.data)
@@ -49,14 +49,24 @@ app.config(function($stateProvider) {
             title: 'Relate Targets'
         }
     })
+    $stateProvider.state({
+        name: 'targets.tags',
+        url: '/Tags',
+        templateUrl: 'states/targets/tags.html',
+        data: {
+            title: 'Manage Tags'
+        }
+    })
 })
 
 import TargetImportController from './TargetImportController.js';
 import TargetsManageController from './TargetsManageController.js';
+import TargetTagsManageController from './TargetTagsManageController.js';
 import TargetRelationshipsController from './TargetRelationshipsController.js';
 
 app.controller('TargetImportController', TargetImportController);
 app.controller('TargetsManageController', TargetsManageController);
+app.controller('TargetTagsManageController', TargetTagsManageController);
 app.controller('TargetRelationshipsController', TargetRelationshipsController);
 
 app.directive('targetImportForm', function () {

@@ -21,7 +21,7 @@ app.config(function($stateProvider) {
                 }
             },
             tags: function($http) {
-                return $http.get('./tags/missions').then(result => result.data)
+                return $http.get('./tags/missions').then(result => result.data?.map(tag => tag.name))
             },
             targetRelationships: function($http) {
                 return $http.get('./relationship-types/target').then(result => result.data)

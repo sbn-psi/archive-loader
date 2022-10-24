@@ -35,4 +35,36 @@ async function deleteRequest(req, res, type) {
     } )
 }
 
+
+router.delete('/tag/:type/:name', async function(req, res) {
+    const {name, type} = req.params
+    try {
+        assert(type, 'Missing target type')
+        assert(name, 'Missing target name')
+    } catch (err) {
+        res.status(400).send(err.message)
+        return
+    }
+
+    try {
+        let owners = await db.find({tags: name}, type) 
+        let updateReq = null
+        if(owners?.length > 0) {
+            owners.forEach(doc => {
+                doc.tags = doc.tags.filter(tag => tag != name)
+            })
+            updateReq = await db.insert(owners, type)
+        }
+        const deleteReq = await db.deleteOne({ name, type }, db.tags)
+    
+        // ALSO I NEED TO DELETE THE TAG FROM THE THING
+        res.status(200).send( {
+            updateReq: updateReq , deleteReq
+        } )
+    } catch(err) {
+        res.status(500).send("Unexpected database error deleting tag")
+        console.log(err)
+    }
+})
+
 module.exports = router
