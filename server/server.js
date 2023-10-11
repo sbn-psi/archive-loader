@@ -19,7 +19,7 @@ require('./minio.js').bootstrap().then(expressSetup, error => {
 });
 const express = require('express')
 const app = express()
-app.use(express.json({ limit: '3MB' }))
+app.use(express.json({ limit: '10mb' }))
 const helmet = require('helmet')
 app.use(helmet())
 
@@ -121,6 +121,7 @@ app.use('/save', require('./routes/save-context-object'))
 app.use('/save', require('./routes/save-relationships'))
 app.use('/save', require('./routes/save-tags'))
 app.use('/solr', require('./routes/solr'))
+app.use('/import', require('./routes/import'))
 
 // // // SUPER SECURE ROUTES // // //
 app.all('/admin/*', (req, res, next) => req.user === adminUser ? next() : res.sendStatus(403))
