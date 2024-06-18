@@ -30,15 +30,30 @@ const solrizeNode = function(parentPath, name, node) {
         attrpath: path,
         id: id
     }
-    let childDocs = []
 
     for (const [key, value] of Object.entries(node)) {
         if (isDict(value)) {
-            childDocs.push(solrizeNode(path, key, value))
+            for (const [k, v] of Object.entries(value)) {
+                doc[key + '.' + k] = v
+            }
         }
         else if(isDictList(value)) {
-            for (element of value) {
-                childDocs.push(solrizeNode(path, key, element))
+            // create arrays for each key in the dictionaries
+            const keys = Object.keys(value[0])
+            for(const k of keys) {
+                doc[key + '.' + k] = []
+            }
+
+            // push a value for each key in each dictionary, even if they are null
+            for (dict of value) {
+                for(k of keys) {
+                    if(dict.hasOwnProperty(k)) {
+                        doc[key + '.' + k].push(dict[k])
+                    }
+                    else {
+                        doc[key + '.' + k].push(null)
+                    }
+                }
             }
         }
         else {
@@ -46,9 +61,6 @@ const solrizeNode = function(parentPath, name, node) {
         }
     }
 
-    if (childDocs.length > 0) {
-        doc["_childDocuments_"] = childDocs
-    }
     return doc
 }
 
