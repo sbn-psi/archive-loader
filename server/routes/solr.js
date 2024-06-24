@@ -183,8 +183,10 @@ function sync(suffix, force) {
 }
 
 // pull supplemented lids from the core registry and back them up to our solr instance
-function backup(suffix) {
+function backup(suffix, ignoreBackup) {
     const databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments]
+
+    if(ignoreBackup) { return Promise.resolve(0) }
 
     return new Promise(async (resolve, reject) => {
         let identifiers = []
@@ -269,7 +271,7 @@ router.post('/sync', async function(req, res){
 
     Promise.allSettled([
         sync(req.body.suffix, req.body.force),
-        backup(req.body.suffix)
+        backup(req.body.suffix, req.body.ignoreBackup)
     ]).then(promiseResults => {
         const [syncStatus, backupStatus] = promiseResults
         if(syncStatus.status === "fulfilled") {
