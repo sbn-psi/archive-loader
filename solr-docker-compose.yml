@@ -9,6 +9,9 @@ services:
       - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
     networks:
       - solr
+    volumes:
+      - data1:/var/solr
+      - config1:/opt/solr/
     depends_on:
       - zoo1
       - zoo2
@@ -23,6 +26,9 @@ services:
       - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
     networks:
       - solr
+    volumes:
+      - data2:/var/solr
+      - config2:/opt/solr/
     depends_on:
       - zoo1
       - zoo2
@@ -37,6 +43,9 @@ services:
       - ZK_HOST=zoo1:2181,zoo2:2181,zoo3:2181
     networks:
       - solr
+    volumes:
+      - data3:/var/solr
+      - config3:/opt/solr/
     depends_on:
       - zoo1
       - zoo2
@@ -92,3 +101,11 @@ services:
 
 networks:
   solr:
+
+volumes:
+  data1:
+  data2:
+  data3:
+  config1:
+  config2:
+  config3:
