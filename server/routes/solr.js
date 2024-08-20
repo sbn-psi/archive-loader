@@ -198,6 +198,12 @@ function backup(suffix, ignoreBackup) {
         let fromRegistry = await registry.lookupIdentifiers(identifiers)
         fromRegistry.forEach( doc => {
             delete doc.score
+            if(!doc.lid) {
+                doc.lid = doc.identifier   
+            }
+            if(!doc.package_id) {
+                doc.package_id = suffix
+            }
         })
 
         // STEP 1: Create collection
@@ -206,7 +212,7 @@ function backup(suffix, ignoreBackup) {
                 action: 'CREATE',
                 name: `${backupCollection}-${suffix}`,
                 numShards: 1,
-                ['collection.configName']: 'pds'
+                ['collection.configName']: 'data'
             }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
         }
         catch(err) {
@@ -284,7 +290,26 @@ router.post('/sync', async function(req, res){
     })
 })
 
-
+router.get('/fetchbackup', async function(req, res){
+    const databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments]
+    let identifiers = []
+    for (database of databases) {
+        let newLids = await db.find({}, database, ['logical_identifier'])
+        identifiers = [...identifiers, ...newLids.map(doc => new LID(doc.logical_identifier).lid)]
+    }
+    let fromRegistry = await registry.lookupIdentifiers(identifiers)
+    fromRegistry.forEach( doc => {
+        delete doc.score
+        if(!doc.lid)
+        {
+            doc.lid = doc.identifier   
+        }
+        if(!doc.package_id) {
+            doc.package_id = 'sbn'
+        }
+    })
+    res.status(200).json(fromRegistry)
+})
 
 router.get('/suffix-suggestion', async (req, res) => {
     let latest = await db.find({}, db.successfulIndexes)
