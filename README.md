@@ -8,7 +8,7 @@ First, you will need to configure the services.env file that configures all the 
 
 ### services.env
 - HARVEST: The URL for your deployment of the [PDS Harvest Server](https://github.com/sbn-psi/harvest-server)
-- SOLR: The URL for your deployment of the [PDS Registry (Solr) Build 9b](https://pds-engineering.jpl.nasa.gov/content/pds4-software)
+- SOLR: The URL for your deployment of the [Legacy Solr Registry](https://github.com/sbn-psi/en-registry-solr)
 - SOLR_USER: The user, if any, for your running solr instance
 - SOLR_PASS: The password, if any, for your running solr instance
 - AUTH_SECRET: A randomized string for encrypting cookies
@@ -34,12 +34,7 @@ If you have the correct services.env file created, this will build and run your 
 
 ### PDS Schema
 
-Part of this stack includes a service that will back up a copy of the PDS registry to a collection under our control. It does this by fetching records for each LID that we have supplemental metadata for, and importing it to another collection. This backup collection ("pds-" prefix) uses a schema distributed with the registry version 9b meant for use by Harvest, but **with some slight modifications**. These are...
-- The `lid` and `lidvid` fields are no longer required
-- The `<copyField source="lidvid" dest="identifier" />` rule is disabled
-- `update.autoCreateFields` is enabled in the pds schema config
-
-You must change these values via the [Solr Schema API](https://solr.apache.org/guide/7_7/schema-api.html) after deployment for the backup service to function correctly.
+Part of this stack includes a service that will back up a copy of the PDS registry context products to a collection under our control. It does this by fetching records for each LID that we have supplemental metadata for, and importing it to another collection. This backup collection ("pds-" prefix) uses our own managed schema slightly adapted from the original. 
 
 ## Development
 
