@@ -1,6 +1,7 @@
 // internal modules
 require('../static/scripts/helpers.js')
 const db = require('./db.js')
+const backupManager = require('./backupManager.js')
 
 // env setup
 if(!process.env.MINIO_ACCESS_KEY) {
@@ -33,6 +34,11 @@ function startServer() {
     app.listen(8989, () => {
         console.log('running on port 8989...')
     })
+
+    // backup every 24 hours
+    setInterval(async () => {
+        await backupManager.performBackup();
+    }, 24 * 60 * 60 * 1000);
 }
 
 // // // AUTH MANAGEMENT // // // 

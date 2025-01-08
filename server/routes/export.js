@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const db = require('../db.js')
-const solrize = require('../solrize.js')
+const { streamHelper, streamList, standardChunk } = require('../utils.js')
 
 router.get('/datasets', async function(req, res) {
     let stream = streamHelper(res, standardChunk)
@@ -46,42 +46,4 @@ router.get('/all', async (req, res) => {
     }
     res.end('}')
 })
-
-function standardChunk(chunk) {
-    return JSON.stringify(chunk, null, "\t")
-}
-function solrizedChunk(attr) {
-    return chunk => standardChunk(solrize(chunk, attr))
-}
-function streamHelper(res, chunkHandler) {
-    res.set('Content-Type', 'json')
-    let listStreamer = streamList(res, chunkHandler)
-    return {
-        data: listStreamer.data,
-        end: () => {
-            listStreamer.end()
-            res.end()
-        }
-    }
-
-}
-function streamList(res, chunkHandler) {
-    res.write('[')
-    let prevChunk
-    return {
-        data: data => {
-            if(prevChunk) { 
-                res.write(chunkHandler(prevChunk) + ',')
-            }
-            prevChunk = data
-        },
-        end: () => {
-            if(prevChunk) {
-                res.write(chunkHandler(prevChunk))
-            }
-            res.write(']')
-        }
-    }
-}
-
 module.exports = router

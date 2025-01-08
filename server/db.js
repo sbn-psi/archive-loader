@@ -1,6 +1,7 @@
 const url = process.env.NODE_ENV === 'production' ? 'mongodb://mongo:27017' : 'mongodb://localhost:27017'
 const APP_NAME = 'app'
 const assert = require('assert')
+const backupManager = require('./backupManager.js')
 
 const {MongoClient} = require('mongodb')
 
@@ -104,6 +105,10 @@ module.exports = {
         }
         var result = await bulkOperation.execute();
         assert(result.result.ok)
+
+        // flag the backup manager to upload the new data
+        backupManager.markAsDirty()
+
         return result.result.upserted
     },
     find: async function(inputFilter, type, fields) {
@@ -142,6 +147,9 @@ module.exports = {
         }
         // do a soft delete
         const result = await collection.updateOne(toUpdate, { $set: { _isActive: false }});
+
+        // flag the backup manager to upload the new data
+        backupManager.markAsDirty()
         return result.ops;
     },
     insertRelationships: async function(documents) {
@@ -162,6 +170,9 @@ module.exports = {
         }
         var result = await bulkOperation.execute();
         assert(result.result.ok)
+
+        // flag the backup manager to upload the new data
+        backupManager.markAsDirty()
         return result.ops
     },
     join: async function(primaryType, foreignType, idField, foreignField, intoField) {
