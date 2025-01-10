@@ -114,6 +114,5 @@ class BackupManager {
 }
 
 const instance = new BackupManager();
-Object.freeze(instance);
 
 module.exports = instance;
