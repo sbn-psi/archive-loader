@@ -1,19 +1,33 @@
 <form class="form-group" ng-controller="DatasetLoaderController">
     <div id="primary-input" class="form-group">
-        <h2>PDS4 Dataset type: </h2>
-        <div>
-            <input type="radio" id="bundle-radio" ng-model="state.datasetType" name="dataset-type" value="Bundle">
-            <label for="bundle-radio">Bundle</label>
-        </div>
-        <div>
-            <input type="radio" id="collection-radio" ng-model="state.datasetType" name="dataset-type" value="Collection">
-            <label for="collection-radio">Collection</label>
-        </div>
-        <h2>{{state.datasetType}} URL: </h2>
+        <h2>Archive URL: </h2>
         <input class="form-control" type="url" ng-model="state.datasetUrl"><br/>
         <p>
             <input class="btn btn-primary" type="submit" value="Fetch" ng-click="fetch()" ng-if="!state.loading">
             <loading ng-if="state.loading"></loading>
         </p>
+        <div ng-if="state.harvestResponse">
+            <h2>Detected Bundle:</h2>
+            <div ng-if="state.harvestResponse.bundle">
+                <div><strong>LIDVID:</strong> {{state.harvestResponse.bundle.lidvid}}</div>
+                <div><strong>Title:</strong> {{state.harvestResponse.bundle.name}}</div>
+                <div><strong>URL:</strong> {{state.harvestResponse.bundle.browseUrl}}</div>
+            </div>
+            <h2>Detected Collections:</h2>
+            <ul>
+                <li ng-repeat="dataset in state.harvestResponse.collections">
+                    <div><strong>LIDVID:</strong> {{dataset.lidvid}}</div>
+                    <div><strong>Title:</strong> {{dataset.name}}</div>
+                    <div><strong>URL:</strong> {{dataset.browseUrl}}</div>
+                </li>
+            </ul>
+            <h3>Ingest preview:</h3>
+            <code style="display:block; width:100%; height:200px; overflow-y:auto; background-color: #EFEFEF; padding: 6px;" ng-if="state.harvestResponse.harvestOutput">{{state.harvestResponse.harvestOutput}}</code>
+            <h3></h3>
+            <p>
+                <input class="btn btn-primary" type="submit" value="Load and Continue" ng-click="confirm()" ng-if="!state.loading">
+                <loading ng-if="state.loading"></loading>
+            </p>
+        </div>
     </div>
 </form>

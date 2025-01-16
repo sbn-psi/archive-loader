@@ -6,9 +6,13 @@ const solrize = require('../solrize.js')
 const httpRequest = require('../httpRequest.js')
 const registry = require('../registry.js')
 const LID = require('../LogicalIdentifier')
+const got = require('got')
+const { xmlParser } = require('../utils.js')
 
 const SOLR = (process.env.SOLR ? process.env.SOLR : 'http://localhost:8983/solr')
-const backupCollection = 'pds'
+const pdsCollectionAlias = 'pds' // alias of both context and dataset collections
+const contextCollection = 'pds-context' // will be suffixed, gets replaced every time
+const datasetCollection = 'pds-dataset' // will NOT be suffixed, stays persistent
 const collections = [{
     dbName: db.datasets,
     collectionName: 'web-datasets',
@@ -62,7 +66,6 @@ function checkAvailability() {
     return new Promise(async (resolve, reject) => {
         Promise.all([
             checkSolrIntegrity(),
-            checkPDSAvailability()
         ]).then(resolve, reject)
     })
 }
@@ -79,20 +82,6 @@ function checkSolrIntegrity() {
         catch(err) {
             console.log(err)
             reject("Error fetching collections in Solr: " + err.message)
-        }
-    })
-}
-
-// Checks if PDS registry is reachable and returning results
-function checkPDSAvailability() {
-    return new Promise(async (resolve, reject) => {
-        try{ 
-            let lookup = await registry.lookupIdentifiers(['urn:nasa:pds:context:instrument:ocams.orex'])
-            if(!!lookup && lookup.length > 0) { resolve() } else { reject() }
-        }
-        catch(err) {
-            console.log(err)
-            reject("PDS Registry does not appear to be running")
         }
     })
 }
@@ -184,7 +173,7 @@ function sync(suffix, force) {
 
 // pull supplemented lids from the core registry and back them up to our solr instance
 function backup(suffix, ignoreBackup) {
-    const databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments]
+    const databases = [db.targets, db.missions, db.spacecraft, db.instruments]
 
     if(ignoreBackup) { return Promise.resolve(0) }
 
@@ -210,7 +199,7 @@ function backup(suffix, ignoreBackup) {
         try {
             await httpRequest(`${SOLR}/admin/collections`, {
                 action: 'CREATE',
-                name: `${backupCollection}-${suffix}`,
+                name: `${contextCollection}-${suffix}`,
                 numShards: 1,
                 ['collection.configName']: 'data'
             }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
@@ -222,7 +211,7 @@ function backup(suffix, ignoreBackup) {
     
         // STEP 2: Fill collection
         try { 
-            await httpRequest(`${SOLR}/${backupCollection}-${suffix}/update`, { commit: true }, fromRegistry, process.env.SOLR_USER, process.env.SOLR_PASS)
+            await httpRequest(`${SOLR}/${contextCollection}-${suffix}/update`, { commit: true }, fromRegistry, process.env.SOLR_USER, process.env.SOLR_PASS)
         }
         catch(err) {
             reject("Error posting to collection in Solr: " + err.message)
@@ -233,8 +222,8 @@ function backup(suffix, ignoreBackup) {
         try{ 
             await httpRequest(`${SOLR}/admin/collections`, {
                 action: 'CREATEALIAS',
-                name: `${backupCollection}-alias`,
-                collections: `${backupCollection}-${suffix}`
+                name: `${pdsCollectionAlias}-alias`,
+                collections: `${contextCollection}-${suffix},${datasetCollection}`
             }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
         }
         catch(err) {
@@ -244,7 +233,7 @@ function backup(suffix, ignoreBackup) {
     
         // delete previous collections
         const solrCollections = await httpRequest(`${SOLR}/admin/collections`, { action: 'LIST' }, null, process.env.SOLR_USER, process.env.SOLR_PASS) 
-        const oldPdsCollections = solrCollections.collections.filter(collection => collection.startsWith(`${backupCollection}-`) && collection !== `${backupCollection}-${suffix}`)
+        const oldPdsCollections = solrCollections.collections.filter(collection => collection.startsWith(`${contextCollection}-`) && collection !== `${contextCollection}-${suffix}`)
 
         if(oldPdsCollections.length > 0) {
             let deleteRequests = oldPdsCollections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
@@ -291,7 +280,7 @@ router.post('/sync', async function(req, res){
 })
 
 router.get('/fetchbackup', async function(req, res){
-    const databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments]
+    const databases = [db.targets, db.missions, db.spacecraft, db.instruments]
     let identifiers = []
     for (database of databases) {
         let newLids = await db.find({}, database, ['logical_identifier'])
@@ -362,6 +351,37 @@ router.delete('/cleanup/:suffix', async (req, res) => {
     if(bailed) {return}
 
     cleanup(req.params.suffix).then(() => res.sendStatus(204), err => res.status(500).send(err))
+})
+
+router.post('/harvest', async (req, res) => {
+    try {
+        assert(req.body.xml, "Expected XML to be specified")
+        let parsed = xmlParser.parse(req.body.xml)
+        assert(parsed, 'Could not parse the harvest xml')
+        assert(parsed.add, 'Harvest could not find any Bundles or Collections')
+        assert(parsed.add.doc, 'Harvest could not find any Bundles or Collections')
+        assert(parsed.add.doc.length > 0, 'Harvest could not find any Bundles or Collections')
+        assert(parsed.add.doc[0].field, 'Harvest could not find any Bundles or Collections')
+        assert(parsed.add.doc[0].field.length > 0, 'Harvest could not find any Bundles or Collections')
+    } catch(err) {
+        res.status(400).send(err.message)
+        return
+    }
+
+    // make a got request with the xml body to the solr instance
+    try {
+        let response = await got.post(`${SOLR}/${datasetCollection}/update?tr=add-hierarchy.xsl&commit=true`, {
+            body: req.body.xml,
+            headers: {
+                'Content-Type': 'application/xml'
+            },
+            username: process.env.SOLR_USER,
+            password: process.env.SOLR_PASS
+        })
+        res.status(200).send(response.body)
+    } catch(err) {
+        res.status(500).send(err.message)
+    }  
 })
 
 module.exports = router

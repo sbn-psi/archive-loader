@@ -4,7 +4,6 @@ app.controller('RootController', function($scope, constants, $state, $transition
     // set initial state
     $scope.constants = constants;
     $scope.state = {
-        datasetType: constants.bundleType,
         progress: function() {
             switch($state.current.name) {
                 case 'datasets.load': $state.go('datasets.import'); break;
