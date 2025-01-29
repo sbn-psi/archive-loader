@@ -9,15 +9,17 @@
         <div ng-if="state.harvestResponse">
             <h2>Detected Bundle:</h2>
             <div ng-if="state.harvestResponse.bundle">
-                <div><strong>LIDVID:</strong> {{state.harvestResponse.bundle.lidvid}}</div>
+                <ul><li>
                 <div><strong>Title:</strong> {{state.harvestResponse.bundle.name}}</div>
+                <div><strong>LIDVID:</strong> {{state.harvestResponse.bundle.lidvid}}</div>
                 <div><strong>URL:</strong> {{state.harvestResponse.bundle.browseUrl}}</div>
+                </li></ul>
             </div>
             <h2>Detected Collections:</h2>
             <ul>
                 <li ng-repeat="dataset in state.harvestResponse.collections">
-                    <div><strong>LIDVID:</strong> {{dataset.lidvid}}</div>
                     <div><strong>Title:</strong> {{dataset.name}}</div>
+                    <div><strong>LIDVID:</strong> {{dataset.lidvid}}</div>
                     <div><strong>URL:</strong> {{dataset.browseUrl}}</div>
                 </li>
             </ul>

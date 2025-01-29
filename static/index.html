@@ -6,9 +6,9 @@
     <meta name="google" content="notranslate">
     <meta http-equiv="Content-Language" content="en">
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="./stylesheet.css" type="text/css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
         type="text/css">
+    <link rel="stylesheet" href="./stylesheet.css" type="text/css">
     <script src="https://code.jquery.com/jquery-3.4.0.min.js"
         integrity="sha256-BJeo0qm959uMBGb65z40ejJYGSgR7REI4+CW1fNKwOg=" crossorigin="anonymous"></script>
     <script src="./lib/jquery-ui-1.12.1/jquery-ui.js" type="text/javascript" charset="utf-8"></script>
@@ -123,16 +123,17 @@
             </form>
         </div>
     </nav>
-
-    <h1 title-container></h1>
-    <ui-view ng-if="!state.transitioning"></ui-view>
-
+    <main>
+        <h1 title-container></h1>
+        <ui-view ng-if="!state.transitioning"></ui-view>
+    </main>
     <div id="alert-frame">
         <loading ng-if="state.loading"></loading>
         <div uib-alert ng-repeat="alert in state.alerts" ng-class="'alert-' + (alert.type || 'warning')"
             close="closeAlert($index)">{{alert.message}}</div>
         <div uib-alert ng-if="state.error" class="alert-danger" close="state.error = null">{{state.error}}</div>
     </div>
+    
 </body>
 
 </html>

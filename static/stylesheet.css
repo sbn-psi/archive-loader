@@ -143,3 +143,334 @@ ui-view {
   font-family: monospace !important;
   background-color: #fffedf !important;
 }
+.inline-loader-bars {
+  margin: 2rem auto;
+  width: 80px;  /* increased width */
+  height: 32px;  /* slightly shorter height for better proportions */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;      /* increased gap between bars */
+}
+
+.inline-loader-bars span {
+  flex: 1;       /* makes bars fill the space evenly */
+  height: 100%;
+  background-color: #3498db;
+  border-radius: 3px;
+  animation: grow 1.2s infinite ease-in-out;
+  opacity: 0.7;  /* slightly softer appearance */
+}
+
+.inline-loader-bars span:nth-child(2) { animation-delay: 0.1s; }
+.inline-loader-bars span:nth-child(3) { animation-delay: 0.2s; }
+.inline-loader-bars span:nth-child(4) { animation-delay: 0.3s; }
+.inline-loader-bars span:nth-child(5) { animation-delay: 0.4s; }
+.inline-loader-bars span:nth-child(6) { animation-delay: 0.5s; }
+
+@keyframes grow {
+  0%, 100% { transform: scaleY(0.3); }
+  50% { transform: scaleY(1); }
+}
+
+:root {
+  --primary-color: #3C576A;
+  --secondary-color: #4E7088;
+  --accent-color: #3498db;
+  --menu-color: #eff0dd;
+  --light-gray: #f8f9fa;
+  --danger-color: #DB3635;
+  --border-radius: 4px;
+  --spacing-unit: 1rem;
+}
+
+/* Layout & Typography */
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+  line-height: 1.6;
+  color: var(--primary-color);
+  background-color: #fff;
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: var(--spacing-unit);
+}
+
+/* Navigation */
+.navbar {
+  background-color: var(--menu-color) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  margin-bottom: var(--spacing-unit);
+}
+
+.navbar-brand {
+  font-weight: 600;
+  color: var(--primary-color) !important;
+}
+
+.nav-link {
+  font-weight: 500;
+  padding: 0.5rem 1rem !important;
+  transition: color 0.2s ease;
+}
+
+.dropdown-menu {
+  border: none;
+  background-color: var(--menu-color);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.4);
+  border-radius: 0;
+}
+
+.dropdown-item {
+  padding: 0.75rem 1.5rem;
+  transition: background-color 0.2s ease;
+}
+
+.dropdown-item:hover {
+  background-color: var(--light-gray);
+}
+
+.dropdown-menu {
+  margin-top: 0.5rem !important;  /* Create space between nav and dropdown */
+  border: 1px solid #e9ecef;
+  transform-origin: top center;   /* For animation */
+  animation: dropdownFade 0.2s ease; /* Smooth appearance */
+  
+  /* Ensure it's below the navbar */
+  z-index: 100;
+  
+  /* Prevent overlap with navbar */
+  clip-path: inset(0px -20px -20px -20px);  /* Clip shadow at top */
+}
+
+@keyframes dropdownFade {
+  from {
+      opacity: 0;
+      transform: translateY(-10px);
+  }
+  to {
+      opacity: 1;
+      transform: translateY(0);
+  }
+}
+
+/* Ensure navbar has higher z-index */
+.navbar {
+  position: relative;
+  z-index: 1000;
+  /* ... your other navbar styles ... */
+}
+
+/* Optional: style dropdown items */
+.dropdown-item {
+  padding: 0.75rem 1.5rem;
+  transition: background-color 0.15s ease;
+}
+
+.dropdown-item:hover {
+  background-color: #f8f9fa;
+}
+
+
+/* Forms */
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.form-control {
+  border: 2px solid #e9ecef;
+  border-radius: var(--border-radius);
+  /* padding: 0.75rem; */
+  transition: border-color 0.2s ease;
+}
+
+.form-control:focus {
+  border-color: var(--accent-color);
+  box-shadow: none;
+}
+
+
+.form-group ul {
+  list-style: none;
+  padding: 0;
+  margin: 2rem 0;
+}
+
+.form-group li {
+  background-color: #f8f9fa;
+  border: 1px solid #e9ecef;
+  border-radius: 8px;
+  padding: 0.8rem 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Label styles */
+.form-group li div {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+  align-items: baseline;
+}
+
+/* Label text */
+.form-group li strong::before {
+  content: attr(class);
+  font-weight: 600;
+  color: #495057;
+  font-size: 0.9rem;
+}
+
+/* Buttons */
+.btn {
+  /* padding: 0.5rem 1.5rem; */
+  font-weight: 500;
+  /* border-radius: var(--border-radius); */
+  transition: all 0.2s ease;
+}
+
+.btn-primary {
+  background-color: var(--accent-color);
+  border: none;
+}
+
+.btn-primary:hover {
+  background-color: #2980b9;
+  transform: translateY(1px);
+}
+
+.btn-danger {
+  background-color: var(--danger-color);
+}
+
+.btn-danger:hover {
+  background-color: #C72F2E;
+  transform: translateY(1px);
+}
+
+.btn-secondary {
+  background-color: var(--secondary-color);
+}
+.btn-secondary:hover {
+  background-color: var(--primary-color);
+  transform: translateY(1px);
+}
+
+.error {
+  color: var(--danger-color);
+}
+.text-primary {
+  color: var(--accent-color) !important;
+}
+
+/* Headers */
+h1,
+h2,
+h3 {
+  color: var(--primary-color);
+  margin-bottom: 1.5rem;
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 600;
+}
+
+h2 {
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* Dataset Information */
+div strong {
+  color: var(--secondary-color);
+  display: inline-block;
+  min-width: 80px;
+}
+
+/* Code Block */
+code {
+  background-color: var(--light-gray) !important;
+  border-radius: var(--border-radius);
+  font-family: 'Monaco', 'Consolas', monospace;
+  font-size: 0.9rem;
+}
+
+/* Alert Frame */
+#alert-frame {
+  position: fixed;
+  bottom: 1rem;
+  right: 1rem;
+  z-index: 1000;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+  .container {
+      padding: 0.5rem;
+  }
+
+  h1 {
+      font-size: 1.75rem;
+  }
+
+  .navbar-brand {
+      font-size: 1.25rem;
+  }
+}
+
+/* Animation */
+.navbar-collapse {
+  transition: height 0.3s ease;
+}
+
+/* Accessibility */
+:focus-visible {  /* Using focus-visible instead of focus */
+  outline: none;  /* Remove default outline */
+  box-shadow: 0 0 0 3px white, /* Create white space around element */
+              0 0 0 6px #3498db; /* Primary blue outline */
+  border-radius: 4px;  /* Slightly rounded corners */
+  transition: box-shadow 0.2s ease; /* Smooth transition */
+}
+
+/* Ensure the focus style works on buttons and inputs */
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+a:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px white,
+              0 0 0 6px #3498db;
+}
+
+/* High contrast mode support */
+@media (forced-colors: active) {
+  :focus-visible {
+    outline: 3px solid CanvasText;
+    box-shadow: none;
+  }
+}
+
+
+/* Loading States */
+.loading {
+  opacity: 0.7;
+  pointer-events: none;
+}
+
+/* Dataset Details */
+.dataset-info {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+
+.dataset-info strong {
+  color: var(--secondary-color);
+}

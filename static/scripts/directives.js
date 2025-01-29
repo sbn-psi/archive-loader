@@ -1,7 +1,7 @@
 
 app.directive('loading', function() {
     return {
-        template: '<div class="lds-ring"><div></div><div></div><div></div><div></div></div>'
+        template: '<div class="inline-loader-bars"><span></span><span></span><span></span><span></span><span></span><span></span></div>'
     }
 });
 
