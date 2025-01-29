@@ -264,6 +264,8 @@ router.post('/sync', async function(req, res){
         return
     }
 
+    // we don't want to do backups every time now
+    /*
     Promise.allSettled([
         sync(req.body.suffix, req.body.force),
         backup(req.body.suffix, req.body.ignoreBackup)
@@ -277,6 +279,12 @@ router.post('/sync', async function(req, res){
             res.status(500).send(syncStatus.reason)
         }
     })
+    */
+
+    sync(req.body.suffix, req.body.force).then(
+        completionStatus => res.status(200).json(completionStatus),
+        err => res.status(500).send(err)
+    )
 })
 
 router.get('/fetchbackup', async function(req, res){
