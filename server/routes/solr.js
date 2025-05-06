@@ -378,7 +378,7 @@ router.post('/harvest', async (req, res) => {
 
     // make a got request with the xml body to the solr instance
     try {
-        let response = await got.post(`${SOLR}/${datasetCollection}/update?tr=add-hierarchy.xsl&commit=true`, {
+        let response = await got.post(`${SOLR}/${datasetCollection}/update/xslt?tr=add-hierarchy.xsl&commit=true`, {
             body: req.body.xml,
             headers: {
                 'Content-Type': 'application/xml'
