@@ -23,7 +23,7 @@
     "got": "^11.3.0",
     "helmet": "^3.21.2",
     "minio": "^7.0.16",
-    "mongodb": "^3.6.6",
+    "mongodb": "^3.6.10",
     "passport": "^0.6.0",
     "passport-local": "^1.0.0",
     "uuid": "^8.3.2"
