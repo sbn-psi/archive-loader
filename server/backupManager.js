@@ -58,24 +58,26 @@ async function generateAndUploadFile() {
         }
     }
 
-    writeStream.end('}');  // End the JSON object
-
     // Wait until the file is fully written and then upload it to S3
     writeStream.on('finish', async () => {
-        try {
-            const bucketName = 'pds-sbn-psi-archiveloader-backup';
-            const s3Key = `backup-${process.env.APP_ENVIRONMENT ? process.env.APP_ENVIRONMENT : 'unknown'}-${new Date().toISOString()}.json`;  // Unique key for the backup file
-            await uploadToS3(filePath, bucketName, s3Key);
+      console.log('File generated successfully:', filePath);
+      try {
+          const bucketName = 'pds-sbn-psi-archiveloader-backup';
+          const s3Key = `backup-${process.env.APP_ENVIRONMENT ? process.env.APP_ENVIRONMENT : 'unknown'}-${new Date().toISOString()}.json`;  // Unique key for the backup file
+          await uploadToS3(filePath, bucketName, s3Key);
+          console.log('Backup file uploaded to S3:', s3Key);
 
-            fs.unlinkSync(filePath);
-        } catch (error) {
-            console.log('Error generating or uploading file:', error);
-        }
+          fs.unlinkSync(filePath);
+      } catch (error) {
+          console.log('Error generating or uploading file:', error);
+      }
     });
 
     writeStream.on('error', (err) => {
         console.log('Error writing to file:', err);
     });
+
+    writeStream.end('}');  // End the JSON object
 }
 
 // the singleton that manages the backup process
