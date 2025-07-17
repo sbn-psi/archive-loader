@@ -145,7 +145,7 @@ app.get('/admin/backup', async function(req, res) {
         await backupManager.uploadBackup();
         res.status(200).send("Backup uploaded successfully");
     } catch (error) {
-        console.error('Error uploading backup:', error);
+        console.log('Error uploading backup:', error);
         res.status(500).send("Failed to upload backup");
     }
 })

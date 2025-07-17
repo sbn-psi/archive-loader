@@ -32,7 +32,7 @@ async function uploadToS3(filePath, bucketName, key) {
         const result = await s3.upload(params).promise();
         console.log("File uploaded successfully:", result.Location);
     } catch (err) {
-        console.error("Error uploading file:", err);
+        console.log("Error uploading file:", err);
     }
 }
 
@@ -69,12 +69,12 @@ async function generateAndUploadFile() {
 
             fs.unlinkSync(filePath);
         } catch (error) {
-            console.error('Error generating or uploading file:', error);
+            console.log('Error generating or uploading file:', error);
         }
     });
 
     writeStream.on('error', (err) => {
-        console.error('Error writing to file:', err);
+        console.log('Error writing to file:', err);
     });
 }
 
