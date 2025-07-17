@@ -28,6 +28,8 @@ async function uploadToS3(filePath, bucketName, key) {
         ContentType: 'application/json',
     };
 
+    console.log("Uploading file to S3:", params);
+
     try {
         const result = await s3.upload(params).promise();
         console.log("File uploaded successfully:", result.Location);
@@ -64,6 +66,7 @@ async function generateAndUploadFile() {
       try {
           const bucketName = 'pds-sbn-psi-archiveloader-backup';
           const s3Key = `backup-${process.env.APP_ENVIRONMENT ? process.env.APP_ENVIRONMENT : 'unknown'}-${new Date().toISOString()}.json`;  // Unique key for the backup file
+          console.log('Uploading backup file to S3:', s3Key);
           await uploadToS3(filePath, bucketName, s3Key);
           console.log('Backup file uploaded to S3:', s3Key);
 
