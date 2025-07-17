@@ -140,3 +140,12 @@ app.post('/admin/create-user', async function(req, res) {
 app.get('/admin/permission', async function(req, res) {
     res.status(200).send("Yep you're an admin")
 })
+app.get('/admin/backup', async function(req, res) {
+    try {
+        await backupManager.uploadBackup();
+        res.status(200).send("Backup uploaded successfully");
+    } catch (error) {
+        console.error('Error uploading backup:', error);
+        res.status(500).send("Failed to upload backup");
+    }
+})

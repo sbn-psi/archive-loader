@@ -64,7 +64,7 @@ async function generateAndUploadFile() {
     writeStream.on('finish', async () => {
         try {
             const bucketName = 'pds-sbn-psi-archiveloader-backup';
-            const s3Key = 'export.json'; 
+            const s3Key = `backup-${process.env.APP_ENVIRONMENT ? process.env.APP_ENVIRONMENT : 'unknown'}-${new Date().toISOString()}.json`;  // Unique key for the backup file
             await uploadToS3(filePath, bucketName, s3Key);
 
             fs.unlinkSync(filePath);
@@ -83,8 +83,9 @@ class BackupManager {
   constructor() {
     if (!BackupManager.instance) {
       this.lastBackupTime = null;  // Store the last backup time
-      this.isDirty = false;        // Track if the backup is dirty (needs to be uploaded)
+      this.isDirty = true;        // Track if the backup is dirty (needs to be uploaded), default to true so that the first backup is uploaded immediately
       BackupManager.instance = this;
+      db.setBackupManager(this);  // Set the backup manager in the database module
     }
 
     return BackupManager.instance;
@@ -93,6 +94,7 @@ class BackupManager {
   // Mark the backup as "dirty", meaning it needs to be uploaded
   markAsDirty() {
     this.isDirty = true;
+    console.log('Backup marked as dirty. Will upload on next interval.');
   }
 
   async uploadBackup() {

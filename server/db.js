@@ -1,7 +1,6 @@
 const url = process.env.NODE_ENV === 'production' ? 'mongodb://mongo:27017' : 'mongodb://localhost:27017'
 const APP_NAME = 'app'
 const assert = require('assert')
-const backupManager = require('./backupManager.js')
 
 const {MongoClient} = require('mongodb')
 
@@ -24,6 +23,7 @@ const usersCollection = 'users'
 let db
 let client
 let connectionPromise
+let backupManager
 
 let connect = async function() {
     if(!!connectionPromise) { 
@@ -88,6 +88,9 @@ module.exports = {
             try{await connect()} catch(err) {reject(err)}
             resolve(client)
         }),
+    setBackupManager: function(manager) {
+        backupManager = manager
+    },
     insert: async function(documents, type) {
         await connect()
         assert(documents.constructor === Array, "First argument must be an array of documents to insert")
@@ -107,7 +110,7 @@ module.exports = {
         assert(result.result.ok)
 
         // flag the backup manager to upload the new data
-        backupManager.markAsDirty()
+        backupManager?.markAsDirty()
 
         return result.result.upserted
     },
@@ -149,7 +152,7 @@ module.exports = {
         const result = await collection.updateOne(toUpdate, { $set: { _isActive: false }});
 
         // flag the backup manager to upload the new data
-        backupManager.markAsDirty()
+        backupManager?.markAsDirty()
         return result.ops;
     },
     insertRelationships: async function(documents) {
@@ -172,7 +175,7 @@ module.exports = {
         assert(result.result.ok)
 
         // flag the backup manager to upload the new data
-        backupManager.markAsDirty()
+        backupManager?.markAsDirty()
         return result.ops
     },
     join: async function(primaryType, foreignType, idField, foreignField, intoField) {

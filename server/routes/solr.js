@@ -154,7 +154,11 @@ function sync(suffix, force) {
     
         // STEP 5: Flush cache of context browser
         try {
-            await httpRequest('https://arcnav.psi.edu/urn:nasa:pds:context:investigation:mission.orex', {flush: true})
+            await got('https://arcnav.psi.edu/urn:nasa:pds:context:investigation:mission.orex', {
+                searchParams: {
+                    flush: true
+                }
+            });
         } catch(err) {
             console.log(err)
             // don't reject if this fails
