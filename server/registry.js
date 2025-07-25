@@ -1,7 +1,7 @@
 const assert = require('assert')
 const httpRequest = require('./httpRequest.js')
 const LID = require('./LogicalIdentifier')
-const registryUrl = 'https://pds.nasa.gov/services/search/search'
+const registryUrl = 'https://sbnpds4.psi.edu/solr/pds-alias/select'
 
 const type = {
     spacecraft: 'spacecraft',
