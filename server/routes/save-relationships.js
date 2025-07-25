@@ -22,6 +22,10 @@ router.post('/relationships', async function(req, res) {
         let fieldsPresent = 0
         for(field of possibleFields) {
             if(!!doc[field]) { fieldsPresent++ }
+            // sanitize duplicated lids since the new registry loves to do that
+            if(doc[field] && doc[field].constructor === Array) {
+                doc[field] = doc[field][0]  // take the first one
+            } 
         }
         try {
             assert(fieldsPresent === 2, `Expected ${JSON.stringify(doc)} to contain exactly two of [${possibleFields.join(', ')}]`)
