@@ -47,11 +47,13 @@ async function related(desiredType, req, res) {
         discovered = fromRegistry.map(rel => { 
             const lid = new LID(rel.identifier).lid
             let existing = existingRelationships.find(existing => new LID(existing[otherObjectDbKey]).lid === lid)
+            // bundles use label instead of relationshipId, and we can defaiult it to the title if none is set
+            const defaultLabel = desiredType === registry.type.bundle ? (existing ? existing.label : rel.title) : null
             return {
                 lid: lid,
                 name: rel.title,
                 relationshipId: existing ? existing.relationshipId : null,
-                label: existing? existing.label : null
+                label: defaultLabel
             }
         })
     } catch (err) {
