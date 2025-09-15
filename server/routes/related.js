@@ -3,6 +3,7 @@ const router = express.Router()
 const db = require('../db.js')
 const registry = require('../registry.js')
 const assert = require('assert')
+const LID = require('../LogicalIdentifier.js')
 
 router.get('/target/', async function(req, res) {
     related(registry.type.target, req, res)
@@ -44,9 +45,10 @@ async function related(desiredType, req, res) {
                 [otherObjectDbKey]: { $ne: null }
             }, db.objectRelationships)
         discovered = fromRegistry.map(rel => { 
-            let existing = existingRelationships.find(existing => existing[otherObjectDbKey] === rel.identifier)
+            const lid = new LID(rel.identifier).lid
+            let existing = existingRelationships.find(existing => new LID(existing[otherObjectDbKey]).lid === lid)
             return {
-                lid: rel.identifier,
+                lid: lid,
                 name: rel.title,
                 relationshipId: existing ? existing.relationshipId : null,
                 label: existing? existing.label : null

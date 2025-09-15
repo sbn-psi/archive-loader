@@ -2,6 +2,12 @@ module.exports = class LogicalIdentifier {
 
     constructor(identifier, vid) {
         if(!identifier) { return }
+
+        // if identifier is an array, take first element
+        if(identifier.constructor === Array) {
+            identifier = identifier[0]
+        }
+
         if(!!vid) {
             this.lidvid = `${identifier}::${vid}`
             this.lid = identifier
