@@ -7,9 +7,14 @@
             <label ng-if="type === 'Bundle'">Primary Context (appearance location) (required)</label>
             <select ng-if="type === 'Bundle'" class="form-control" ng-model="dataset.primary_context">
                 <option disabled selected value> -- Required -- </option>
-                <option ng-value="'target'">Target-oriented</option>
-                <option ng-value="'mission'">Mission-oriented</option>
-                <option ng-value="'both'">Both</option>
+                <option ng-value="'mission_instrument_data'">Mission Instrument Data</option>
+                <option ng-value="'mission_more_data'">Mission More Data Page</option>
+                <option ng-value="'target_derived_data'">Target Derived Data Page</option>
+                <option ng-value="'target_more_data'">Target More Data Page</option>
+                <option ng-value="'more_data'">Both More Data Pages</option>
+                <option disabled ng-value="'target'">(Legacy Setting) Target-oriented</option>
+                <option disabled ng-value="'mission'">(Legacy Setting) Mission-oriented</option>
+                <option disabled ng-value="'both'">(Legacy Setting) Both</option>
             </select>
             <label>DOI: </label><input class="form-control" type="text" ng-model="dataset.doi" uib-typeahead="val for val in autocomplete('doi', $viewValue)">
             <label>Display Description (required): </label><textarea class="form-control" ng-model="dataset.display_description" uib-typeahead="val for val in autocomplete('display_description', $viewValue)"></textarea>
