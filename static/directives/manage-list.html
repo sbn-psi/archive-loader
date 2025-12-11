@@ -1,12 +1,21 @@
 <loading ng-if="list === undefined"></loading>
 <div ng-if="list != undefined">
     <table class="table table-responsive-sm">
+        <tr>
+            <th>Name</th>
+            <th ng-if="showContext">Page Context</th>
+            <th ng-if="usesTags">Group Tag</th>
+            <th ng-if="readyFlags">Ready Status</th>
+            <th>LIDVID</th>
+            <th></th>
+        </tr>
         <!-- Ungrouped items -->
         <tr ng-if="!!ungrouped && ungrouped.length > 0">
             <th colspan="4" class="error">Need {{groupBy}} assigned!</th>
         </tr>
         <tr ng-repeat="item in ungrouped track by $index">
             <td class="align-middle">{{item.name}}</td>
+            <td ng-if="showContext" class="align-middle" ng-class="{error: item.context === 'Missing Context!'}">{{item.context}}</td>
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td ng-if="readyFlags" class="align-middle" ng-class="{error: !item.is_ready}">{{item.is_ready ? 'Ready' : 'Not Ready' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>
@@ -22,6 +31,7 @@
         </tr>
         <tr ng-repeat-end ng-repeat="item in list | filter:group.name track by $index">
             <td class="align-middle">{{item.name}}</td>
+            <td ng-if="showContext" class="align-middle" ng-class="{error: item.context === 'Missing Context!'}">{{item.context}}</td>
             <td ng-if="usesTags" class="align-middle" ng-class="{error: !item.tags || item.tags.length === 0}">{{item.tags && item.tags.length > 0 ? item.tags[0] : 'Needs tags!' }}</td>
             <td ng-if="readyFlags" class="align-middle" ng-class="{error: !item.is_ready}">{{item.is_ready ? 'Ready' : 'Not Ready' }}</td>
             <td class="align-middle text-note">{{item.lid}}</td>

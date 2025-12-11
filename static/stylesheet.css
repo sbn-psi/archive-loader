@@ -200,6 +200,19 @@ body {
   padding: var(--spacing-unit);
 }
 
+.controls {
+  display: inline-flex;
+  flex-flow: column wrap;
+  gap: var(--spacing-unit);
+  background-color: var(--menu-color) !important;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  margin-bottom: var(--spacing-unit);
+  margin-right: var(--spacing-unit);
+  padding: var(--spacing-unit);
+  border-radius: var(--border-radius);
+  float: right;
+}
+
 /* Navigation */
 .navbar {
   background-color: var(--menu-color) !important;

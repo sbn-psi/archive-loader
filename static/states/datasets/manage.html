@@ -1,4 +1,12 @@
 <div ng-controller="DatasetManageController">
-    <h2>There are {{status.count}} datasets saved:</h2>
-    <manage-list sref="sref" delete="delete" list="status.results" tags="true"></manage-list>
+    <h2>There are {{status.count}} datasets saved{{state.showCollections ? '' : ' (showing only bundles)'}}:</h2>
+    <!-- show only bundles toggle switch-->
+    <div class="controls">
+        <label class="switch">
+            <input type="checkbox" ng-model="state.showCollections">
+            <span class="slider round">Show Collections</span>
+        </label>
+    </div>
+    <manage-list sref="sref" delete="delete" list="filteredResults" show-context="true"
+        group-by="{{state.showCollections ? 'bundle_lid' : undefined}}" tags="true"></manage-list>
 </div>

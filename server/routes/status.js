@@ -2,20 +2,31 @@ const express = require('express')
 const router = express.Router()
 const db = require('../db.js')
 
-async function statusRequest(req, res, type) {
+async function statusRequest(req, res, type, transformFn) {
     const result = await db.find({}, type)
     res.status(200).send({
         count: result.length,
-        results: result.map(item => { return { 
-            name: item.display_name, 
-            lid: item.logical_identifier,
-            tags: item.tags,
-            is_ready: item.is_ready
-        }})
+        results: result.map(item => {
+            let transform = { 
+                name: item.display_name, 
+                lid: item.logical_identifier,
+                tags: item.tags,
+                is_ready: item.is_ready
+            }
+            if(transformFn) {
+                transform = transformFn(item, transform)
+            }
+            return transform
+        })
     })
 }
 router.get('/datasets', async function(req, res) {
-    await statusRequest(req, res, db.datasets)
+    await statusRequest(req, res, db.datasets, (dataset, transform) => {
+        return {
+            ...transform,
+            context: dataset.primary_context
+        }
+    })
 })
 router.get('/targets', async function(req, res) {
     await statusRequest(req, res, db.targets)

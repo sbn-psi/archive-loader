@@ -30,6 +30,7 @@ app.directive('manageList', function() {
             list: '<',
             groupBy: '@?',
             usesTags: '@?tags',
+            showContext: '@?',
             readyFlags: '@?'
         },
         templateUrl: './directives/manage-list.html',
@@ -63,7 +64,7 @@ app.directive('manageList', function() {
                 let lookups = groupsWithLids.map(group => lidCheck(group.name, 'title'))
                 Promise.all(lookups).then(results => {
                     results.forEach((result, index) => {
-                        groupsWithLids[index].display_name = result.title
+                        groupsWithLids[index].display_name = (result.title instanceof Array) ? result.title[0] : result.title
                     })
                     $scope.$digest();
                 })
