@@ -19,13 +19,22 @@ export default function($scope, $stateParams, $http, constants, existingDataset,
         }
     }
 
+    const isBundle = (lidvid) => {
+                if(!lidvid) { return false }
+                // first: strip off any version component
+                const lid = lidvid.split('::')[0];
+
+                // bundles are urn:nasa:pds:bundle so have 4 parts
+                return lid.split(':').length === 4;
+            }
+
     const prepDatasetFromEdit = function(dataset) {
         let obj = { bundle: null, collections: [] }
 
         dataset = prepForForm(dataset, templateModel)
 
         // sort into bundle and collections
-        if(dataset.logical_identifier && dataset.logical_identifier.split(':').length === 7) { // a lidvid with a collection will have 6 colons, thus 7 parts
+        if(dataset.logical_identifier && isBundle(dataset.logical_identifier)) {
             obj.collections.push(dataset)
         } else {
             obj.bundle = dataset

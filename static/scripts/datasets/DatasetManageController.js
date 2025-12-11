@@ -6,11 +6,20 @@ export default function($scope, $http, $state) {
             if(!response.results) {
                 response.results = []
             }
+
+            const isBundle = (lidvid) => {
+                if(!lidvid) { return false }
+                // first: strip off any version component
+                const lid = lidvid.split('::')[0];
+
+                // bundles are urn:nasa:pds:bundle so have 4 parts
+                return lid.split(':').length === 4;
+            }
             
             // response.results has the list of datasets
             // add some computed properties to show bundle/collection status
             response.results.forEach(dataset => {
-                if(dataset.lid && dataset.lid.split(':').length === 7) { // a lidvid with a collection will have 6 colons, thus 7 parts
+                if(dataset.lid && !isBundle(dataset.lid)) {
                     dataset.is_bundle = false
                     dataset.bundle_lid = dataset.lid.split(':').slice(0,4).join(':')
                 } else {
