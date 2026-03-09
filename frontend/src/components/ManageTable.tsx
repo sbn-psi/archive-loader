@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import { groupItems } from "@/lib/domain";
 import type { StatusListItem } from "@/types";
@@ -10,8 +11,30 @@ type ManageTableProps = {
   showTags?: boolean;
   showContext?: boolean;
   showReady?: boolean;
+  showUpdatedAt?: boolean;
   groupLabels?: Record<string, string>;
 };
+
+type SortKey = "name" | "lid" | "context" | "tag" | "is_ready" | "updated_at";
+
+function formatLastEdited(value?: string | null) {
+  if (!value) {
+    return "Unknown";
+  }
+
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
 
 function Row({
   item,
@@ -20,6 +43,7 @@ function Row({
   showTags,
   showContext,
   showReady,
+  showUpdatedAt,
 }: {
   item: StatusListItem;
   editHref: (lid: string) => string;
@@ -27,17 +51,19 @@ function Row({
   showTags?: boolean;
   showContext?: boolean;
   showReady?: boolean;
+  showUpdatedAt?: boolean;
 }) {
   const firstTag = Array.isArray(item.tags) && item.tags.length > 0 ? item.tags[0] : null;
   return (
     <tr>
-      <td>{item.name}</td>
-      <td>{item.lid}</td>
-      {showContext ? <td className={item.context === "Missing Context!" ? "status-error" : ""}>{item.context}</td> : null}
+      <td className="col-name">{item.name}</td>
+      <td className="col-lid">{item.lid}</td>
+      {showContext ? <td className={`col-context${item.context === "Missing Context!" ? " status-error" : ""}`}>{item.context}</td> : null}
       {showTags ? (
-        <td className={!firstTag ? "status-error" : ""}>{firstTag ?? "Needs tags!"}</td>
+        <td className={`col-tag${!firstTag ? " status-error" : ""}`}>{firstTag ?? "Needs tags!"}</td>
       ) : null}
-      {showReady ? <td className={!item.is_ready ? "status-error" : ""}>{item.is_ready ? "Ready" : "Not Ready"}</td> : null}
+      {showReady ? <td className={`col-ready${!item.is_ready ? " status-error" : ""}`}>{item.is_ready ? "Ready" : "Not Ready"}</td> : null}
+      {showUpdatedAt ? <td className="col-updated">{formatLastEdited(item.updated_at)}</td> : null}
       <td className="inline-actions action-cell">
         <Link className="button-primary" to={editHref(item.lid)}>Edit</Link>
         <button type="button" className="button-danger ghost-danger" onClick={() => onDelete(item)}>
@@ -49,41 +75,91 @@ function Row({
 }
 
 export function ManageTable(props: ManageTableProps) {
-  const { groups, ungrouped } = groupItems(props.items, props.groupBy);
+  const [sortKey, setSortKey] = useState<SortKey>("updated_at");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const sortedItems = useMemo(() => {
+    const valueForSort = (item: StatusListItem, key: SortKey) => {
+      switch (key) {
+        case "name":
+          return item.name ?? "";
+        case "lid":
+          return item.lid ?? "";
+        case "context":
+          return item.context ?? "";
+        case "tag":
+          return Array.isArray(item.tags) && item.tags.length > 0 ? item.tags[0] : "";
+        case "is_ready":
+          return item.is_ready ? "1" : "0";
+        case "updated_at":
+          return item.updated_at ?? "";
+        default:
+          return "";
+      }
+    };
+
+    return [...props.items].sort((left, right) => {
+      const leftValue = valueForSort(left, sortKey);
+      const rightValue = valueForSort(right, sortKey);
+      const comparison = String(leftValue).localeCompare(String(rightValue));
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+  }, [props.items, sortDirection, sortKey]);
+  const { groups, ungrouped } = groupItems(sortedItems, props.groupBy);
+  const colSpan = 3 + (props.showContext ? 1 : 0) + (props.showTags ? 1 : 0) + (props.showReady ? 1 : 0) + (props.showUpdatedAt ? 1 : 0);
+  const toggleSort = (key: SortKey) => {
+    if (sortKey === key) {
+      setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortKey(key);
+    setSortDirection(key === "updated_at" ? "desc" : "asc");
+  };
+  const headerButton = (label: string, key: SortKey) => (
+    <button type="button" className={`table-sort${sortKey === key ? " is-active" : ""}`} onClick={() => toggleSort(key)} aria-label={`Sort by ${label}`}>
+      <span>{label}</span>
+      <span className="table-sort-icons" aria-hidden="true">
+        <span className={`table-sort-icon${sortKey === key && sortDirection === "asc" ? " is-active" : ""}`}>↑</span>
+        <span className={`table-sort-icon${sortKey === key && sortDirection === "desc" ? " is-active" : ""}`}>↓</span>
+      </span>
+    </button>
+  );
 
   return (
-    <table className="table">
-      <thead>
-        <tr>
-          <th>Name</th>
-          <th>LID</th>
-          {props.showContext ? <th>Page Context</th> : null}
-          {props.showTags ? <th>Group Tag</th> : null}
-          {props.showReady ? <th>Ready Status</th> : null}
-          <th className="action-column">Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {ungrouped.map((item) => (
-          <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} />
-        ))}
-        {groups.map((group) => (
-          group.name ? (
-            <>
-              <tr key={`${group.name}-heading`}>
-                <td colSpan={props.showContext || props.showTags || props.showReady ? 6 : 3}>
-                  <strong>{props.groupLabels?.[group.name] ?? group.name}</strong>
-                </td>
-              </tr>
-              {group.items.map((item) => (
-                <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} />
-              ))}
-            </>
-          ) : group.items.map((item) => (
-            <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} />
-          ))
-        ))}
-      </tbody>
-    </table>
+    <div className="table-wrap">
+      <table className="table manage-table">
+        <thead>
+          <tr>
+            <th className="col-name">{headerButton("Name", "name")}</th>
+            <th className="col-lid">{headerButton("LID", "lid")}</th>
+            {props.showContext ? <th className="col-context">{headerButton("Page Context", "context")}</th> : null}
+            {props.showTags ? <th className="col-tag">{headerButton("Group Tag", "tag")}</th> : null}
+            {props.showReady ? <th className="col-ready">{headerButton("Ready Status", "is_ready")}</th> : null}
+            {props.showUpdatedAt ? <th className="col-updated">{headerButton("Last Edited", "updated_at")}</th> : null}
+            <th className="action-column">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {ungrouped.map((item) => (
+            <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} showUpdatedAt={props.showUpdatedAt} />
+          ))}
+          {groups.map((group) => (
+            group.name ? (
+              <>
+                <tr key={`${group.name}-heading`}>
+                  <td colSpan={colSpan}>
+                    <strong>{props.groupLabels?.[group.name] ?? group.name}</strong>
+                  </td>
+                </tr>
+                {group.items.map((item) => (
+                  <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} showUpdatedAt={props.showUpdatedAt} />
+                ))}
+              </>
+            ) : group.items.map((item) => (
+              <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} showUpdatedAt={props.showUpdatedAt} />
+            ))
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }

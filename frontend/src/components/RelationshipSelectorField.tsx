@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 import type { LookupRelationship, RelationshipType } from "@/types";
 
 type RelationshipSelectorFieldProps = {
@@ -5,6 +6,7 @@ type RelationshipSelectorFieldProps = {
   relationships: LookupRelationship[];
   onChange: (items: LookupRelationship[]) => void;
   relationshipTypes?: RelationshipType[] | null;
+  editHref?: (lid: string) => string;
 };
 
 export function RelationshipSelectorField({
@@ -12,6 +14,7 @@ export function RelationshipSelectorField({
   relationships,
   onChange,
   relationshipTypes,
+  editHref,
 }: RelationshipSelectorFieldProps) {
   const updateRelationship = (index: number, changes: Partial<LookupRelationship>) => {
     onChange(
@@ -26,9 +29,15 @@ export function RelationshipSelectorField({
       <h3>{title}</h3>
       {relationships.length === 0 ? <p>No related records discovered yet.</p> : null}
       {relationships.map((relationship, index) => (
-        <div className="repeat-row" key={`${relationship.lid}-${index}`}>
-          <div className="field">
-            <input disabled value={relationship.name ? `${relationship.name} (${relationship.lid})` : relationship.lid} />
+        <div className="repeat-row relationship-row" key={`${relationship.lid}-${index}`}>
+          <div className="field relationship-link-field">
+            {editHref ? (
+              <Link className="relationship-link-button ghost" to={editHref(relationship.lid)}>
+                {relationship.name ? `${relationship.name} (${relationship.lid})` : relationship.lid}
+              </Link>
+            ) : (
+              <input disabled value={relationship.name ? `${relationship.name} (${relationship.lid})` : relationship.lid} />
+            )}
           </div>
           <div className="field">
             {relationshipTypes ? (

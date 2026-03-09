@@ -5,31 +5,31 @@ const { streamHelper, streamList, standardChunk } = require('../utils.js')
 
 router.get('/datasets', async function(req, res) {
     let stream = streamHelper(res, standardChunk)
-    db.findAndStream({}, db.datasets, stream.data, stream.end)
+    db.findAndStream({}, db.datasets, stream.data, stream.end, { includeTimestamp: true })
 })
 router.get('/targets', async function(req, res) {
     let stream = streamHelper(res, standardChunk)
-    db.findAndStream({}, db.targets, stream.data, stream.end)
+    db.findAndStream({}, db.targets, stream.data, stream.end, { includeTimestamp: true })
 })
 router.get('/instruments', async function(req, res) {
     let stream = streamHelper(res, standardChunk)
-    db.findAndStream({}, db.instruments, stream.data, stream.end)
+    db.findAndStream({}, db.instruments, stream.data, stream.end, { includeTimestamp: true })
 })
 router.get('/missions', async function(req, res) {
     let stream = streamHelper(res, standardChunk)
-    db.findAndStream({}, db.missions, stream.data, stream.end)
+    db.findAndStream({}, db.missions, stream.data, stream.end, { includeTimestamp: true })
 })
 router.get('/spacecraft', async function(req, res) {
     let stream = streamHelper(res, standardChunk)
-    db.findAndStream({}, db.spacecraft, stream.data, stream.end)
+    db.findAndStream({}, db.spacecraft, stream.data, stream.end, { includeTimestamp: true })
 })
 router.get('/target-relationships', async function(req, res) {
     let stream = streamHelper(res, standardChunk)
-    db.findAndStream({}, db.targetRelationships, stream.data, stream.end)
+    db.findAndStream({}, db.targetRelationships, stream.data, stream.end, { includeTimestamp: true })
 })
 router.get('/relationships', async function(req, res) {
     let stream = streamHelper(res, standardChunk)
-    db.findAndStream({}, db.objectRelationships, stream.data, stream.end)
+    db.findAndStream({}, db.objectRelationships, stream.data, stream.end, { includeTimestamp: true })
 })
 
 router.get('/all', async (req, res) => {
@@ -40,7 +40,7 @@ router.get('/all', async (req, res) => {
     for (database of databases) {
         res.write(`"${database}": `)
         let listStreamer = streamList(res, standardChunk)
-        await db.findAndStream({}, database, listStreamer.data, listStreamer.end)
+        await db.findAndStream({}, database, listStreamer.data, listStreamer.end, { includeTimestamp: true })
         index++
         if(index < databases.length) { res.write(',')}
     }

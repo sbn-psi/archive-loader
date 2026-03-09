@@ -1,16 +1,23 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
+import { LoadingState } from "@/components/LoadingState";
+import { PageIntro } from "@/components/PageIntro";
+import { pageMeta } from "@/lib/navigation";
 
 export function DatasetLoadPage({ onError }: { onError: (message: string | null) => void }) {
   const navigate = useNavigate();
   const [url, setUrl] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loadingPhase, setLoadingPhase] = useState<"preview" | "ingest" | null>(null);
   const [preview, setPreview] = useState<Awaited<ReturnType<typeof api.harvestDataset>> | null>(null);
 
   return (
     <div className="page-card">
-      <h1 className="page-title">Load Archived Dataset</h1>
+      <PageIntro
+        title={pageMeta.datasetsLoad.title}
+        subtitle={pageMeta.datasetsLoad.subtitle}
+        legacyLabel={pageMeta.datasetsLoad.legacyLabel}
+      />
       <div className="field">
         <label>Archive URL</label>
         <input type="url" value={url} onChange={(event) => setUrl(event.target.value)} />
@@ -19,23 +26,30 @@ export function DatasetLoadPage({ onError }: { onError: (message: string | null)
         <button
           type="button"
           className="button-primary"
-          disabled={loading || !url}
+          disabled={Boolean(loadingPhase) || !url}
           onClick={async () => {
             try {
-              setLoading(true);
+              setLoadingPhase("preview");
               onError(null);
               const result = await api.harvestDataset(url);
               setPreview(result);
             } catch (error) {
               onError(error instanceof Error ? error.message : "Dataset fetch failed");
             } finally {
-              setLoading(false);
+              setLoadingPhase(null);
             }
           }}
         >
-          {loading ? "Fetching Preview..." : "Fetch Preview"}
+          {loadingPhase === "preview" ? "Preparing Preview..." : "Preview Datasets"}
         </button>
       </div>
+      {loadingPhase === "preview" ? (
+        <LoadingState
+          compact
+          title="Preparing dataset preview"
+          detail="This can take a while for larger archives. You can stay on this page while the preview is built."
+        />
+      ) : null}
       {preview ? (
         <div className="grid two">
           <div className="page-card">
@@ -61,7 +75,7 @@ export function DatasetLoadPage({ onError }: { onError: (message: string | null)
             </ul>
           </div>
           <div className="page-card" style={{ gridColumn: "1 / -1" }}>
-            <h3>Ingest Preview</h3>
+            <h3>Prepared Archive Data</h3>
             <pre style={{ whiteSpace: "pre-wrap" }}>{preview.harvestOutput}</pre>
           </div>
           <div className="button-row">
@@ -70,7 +84,7 @@ export function DatasetLoadPage({ onError }: { onError: (message: string | null)
               className="button-primary"
               onClick={async () => {
                 try {
-                  setLoading(true);
+                  setLoadingPhase("ingest");
                   onError(null);
                   await api.ingestHarvest(preview.harvestOutput);
                   sessionStorage.setItem("dataset-harvest", JSON.stringify(preview));
@@ -78,13 +92,20 @@ export function DatasetLoadPage({ onError }: { onError: (message: string | null)
                 } catch (error) {
                   onError(error instanceof Error ? error.message : "Dataset ingest failed");
                 } finally {
-                  setLoading(false);
+                  setLoadingPhase(null);
                 }
               }}
             >
-              {loading ? "Loading Dataset..." : "Load and Continue"}
+              {loadingPhase === "ingest" ? "Opening Dataset Editor..." : "Load into Editor"}
             </button>
           </div>
+          {loadingPhase === "ingest" ? (
+            <LoadingState
+              compact
+              title="Loading dataset into the editor"
+              detail="Importing the prepared archive data. This can take a minute or more."
+            />
+          ) : null}
         </div>
       ) : null}
     </div>

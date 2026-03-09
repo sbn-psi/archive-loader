@@ -2,6 +2,7 @@ import { useForm } from "react-hook-form";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
+import { LoadingState } from "@/components/LoadingState";
 
 export function LoginPage({ onError }: { onError: (message: string | null) => void }) {
   const form = useForm<{ username: string; password: string }>({
@@ -18,7 +19,7 @@ export function LoginPage({ onError }: { onError: (message: string | null) => vo
     onSuccess: async (result) => {
       onError(null);
       queryClient.setQueryData(["auth", "user"], result);
-      navigate("/datasets/manage");
+      navigate("/workbench");
     },
     onError: (error) => onError(error instanceof Error ? error.message : "Login failed"),
   });
@@ -41,6 +42,7 @@ export function LoginPage({ onError }: { onError: (message: string | null) => vo
               {login.isPending ? "Logging in..." : "Log In"}
             </button>
           </div>
+          {login.isPending ? <LoadingState compact title="Signing you in" detail="Starting your session and loading the app." /> : null}
         </form>
       </div>
     </div>

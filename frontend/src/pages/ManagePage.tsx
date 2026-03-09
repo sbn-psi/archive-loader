@@ -3,29 +3,30 @@ import { useQuery } from "@tanstack/react-query";
 import { useNavigate } from "react-router-dom";
 import { api } from "@/lib/api";
 import { classifyDatasetStatusRows, getGroupTitleLookupLids } from "@/lib/domain";
+import { LoadingState } from "@/components/LoadingState";
 import { ManageTable } from "@/components/ManageTable";
+import { PageIntro } from "@/components/PageIntro";
 
 type ManageMode = "datasets" | "targets" | "missions" | "spacecraft" | "instruments";
 
 const titleLookupField = ["title"];
-const primaryActionLabel: Record<ManageMode, string> = {
-  datasets: "Load Dataset",
-  targets: "Add Target",
-  missions: "Add Mission",
-  spacecraft: "Add Spacecraft",
-  instruments: "Add Instrument",
-};
 
 export function ManagePage({
   title,
+  subtitle,
+  legacyLabel,
   statusType,
   entityType,
   mode,
+  primaryActionLabel,
 }: {
   title: string;
+  subtitle?: string;
+  legacyLabel?: string;
   statusType: string;
   entityType: string;
   mode: ManageMode;
+  primaryActionLabel: string;
 }) {
   const navigate = useNavigate();
   const [showCollections, setShowCollections] = useState(false);
@@ -78,26 +79,30 @@ export function ManagePage({
   });
 
   if (status.isLoading) {
-    return <div className="page-state">Loading {title.toLowerCase()}...</div>;
+    return <LoadingState title={`Loading ${title.toLowerCase()}`} detail="Fetching the latest records for this view." />;
   }
 
   return (
     <div className="page-card">
-      <div className="page-header">
-        <h1 className="page-title">{title}</h1>
-        <div className="page-header-actions">
-          {mode === "datasets" ? (
-            <label className="toolbar page-toggle">
-              <input type="checkbox" checked={showCollections} onChange={(event) => setShowCollections(event.target.checked)} />
-              Show Collections
-            </label>
-          ) : null}
-          <button type="button" className="button-primary" onClick={() => navigate(`/${mode}/${mode === "datasets" ? "load" : "import"}`)}>
-            {primaryActionLabel[mode]}
-          </button>
-        </div>
-      </div>
-      <p>There are {items.length} records in this view.</p>
+      <PageIntro
+        title={title}
+        subtitle={subtitle}
+        legacyLabel={legacyLabel}
+        actions={
+          <>
+            {mode === "datasets" ? (
+              <label className="toolbar page-toggle">
+                <input type="checkbox" checked={showCollections} onChange={(event) => setShowCollections(event.target.checked)} />
+                Show Collections
+              </label>
+            ) : null}
+            <button type="button" className="button-primary" onClick={() => navigate(`/${mode}/${mode === "datasets" ? "load" : "import"}`)}>
+              {primaryActionLabel}
+            </button>
+          </>
+        }
+      />
+      <p className="muted">There are {items.length} records in this view.</p>
       <ManageTable
         items={items}
         editHref={(lid) => `/${mode}/import?edit=${encodeURIComponent(lid)}`}
@@ -111,6 +116,7 @@ export function ManagePage({
         showContext={mode === "datasets"}
         showTags={mode === "datasets" || mode === "targets" || mode === "spacecraft" || mode === "instruments"}
         showReady={mode === "missions"}
+        showUpdatedAt
         groupBy={mode === "instruments" ? "spacecraft" : mode === "datasets" && showCollections ? "bundle_lid" : undefined}
         groupLabels={lookups.data}
       />

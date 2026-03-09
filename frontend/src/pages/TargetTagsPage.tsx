@@ -2,6 +2,9 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { extractDistinctGroups } from "@/lib/domain";
+import { LoadingState } from "@/components/LoadingState";
+import { PageIntro } from "@/components/PageIntro";
+import { pageMeta } from "@/lib/navigation";
 
 export function TargetTagsPage({ onError }: { onError: (message: string | null) => void }) {
   const tags = useQuery({
@@ -11,14 +14,14 @@ export function TargetTagsPage({ onError }: { onError: (message: string | null) 
   const [editing, setEditing] = useState<{ name: string; group?: string; newGroup?: string } | null>(null);
 
   if (tags.isLoading || !tags.data) {
-    return <div className="page-state">Loading target tags...</div>;
+    return <LoadingState title="Loading target tags" detail="Fetching existing tags and tag groups." />;
   }
 
   const groups = extractDistinctGroups(tags.data);
 
   return (
     <div className="page-card">
-      <h1 className="page-title">Target Tags</h1>
+      <PageIntro title={pageMeta.tagGroups.title} subtitle={pageMeta.tagGroups.subtitle} legacyLabel={pageMeta.tagGroups.legacyLabel} />
       {editing ? (
         <div className="page-card">
           <div className="form-page-header compact">

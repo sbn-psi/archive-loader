@@ -83,30 +83,14 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // // // PUBLIC ROUTES // // //
-app.post('/login', passport.authenticate('local'), (req, res) => {
+app.post('/api/login', passport.authenticate('local'), (req, res) => {
     res.status(200).send({user: req.user})
 })
-app.use('/export', require('./routes/export'))
+app.use('/api/export', require('./routes/export'))
 const reactDist = path.resolve(__dirname, '../frontend/dist')
 if (fs.existsSync(reactDist)) {
     const apiMatchers = [
-        (requestPath) => requestPath === '/export' || requestPath.startsWith('/export/'),
-        (requestPath) => requestPath === '/login',
-        (requestPath) => requestPath === '/logout',
-        (requestPath) => requestPath === '/user',
-        (requestPath) => requestPath === '/relationship-types' || requestPath.startsWith('/relationship-types/'),
-        (requestPath) => requestPath === '/tags' || requestPath.startsWith('/tags/'),
-        (requestPath) => requestPath === '/status' || requestPath.startsWith('/status/'),
-        (requestPath) => requestPath === '/related' || requestPath.startsWith('/related/'),
-        (requestPath) => requestPath === '/lookup' || requestPath.startsWith('/lookup/'),
-        (requestPath) => requestPath === '/edit' || requestPath.startsWith('/edit/'),
-        (requestPath) => requestPath === '/delete' || requestPath.startsWith('/delete/'),
-        (requestPath) => requestPath === '/image' || requestPath.startsWith('/image/'),
-        (requestPath) => requestPath === '/datasets/harvest' || requestPath.startsWith('/datasets/check/'),
-        (requestPath) => requestPath === '/save' || requestPath.startsWith('/save/'),
-        (requestPath) => requestPath === '/solr' || requestPath.startsWith('/solr/'),
-        (requestPath) => requestPath === '/import' || requestPath.startsWith('/import/'),
-        (requestPath) => requestPath === '/admin' || requestPath.startsWith('/admin/'),
+        (requestPath) => requestPath === '/api' || requestPath.startsWith('/api/'),
     ]
     const isFrontendRequest = (req) => req.method === 'GET' && !apiMatchers.some((matches) => matches(req.path))
 
@@ -126,8 +110,8 @@ if (fs.existsSync(reactDist)) {
 }
 
 // // // SECURE ROUTES // // //
-app.all('*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
-app.get('/logout', (req, res) => {
+app.all('/api/*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
+app.get('/api/logout', (req, res) => {
     req.logout(err => {
         if(err) {
             console.log(err)
@@ -136,37 +120,37 @@ app.get('/logout', (req, res) => {
         else res.sendStatus(204)
     })
 })
-app.get('/user', (req, res) => {
+app.get('/api/user', (req, res) => {
     res.status(200).send({user: req.user})
 })
-app.use('/relationship-types', require('./routes/relationship-types'))
-app.use('/tags', require('./routes/tags'))
-app.use('/status', require('./routes/status'))
-app.use('/related', require('./routes/related'))
-app.use('/lookup', require('./routes/lookup'))
-app.use('/edit', require('./routes/edit'))
-app.use('/delete', require('./routes/delete'))
-app.use('/image/upload', imageUpload)
-app.use('/datasets', require('./routes/dataset-check'))
-app.use('/save', require('./routes/save-dataset'))
-app.use('/save', require('./routes/save-context-object'))
-app.use('/save', require('./routes/save-relationships'))
-app.use('/save', require('./routes/save-tags'))
-app.use('/solr', require('./routes/solr'))
-app.use('/import', require('./routes/import'))
+app.use('/api/relationship-types', require('./routes/relationship-types'))
+app.use('/api/tags', require('./routes/tags'))
+app.use('/api/status', require('./routes/status'))
+app.use('/api/related', require('./routes/related'))
+app.use('/api/lookup', require('./routes/lookup'))
+app.use('/api/edit', require('./routes/edit'))
+app.use('/api/delete', require('./routes/delete'))
+app.use('/api/image/upload', imageUpload)
+app.use('/api/datasets', require('./routes/dataset-check'))
+app.use('/api/save', require('./routes/save-dataset'))
+app.use('/api/save', require('./routes/save-context-object'))
+app.use('/api/save', require('./routes/save-relationships'))
+app.use('/api/save', require('./routes/save-tags'))
+app.use('/api/solr', require('./routes/solr'))
+app.use('/api/import', require('./routes/import'))
 
 // // // SUPER SECURE ROUTES // // //
-app.all('/admin/*', (req, res, next) => req.user === adminUser ? next() : res.sendStatus(403))
-app.post('/admin/create-user', async function(req, res) {
+app.all('/api/admin/*', (req, res, next) => req.user === adminUser ? next() : res.sendStatus(403))
+app.post('/api/admin/create-user', async function(req, res) {
     const { username, password } = req.body
     const hash = await bcrypt.hash(password, 10)
     db.insert([{ username, password: hash }], db.users)
     res.sendStatus(201)
 })
-app.get('/admin/permission', async function(req, res) {
+app.get('/api/admin/permission', async function(req, res) {
     res.status(200).send("Yep you're an admin")
 })
-app.get('/admin/backup', async function(req, res) {
+app.get('/api/admin/backup', async function(req, res) {
     try {
         await backupManager.uploadBackup();
         res.status(200).send("Backup uploaded successfully");

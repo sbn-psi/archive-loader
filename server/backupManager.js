@@ -51,7 +51,7 @@ async function generateAndUploadFile() {
         writeStream.write(`"${database}": `);
 
         let listStreamer = streamList(writeStream, standardChunk);
-        await db.findAndStream({}, database, listStreamer.data, listStreamer.end);
+        await db.findAndStream({}, database, listStreamer.data, listStreamer.end, { includeTimestamp: true });
 
         index++;
         if (index < databases.length) {

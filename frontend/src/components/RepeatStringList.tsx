@@ -15,7 +15,7 @@ export function RepeatStringList({ label, values, onChange, suggestions = [] }: 
     <div className="page-card">
       <h3>{label}</h3>
       {values.map((value, index) => (
-        <div className="repeat-row" key={`${label}-${index}`}>
+        <div className="repeat-row tag-list-row" key={`${label}-${index}`}>
           <div className="field">
             <input list={`${label}-suggestions`} value={value} onChange={(event) => updateValue(index, event.target.value)} />
           </div>

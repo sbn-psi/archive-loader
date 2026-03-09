@@ -11,11 +11,33 @@ export type StatusListItem = {
   spacecraft?: string | null;
   bundle_lid?: string;
   is_bundle?: boolean;
+  updated_at?: string | null;
 };
 
 export type StatusListResponse = {
   count: number;
   results: StatusListItem[];
+};
+
+export type MissingContextDataset = {
+  name: string;
+  lid: string;
+  updated_at?: string | null;
+};
+
+export type MissingContextDatasetsResponse = {
+  count: number;
+  results: MissingContextDataset[];
+};
+
+export type ObjectRelationshipStatus = {
+  relationshipId?: string | null;
+  label?: string | null;
+  target?: string | null;
+  instrument?: string | null;
+  instrument_host?: string | null;
+  investigation?: string | null;
+  bundle?: string | null;
 };
 
 export type TagRecord = {
@@ -97,6 +119,38 @@ export type ContextObjectRecord = {
   mission_override?: string;
   pds3_instrument_id?: string;
   pds3_instrument_host_id?: string;
+  updated_at?: string | null;
+};
+
+export type RecentContextItem = {
+  lid: string;
+  name: string;
+  type: "mission" | "spacecraft" | "instrument" | "target";
+  updated_at?: string | null;
+};
+
+export type ContextOverviewGroup = {
+  mission: RecentContextItem;
+  missions: RecentContextItem[];
+  spacecraft: RecentContextItem[];
+  instruments: RecentContextItem[];
+  targets: RecentContextItem[];
+  latest_updated_at?: string | null;
+};
+
+export type ContextOverviewResponse = {
+  counts: {
+    missions: number;
+    spacecraft: number;
+    instruments: number;
+    targets: number;
+  };
+  groups: ContextOverviewGroup[];
+  standalone: {
+    spacecraft: RecentContextItem[];
+    instruments: RecentContextItem[];
+    targets: RecentContextItem[];
+  };
 };
 
 export type HarvestResponse = {

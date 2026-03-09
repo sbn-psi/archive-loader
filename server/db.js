@@ -115,7 +115,7 @@ module.exports = {
 
         return result.result.upserted
     },
-    find: async function(inputFilter, type, fields) {
+    find: async function(inputFilter, type, fields, options) {
         await connect()
         const collection = db.collection(type)
         let activeFilter = { _isActive: true }
@@ -123,12 +123,18 @@ module.exports = {
         const projection = fields ? fields.reduce((prev, current) => {
             prev[current] = 1
         }, { _id: 0}) : undefined
+        const sort = options?.sort || { $natural: 1 }
+        const limit = options?.limit || 0
 
         // bunch up all documents into array and return
-        const docs = await collection.find(activeFilter, projection).sort({$natural:1}).toArray()
-        return docs.map(hideInternalProperties)
+        let cursor = collection.find(activeFilter, projection).sort(sort)
+        if(limit > 0) {
+            cursor = cursor.limit(limit)
+        }
+        const docs = await cursor.toArray()
+        return docs.map(doc => hideInternalProperties(doc, options))
     },
-    findAndStream: async function(inputFilter, type, stream, end) {
+    findAndStream: async function(inputFilter, type, stream, end, options) {
         await connect()
         const collection = db.collection(type)
         let activeFilter = { _isActive: true }
@@ -137,7 +143,7 @@ module.exports = {
         // stream documents instead of grouping them together
         return new Promise((resolve, reject) => {
             collection.find(activeFilter).sort({$natural:1})
-                .on('data', data => stream(hideInternalProperties(data)))
+                .on('data', data => stream(hideInternalProperties(data, options)))
                 .on('end', () => { end(); resolve()})
         })
     },
@@ -210,11 +216,15 @@ module.exports = {
     }
 }
 
-function hideInternalProperties(doc) {
-    return Object.keys(doc)
-        .filter(key => !key.startsWith('_'))
+function hideInternalProperties(doc, options) {
+    const visible = Object.keys(doc)
+        .filter(key => !key.startsWith('_') || (options?.includeTimestamp && key === '_timestamp'))
         .reduce((obj, key) => {
             obj[key] = doc[key];
             return obj;
         }, {});
+    if(!visible.updated_at && doc._timestamp) {
+        visible.updated_at = new Date(doc._timestamp).toISOString()
+    }
+    return visible
 }

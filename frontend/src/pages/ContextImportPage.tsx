@@ -6,13 +6,18 @@ import { api } from "@/lib/api";
 import { deriveSelectedTools, hydrateToolSelection, isValidUrn, mergeRelationshipsByLid, prepForForm, sanitizeFormObject } from "@/lib/domain";
 import type { ContextObjectRecord, LookupRelationship } from "@/types";
 import { ImageUploadField } from "@/components/ImageUploadField";
+import { LoadingState } from "@/components/LoadingState";
+import { PageIntro } from "@/components/PageIntro";
 import { RelatedToolsField } from "@/components/RelatedToolsField";
 import { RelationshipSelectorField } from "@/components/RelationshipSelectorField";
 import { RepeatStringList } from "@/components/RepeatStringList";
 import { RichTextEditor } from "@/components/RichTextEditor";
+import { getRecordEditHref } from "@/lib/navigation";
 
 type ContextConfig = {
   title: string;
+  subtitle?: string;
+  legacyLabel?: string;
   entityType: string;
   editType: string;
   tagType: string;
@@ -88,7 +93,7 @@ export function ContextImportPage({
       try {
         const existing = await api.getContextEdit(config.editType, lid!);
         if (!cancelled && existing.object) {
-          onError(`${lid} already exists. It should be edited instead of added.`);
+          onError(`${lid} already exists. Open it in edit mode instead of creating a new record.`);
           return;
         }
       } catch {
@@ -173,7 +178,7 @@ export function ContextImportPage({
   };
 
   if ((edit && editQuery.isLoading) || tags.isLoading || toolsQuery.isLoading || relationshipTypes.isLoading) {
-    return <div className="page-state">Loading editor...</div>;
+    return <LoadingState title="Loading editor" detail="Preparing the record, tags, tools, and related metadata." />;
   }
 
   const saveRelationshipsPayload = () =>
@@ -194,27 +199,35 @@ export function ContextImportPage({
 
   return (
     <div className="grid two">
-      <div className="page-card">
-        <div className="form-page-header">
-          <h1 className="page-title">{config.title}</h1>
-          <div className="form-page-actions">
+      <div className="page-card editor-card">
+        <PageIntro
+          title={config.title}
+          subtitle={config.subtitle}
+          legacyLabel={config.legacyLabel}
+          modeLabel={edit ? "Editing existing record" : "Setting up a new record"}
+          actions={
             <button type="button" className="button-primary" onClick={() => void handleSave()}>
               Save
             </button>
+          }
+        />
+        <section className="page-section">
+          <div className="page-section-header">
+            <h3>Core Details</h3>
           </div>
-        </div>
-        <div className="field">
-          <label>LID</label>
-          <input value={record.logical_identifier ?? ""} onChange={(event) => setRecord({ ...record, logical_identifier: event.target.value })} />
-        </div>
-        <div className="field">
-          <label>Display Name</label>
-          <input value={record.display_name ?? ""} onChange={(event) => setRecord({ ...record, display_name: event.target.value })} />
-        </div>
-        <div className="field">
-          <label>Display Description</label>
-          <textarea value={record.display_description ?? ""} onChange={(event) => setRecord({ ...record, display_description: event.target.value })} />
-        </div>
+          <div className="editor-fields two-column">
+            <div className="field">
+              <label>LID</label>
+              <input value={record.logical_identifier ?? ""} onChange={(event) => setRecord({ ...record, logical_identifier: event.target.value })} />
+            </div>
+            <div className="field">
+              <label>Display Name</label>
+              <input value={record.display_name ?? ""} onChange={(event) => setRecord({ ...record, display_name: event.target.value })} />
+            </div>
+            <div className="field span-two">
+              <label>Display Description</label>
+              <textarea value={record.display_description ?? ""} onChange={(event) => setRecord({ ...record, display_description: event.target.value })} />
+            </div>
         {config.editType === "mission" ? (
           <>
             <div className="field">
@@ -271,15 +284,29 @@ export function ContextImportPage({
             </div>
           </>
         ) : null}
+          </div>
+        </section>
+        <section className="page-section">
+          <div className="page-section-header">
+            <h3>Classification</h3>
+          </div>
         <RepeatStringList
           label="Tags"
           values={currentTags}
           suggestions={(tags.data ?? []).map((tag) => tag.name)}
           onChange={(values) => setRecord({ ...record, tags: values.map((value) => ({ name: value })) })}
         />
+        </section>
+        <section className="page-section">
+          <div className="page-section-header">
+            <h3>Media</h3>
+          </div>
         <ImageUploadField label="Image" value={record.image_url} onChange={(value) => setRecord({ ...record, image_url: value })} onError={(message) => onError(message)} />
-        <div>
-          <h3>Additional Content</h3>
+        </section>
+        <section className="page-section">
+          <div className="page-section-header">
+            <h3>Additional Content</h3>
+          </div>
           <RichTextEditor
             label="Supplemental HTML - Top"
             value={record.html1 ?? ""}
@@ -308,8 +335,13 @@ export function ContextImportPage({
               onError={onError}
             />
           ) : null}
-        </div>
-        <RelatedToolsField tools={toolModels} onChange={(nextTools) => setRecord({ ...record, tools: deriveSelectedTools(nextTools) })} />
+        </section>
+        <section className="page-section">
+          <div className="page-section-header">
+            <h3>Related Tools</h3>
+          </div>
+          <RelatedToolsField tools={toolModels} onChange={(nextTools) => setRecord({ ...record, tools: deriveSelectedTools(nextTools) })} />
+        </section>
       </div>
       <div>
         {config.relationshipModelNames.map((modelName) => (
@@ -318,6 +350,7 @@ export function ContextImportPage({
             title={modelName === "mission" ? "Spacecraft" : modelName.charAt(0).toUpperCase() + modelName.slice(1)}
             relationships={relationships[modelName] ?? []}
             relationshipTypes={modelName === "bundle" ? null : relationshipTypes.data ?? null}
+            editHref={(lid) => getRecordEditHref(modelName as "mission" | "spacecraft" | "instrument" | "target" | "bundle", lid)}
             onChange={(items) => setRelationships({ ...relationships, [modelName]: items })}
           />
         ))}

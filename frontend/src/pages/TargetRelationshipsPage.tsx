@@ -1,6 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { api } from "@/lib/api";
+import { LoadingState } from "@/components/LoadingState";
+import { PageIntro } from "@/components/PageIntro";
+import { pageMeta } from "@/lib/navigation";
 
 type RelationshipMode = "INITIAL" | "SPECIFYING" | "RELATING";
 
@@ -14,7 +17,7 @@ export function TargetRelationshipsPage({ onError }: { onError: (message: string
   });
 
   if (data.isLoading || !data.data) {
-    return <div className="page-state">Loading target relationships...</div>;
+    return <LoadingState title="Loading target relationships" detail="Fetching targets and their current relationship graph." />;
   }
 
   const childOf = (targetLid: string) =>
@@ -28,7 +31,11 @@ export function TargetRelationshipsPage({ onError }: { onError: (message: string
 
   return (
     <div className="page-card">
-      <h1 className="page-title">Relate Targets</h1>
+      <PageIntro
+        title={pageMeta.targetRelationships.title}
+        subtitle={pageMeta.targetRelationships.subtitle}
+        legacyLabel={pageMeta.targetRelationships.legacyLabel}
+      />
       {mode === "INITIAL" ? (
         <ul>
           {data.data.targets.map((target) => (

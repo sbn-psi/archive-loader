@@ -3,6 +3,9 @@ import { useState } from "react";
 import { api } from "@/lib/api";
 import { flattenRelationshipTypeGroups, groupRelationshipTypes } from "@/lib/domain";
 import type { RelationshipType } from "@/types";
+import { LoadingState } from "@/components/LoadingState";
+import { PageIntro } from "@/components/PageIntro";
+import { pageMeta } from "@/lib/navigation";
 
 function RelationshipTypeColumn({
   title,
@@ -22,7 +25,7 @@ function RelationshipTypeColumn({
   const [draftGroups, setDraftGroups] = useState<Record<"always" | "sometimes" | "never", RelationshipType[]> | null>(null);
 
   if (query.isLoading || !query.data) {
-    return <div className="page-card">Loading {title.toLowerCase()}...</div>;
+    return <LoadingState title={`Loading ${title.toLowerCase()}`} detail="Fetching saved relationship types." compact />;
   }
 
   const grouped = draftGroups ?? groupRelationshipTypes(query.data);
@@ -47,10 +50,12 @@ function RelationshipTypeColumn({
         </div>
       </div>
       {(Object.keys(grouped) as Array<keyof typeof grouped>).map((groupName) => (
-        <div key={groupName} className="page-card">
-          <h3>{groupName}</h3>
+        <section key={groupName} className="page-section">
+          <div className="page-section-header">
+            <h3>{groupName}</h3>
+          </div>
           {grouped[groupName].map((item, index) => (
-            <div key={item.relationshipId ?? item.name} className="repeat-row">
+            <div key={item.relationshipId ?? item.name} className="relationship-type-row">
               <div className="field">
                 <input
                   value={item.name}
@@ -65,7 +70,7 @@ function RelationshipTypeColumn({
                   }}
                 />
               </div>
-              <div className="inline-actions">
+              <div className="relationship-type-actions">
                 <button
                   type="button"
                   className="ghost"
@@ -107,45 +112,55 @@ function RelationshipTypeColumn({
               </div>
             </div>
           ))}
-        </div>
+        </section>
       ))}
-      <div className="field">
-        <label>New Relationship</label>
-        <input value={draftName} onChange={(event) => setDraftName(event.target.value)} />
-      </div>
-      <div className="field">
-        <label>Group</label>
-        <select value={draftGroup} onChange={(event) => setDraftGroup(event.target.value as typeof draftGroup)}>
-          <option value="always">Always</option>
-          <option value="sometimes">Sometimes</option>
-          <option value="never">Never</option>
-        </select>
-      </div>
-      <div className="button-row">
-        <button
-          type="button"
-          className="button-primary"
-          onClick={() => {
-            const next = {
-              ...grouped,
-              [draftGroup]: [...grouped[draftGroup], { name: draftName, order: 1000 }],
-            };
-            setDraftName("");
-            setDraftGroups(next);
-          }}
-        >
-          Add Relationship Type
-        </button>
-      </div>
+      <section className="page-section">
+        <div className="page-section-header">
+          <h3>Add Relationship Type</h3>
+        </div>
+        <div className="relationship-type-create">
+          <div className="field">
+            <label>New Relationship</label>
+            <input value={draftName} onChange={(event) => setDraftName(event.target.value)} />
+          </div>
+          <div className="field">
+            <label>Group</label>
+            <select value={draftGroup} onChange={(event) => setDraftGroup(event.target.value as typeof draftGroup)}>
+              <option value="always">Always</option>
+              <option value="sometimes">Sometimes</option>
+              <option value="never">Never</option>
+            </select>
+          </div>
+          <div className="relationship-type-create-action">
+            <button
+              type="button"
+              className="button-primary"
+              onClick={() => {
+                const next = {
+                  ...grouped,
+                  [draftGroup]: [...grouped[draftGroup], { name: draftName, order: 1000 }],
+                };
+                setDraftName("");
+                setDraftGroups(next);
+              }}
+            >
+              Add Relationship Type
+            </button>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
 
 export function RelationshipTypesPage({ onError }: { onError: (message: string | null) => void }) {
   return (
-    <div className="grid two">
-      <RelationshipTypeColumn title="Mission-to-Target" type="target" onError={onError} />
-      <RelationshipTypeColumn title="Spacecraft-to-Instrument" type="instrument" onError={onError} />
+    <div className="page-card">
+      <PageIntro title={pageMeta.relationshipTypes.title} subtitle={pageMeta.relationshipTypes.subtitle} />
+      <div className="grid two">
+        <RelationshipTypeColumn title="Mission-to-Target" type="target" onError={onError} />
+        <RelationshipTypeColumn title="Spacecraft-to-Instrument" type="instrument" onError={onError} />
+      </div>
     </div>
   );
 }
