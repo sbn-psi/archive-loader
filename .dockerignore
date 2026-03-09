@@ -1,2 +1,9 @@
 node_modules
 npm-debug.log
+frontend/dist
+node_modules_bak
+.git
+.DS_Store
+coverage
+playwright-report
+test-results

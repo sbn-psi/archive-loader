@@ -2,19 +2,20 @@
 require('../static/scripts/helpers.js')
 const db = require('./db.js')
 const {streamList, standardChunk} = require('./utils.js')
+const { config } = require('./config.js')
+const { PutObjectCommand, S3Client } = require('@aws-sdk/client-s3')
 
 // Import required modules
-const AWS = require('aws-sdk');
 const fs = require('fs');
 const path = require('path');
 
-AWS.config.update({
-    region: process.env.AWS_REGION,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY
-});
-
-const s3 = new AWS.S3();
+const s3 = new S3Client({
+    region: config.awsRegion,
+    credentials: {
+        accessKeyId: config.awsAccessKeyId,
+        secretAccessKey: config.awsSecretAccessKey
+    }
+})
 
 // Function to upload the generated file to S3
 async function uploadToS3(filePath, bucketName, key) {
@@ -29,8 +30,8 @@ async function uploadToS3(filePath, bucketName, key) {
     };
 
     try {
-        const result = await s3.upload(params).promise();
-        console.log("File uploaded successfully:", result.Location);
+        await s3.send(new PutObjectCommand(params))
+        console.log("File uploaded successfully:", key);
     } catch (err) {
         console.log("Error uploading file:", err);
     }
@@ -63,8 +64,8 @@ async function generateAndUploadFile() {
     // Wait until the file is fully written and then upload it to S3
     writeStream.on('finish', async () => {
         try {
-            const bucketName = 'pds-sbn-psi-archiveloader-backup';
-            const s3Key = `backup-${process.env.APP_ENVIRONMENT ? process.env.APP_ENVIRONMENT : 'unknown'}-${new Date().toISOString()}.json`;  // Unique key for the backup file
+            const bucketName = config.backupBucket;
+            const s3Key = `backup-${config.appEnvironment}-${new Date().toISOString()}.json`;
             await uploadToS3(filePath, bucketName, s3Key);
 
             fs.unlinkSync(filePath);

@@ -1,16 +1,30 @@
-FROM node:16
+FROM node:22 AS build
 
 WORKDIR /usr/src/archive-loader
 
-# Install dependencies
 COPY package*.json ./
-RUN npm install --only=production
+RUN npm ci
 
-# Copy project to docker container
 COPY . .
+RUN npm run build:frontend
 
-# Expose port to outside world
+FROM node:22 AS runtime
+
+WORKDIR /usr/src/archive-loader
+
+COPY package*.json ./
+RUN npm ci --omit=dev
+
+COPY server ./server
+COPY static ./static
+COPY solr ./solr
+COPY solrconfigs ./solrconfigs
+COPY data ./data
+COPY .env.example ./
+COPY LICENSE ./
+COPY README.md ./
+COPY --from=build /usr/src/archive-loader/frontend/dist ./frontend/dist
+
 EXPOSE 8989
 
-# Start container process that will keep container up and running
 CMD [ "npm", "start" ]

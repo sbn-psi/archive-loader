@@ -8,8 +8,10 @@ const registry = require('../registry.js')
 const LID = require('../LogicalIdentifier')
 const got = require('got')
 const { xmlParser } = require('../utils.js')
+const { config } = require('../config.js')
 
-const SOLR = (process.env.SOLR ? process.env.SOLR : 'http://localhost:8983/solr')
+const SOLR = config.solrUrl
+const solrAuth = [config.solrUser, config.solrPass]
 const pdsCollectionAlias = 'pds' // alias of both context and dataset collections
 const contextCollection = 'pds-context' // will be suffixed, gets replaced every time
 const datasetCollection = 'pds-dataset' // will NOT be suffixed, stays persistent
@@ -75,7 +77,7 @@ function checkAvailability() {
 function checkSolrIntegrity() {
     return new Promise(async (resolve, reject) => {
         try{ 
-            let solrCollections = await httpRequest(`${SOLR}/admin/collections`, { action: 'LIST' }, null, process.env.SOLR_USER, process.env.SOLR_PASS) 
+            let solrCollections = await httpRequest(`${SOLR}/admin/collections`, { action: 'LIST' }, null, ...solrAuth)
             let webCollections = solrCollections.collections.filter(collection => collection.startsWith('web-'))
             if(webCollections.length === 0 || webCollections.length === collections.length) { resolve() } else { reject() }
         }
@@ -113,7 +115,7 @@ function sync(suffix, force) {
             name: `${collection.collectionName}-${suffix}`,
             numShards: 1,
             ['collection.configName']: collection.config ? collection.config : '_default'
-        }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
+        }, null, ...solrAuth))
         try{ await Promise.all(createRequests) }
         catch(err) {
             reject("Error creating collections in Solr: " + err.message)
@@ -125,7 +127,7 @@ function sync(suffix, force) {
         for (collection of collections) {
             let documents = await db.find({}, collection.dbName)
             completionStatus[collection.dbName] = documents.length
-            let request = httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents, collection.solrizeAttr) : documents, process.env.SOLR_USER, process.env.SOLR_PASS)
+            let request = httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents, collection.solrizeAttr) : documents, ...solrAuth)
             fillRequests.push(request)
         }
         try { 
@@ -141,7 +143,7 @@ function sync(suffix, force) {
             action: 'CREATEALIAS',
             name: `${collection.collectionName}-alias`,
             collections: `${collection.collectionName}-${suffix}`
-        }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
+        }, null, ...solrAuth))
         try{ await Promise.all(aliasRequests) }
         catch(err) {
             reject("Error modifying aliases in Solr: " + err.message)
@@ -154,7 +156,7 @@ function sync(suffix, force) {
     
         // STEP 5: Flush cache of context browser
         try {
-            await got('https://arcnav.psi.edu/urn:nasa:pds:context:investigation:mission.orex', {
+            await got(config.contextBrowserFlushUrl, {
                 searchParams: {
                     flush: true
                 }
@@ -206,7 +208,7 @@ function backup(suffix, ignoreBackup) {
                 name: `${contextCollection}-${suffix}`,
                 numShards: 1,
                 ['collection.configName']: 'data'
-            }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
+            }, null, ...solrAuth)
         }
         catch(err) {
             reject("Error creating collection in Solr: " + err.message)
@@ -215,7 +217,7 @@ function backup(suffix, ignoreBackup) {
     
         // STEP 2: Fill collection
         try { 
-            await httpRequest(`${SOLR}/${contextCollection}-${suffix}/update`, { commit: true }, fromRegistry, process.env.SOLR_USER, process.env.SOLR_PASS)
+            await httpRequest(`${SOLR}/${contextCollection}-${suffix}/update`, { commit: true }, fromRegistry, ...solrAuth)
         }
         catch(err) {
             reject("Error posting to collection in Solr: " + err.message)
@@ -228,7 +230,7 @@ function backup(suffix, ignoreBackup) {
                 action: 'CREATEALIAS',
                 name: `${pdsCollectionAlias}-alias`,
                 collections: `${contextCollection}-${suffix},${datasetCollection}`
-            }, null, process.env.SOLR_USER, process.env.SOLR_PASS)
+            }, null, ...solrAuth)
         }
         catch(err) {
             reject("Error modifying alias in Solr: " + err.message)
@@ -236,14 +238,14 @@ function backup(suffix, ignoreBackup) {
         }
     
         // delete previous collections
-        const solrCollections = await httpRequest(`${SOLR}/admin/collections`, { action: 'LIST' }, null, process.env.SOLR_USER, process.env.SOLR_PASS) 
+        const solrCollections = await httpRequest(`${SOLR}/admin/collections`, { action: 'LIST' }, null, ...solrAuth)
         const oldPdsCollections = solrCollections.collections.filter(collection => collection.startsWith(`${contextCollection}-`) && collection !== `${contextCollection}-${suffix}`)
 
         if(oldPdsCollections.length > 0) {
             let deleteRequests = oldPdsCollections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
                 action: 'DELETE',
                 name: collection
-            }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
+            }, null, ...solrAuth))
             try{ await Promise.all(deleteRequests) }
             catch(err) {
             }
@@ -342,7 +344,7 @@ function cleanup(suffix) {
         let deleteRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
             action: 'DELETE',
             name: `${collection.collectionName}-${suffix}`
-        }, null, process.env.SOLR_USER, process.env.SOLR_PASS))
+        }, null, ...solrAuth))
         try{ await Promise.all(deleteRequests) }
         catch(err) {
             reject("Error deleting collections in Solr: " + err.message)
@@ -387,8 +389,8 @@ router.post('/harvest', async (req, res) => {
             headers: {
                 'Content-Type': 'application/xml'
             },
-            username: process.env.SOLR_USER,
-            password: process.env.SOLR_PASS
+            username: config.solrUser || undefined,
+            password: config.solrPass || undefined
         })
         res.status(200).send(response.body)
     } catch(err) {

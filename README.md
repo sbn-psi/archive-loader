@@ -4,23 +4,25 @@ The archive loader is a database, web server and client application used to load
 
 ## Installation and Deployment
 
-First, you will need to configure the services.env file that configures all the related services as part of this application stack. Start from the services-EXAMPLE.env file, and see below for explanation:
+First, you will need to configure the `.env` file that configures all the related services as part of this application stack. Start from `.env.example`, and see below for explanation:
 
-### services.env
+### .env
+- PORT: Optional server port override. Defaults to `8989`.
+- MONGO_URL: Optional Mongo connection string override. Defaults to `mongodb://localhost:27017` in local development and `mongodb://mongo:27017` in Docker production mode.
 - HARVEST: The URL for your deployment of the [PDS Harvest Server](https://github.com/sbn-psi/harvest-server)
 - SOLR: The URL for your deployment of the [Legacy Solr Registry](https://github.com/sbn-psi/en-registry-solr)
 - SOLR_USER: The user, if any, for your running solr instance
 - SOLR_PASS: The password, if any, for your running solr instance
+- REGISTRY_URL: Optional override for the context-registry Solr endpoint used for lookups and supplemental metadata backup. Defaults to the SBN PDS alias endpoint.
+- CONTEXT_BROWSER_FLUSH_URL: Optional override for the context-browser cache flush URL used after Solr sync.
 - AUTH_SECRET: A randomized string for encrypting cookies
 - ADMIN_USER: Your preferred username for the admin user
 - ADMIN_PASS: Your preferred password for the admin user
-- MINIO_ACCESS_KEY: A randomized username for the Minio server
-- MINIO_SECRET_KEY: A randomized password for the Minio server
-- MINIO_ENDPOINT: The host domain for the deployed minio server (This should be an IP address for development, or simply the domain without a path or scheme e.g. pdsregistryimages.psi.edu)
-- MINIO_PORT: The port for the deployed minio server (Used primarily in development -- Optional)
-- MINIO_SECURITY: true/false depending on whether or not the deployment uses https
-- MINIO_BUCKET: the name of the bucket for uploading images on minio
-- MINIO_UPLOADS_FOLDER_NAME: the name of the folder inside the bucket to place uploaded images
+- AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_REGION: AWS credentials and region for both the image-upload bucket and the JSON backup bucket.
+- S3_IMAGE_BUCKET: S3 bucket name for uploaded images used by the HTML editors and image fields.
+- S3_IMAGE_PREFIX: Optional folder prefix inside `S3_IMAGE_BUCKET`. Defaults to `public`.
+- S3_IMAGE_BASE_URL: Optional public base URL for uploaded images, such as a CloudFront distribution or public bucket URL. When omitted, the app uses the standard S3 virtual-hosted URL for the configured region.
+- BACKUP_BUCKET: Optional S3 bucket name for JSON backups. Defaults to `pds-sbn-psi-archiveloader-backup`.
 
 ### Docker deployment
 This application is hosted as a docker container, and should be instantiated along with the database by using docker-compose:
@@ -30,7 +32,9 @@ $ docker-compose build
 $ docker-compose up -d
 ```
 
-If you have the correct services.env file created, this will build and run your server at `http://localhost:8989/`. If the Archive Loader is running properly, you should see a web form with an input asking for a Bundle URL.
+If you have the correct `.env` file created, this will build and run your server at `http://localhost:8989/` by default. The Docker image now also builds the React frontend during `docker-compose build`, and the React app is served from the site root.
+
+If the Archive Loader is running properly, you should see the React frontend at `http://localhost:8989/`. The legacy AngularJS files are still kept in `static/` for reference, but they are no longer served by default.
 
 ### PDS Schema
 
@@ -38,11 +42,8 @@ Part of this stack includes a service that will back up a copy of the PDS regist
 
 ## Development
 
-It may be useful to run this application outside of docker-compose for a faster build-run cycle. To do so, you will need to stand up each service independently. First, ensure your local services.env file lists the same MINIO credentials shown in services-EXAMPLE.env. You will also need a "data" directory in the root (create it if it doesn't exist). Then, in three separate terminals, run these commands in order:
+It may be useful to run this application outside of docker-compose for a faster build-run cycle. To do so, make sure your local `.env` contains valid Mongo, Solr, harvest, and AWS/S3 settings. You will also need a `data` directory in the root (create it if it doesn't exist). Then, in two separate terminals, run these commands in order:
 
-```bash
-$ npm run minio-dev
-```
 ```bash
 $ npm run mongo-dev
 ```
@@ -71,7 +72,7 @@ From there you can [run commands on the database as documented here](https://doc
 
 ## Usage
 
-Log in using the username and password specified in the services.env file. Then, you will be able to import and manage datasets and context objects, and sync them to your solr registries
+Log in using the username and password specified in the `.env` file. Then, you will be able to import and manage datasets and context objects, and sync them to your solr registries
 
 ### Importing datasets
 Paste the URL for a PDS4 Bundle directory, or toggle to Collection and paste a URL for a PDS4 Collection directory. Currently, this is whitelisted to these domains:

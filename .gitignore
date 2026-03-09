@@ -4,6 +4,7 @@ logs
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+.DS_Store
 
 # Runtime data
 pids
@@ -16,6 +17,7 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+frontend/coverage
 
 # nyc test coverage
 .nyc_output
@@ -61,11 +63,15 @@ typings/
 # next.js build output
 .next
 
+# Frontend build output
+frontend/dist
+
 
 ########
 
 # database
 data/
 
-# services environment config
-services.env
+# Playwright output
+playwright-report/
+test-results/

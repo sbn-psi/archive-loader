@@ -2,37 +2,26 @@
 require('../static/scripts/helpers.js')
 const db = require('./db.js')
 const backupManager = require('./backupManager.js')
+const fs = require('fs')
+const path = require('path')
+const { config, missingRequiredEnv } = require('./config.js')
+const imageUpload = require('./imageUpload.js')
 
-// env setup
-if(!process.env.MINIO_ACCESS_KEY) {
-    console.log('using local services.env file')
-    require('dotenv').config({ path: 'services.env' })
+const missingEnv = missingRequiredEnv()
+if (missingEnv.length > 0) {
+    console.warn(`Missing environment variables: ${missingEnv.join(', ')}`)
 }
 
-// express, minio setup
-console.log('connecting to file server...')
-require('./minio.js').bootstrap().then(expressSetup, error => {
-    console.log("############# ERROR #################")
-    console.log("##### Couldn't connect to Minio #####")
-    console.log(error)
-    console.log("###### Starting server anyway #######")
-    startServer()
-});
 const express = require('express')
 const app = express()
 app.use(express.json({ limit: '10mb' }))
 const helmet = require('helmet')
 app.use(helmet())
-
-// called once file server is bootstrapped; starts the actual listening process
-function expressSetup(minioHandler) {
-    app.use('/image/upload', minioHandler)
-    startServer()
-}
+startServer()
 
 function startServer() {
-    app.listen(8989, () => {
-        console.log('running on port 8989...')
+    app.listen(config.port, () => {
+        console.log(`running on port ${config.port}...`)
     })
 
     // backup every 24 hours
@@ -48,7 +37,7 @@ const LocalStrategy = require('passport-local').Strategy
 const bcrypt = require('bcrypt')
 passport.use('local', new LocalStrategy(
     async function(username, password, done) {
-        if(username === process.env.ADMIN_USER && password === process.env.ADMIN_PASS) { return done(null, adminUser)}
+        if(username === config.adminUser && password === config.adminPass) { return done(null, adminUser)}
         else {
             let user = await db.find({username}, db.users)
             if(!!user && user.length > 0) {
@@ -79,7 +68,7 @@ const MongoStore = require('connect-mongo')(session);
 app.set('trust proxy', 1)
 app.use(session({
     name: 'archive-loader',
-    secret: process.env.AUTH_SECRET,
+    secret: config.authSecret,
     maxAge: 604800000,
     store: new MongoStore({clientPromise: db.client}),
     resave: false,
@@ -98,7 +87,43 @@ app.post('/login', passport.authenticate('local'), (req, res) => {
     res.status(200).send({user: req.user})
 })
 app.use('/export', require('./routes/export'))
-app.use(express.static('static'))
+const reactDist = path.resolve(__dirname, '../frontend/dist')
+if (fs.existsSync(reactDist)) {
+    const apiMatchers = [
+        (requestPath) => requestPath === '/export' || requestPath.startsWith('/export/'),
+        (requestPath) => requestPath === '/login',
+        (requestPath) => requestPath === '/logout',
+        (requestPath) => requestPath === '/user',
+        (requestPath) => requestPath === '/relationship-types' || requestPath.startsWith('/relationship-types/'),
+        (requestPath) => requestPath === '/tags' || requestPath.startsWith('/tags/'),
+        (requestPath) => requestPath === '/status' || requestPath.startsWith('/status/'),
+        (requestPath) => requestPath === '/related' || requestPath.startsWith('/related/'),
+        (requestPath) => requestPath === '/lookup' || requestPath.startsWith('/lookup/'),
+        (requestPath) => requestPath === '/edit' || requestPath.startsWith('/edit/'),
+        (requestPath) => requestPath === '/delete' || requestPath.startsWith('/delete/'),
+        (requestPath) => requestPath === '/image' || requestPath.startsWith('/image/'),
+        (requestPath) => requestPath === '/datasets/harvest' || requestPath.startsWith('/datasets/check/'),
+        (requestPath) => requestPath === '/save' || requestPath.startsWith('/save/'),
+        (requestPath) => requestPath === '/solr' || requestPath.startsWith('/solr/'),
+        (requestPath) => requestPath === '/import' || requestPath.startsWith('/import/'),
+        (requestPath) => requestPath === '/admin' || requestPath.startsWith('/admin/'),
+    ]
+    const isFrontendRequest = (req) => req.method === 'GET' && !apiMatchers.some((matches) => matches(req.path))
+
+    app.use(express.static(reactDist))
+    app.get('/app', (req, res) => {
+        res.redirect(301, '/')
+    })
+    app.get('/app/*', (req, res) => {
+        res.redirect(301, req.path.replace(/^\/app/, '') || '/')
+    })
+    app.get('*', (req, res, next) => {
+        if (!isFrontendRequest(req)) {
+            return next()
+        }
+        res.sendFile(path.join(reactDist, 'index.html'))
+    })
+}
 
 // // // SECURE ROUTES // // //
 app.all('*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
@@ -121,6 +146,7 @@ app.use('/related', require('./routes/related'))
 app.use('/lookup', require('./routes/lookup'))
 app.use('/edit', require('./routes/edit'))
 app.use('/delete', require('./routes/delete'))
+app.use('/image/upload', imageUpload)
 app.use('/datasets', require('./routes/dataset-check'))
 app.use('/save', require('./routes/save-dataset'))
 app.use('/save', require('./routes/save-context-object'))

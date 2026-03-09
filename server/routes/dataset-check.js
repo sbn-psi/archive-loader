@@ -3,8 +3,9 @@ const router = express.Router()
 const httpRequest = require('../httpRequest.js')
 const assert = require('assert')
 const { xmlParser } = require('../utils.js')
+const { config } = require('../config.js')
 
-const HARVESTWRAPPER = (process.env.HARVEST ? process.env.HARVEST : 'http://localhost:3009')
+const HARVESTWRAPPER = config.harvestUrl
 
 const fieldMapper = dataset => { return {
     name: dataset.title,
