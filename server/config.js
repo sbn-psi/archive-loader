@@ -28,6 +28,11 @@ function normalizePrefix(value) {
     return String(value).replace(/^\/+|\/+$/g, '')
 }
 
+function normalizeBasePath(value) {
+    const normalized = normalizePrefix(value)
+    return normalized ? `/${normalized}` : ''
+}
+
 const config = {
     nodeEnv: process.env.NODE_ENV || 'development',
     isProduction: process.env.NODE_ENV === 'production',
@@ -42,6 +47,7 @@ const config = {
     authSecret: process.env.AUTH_SECRET || '',
     adminUser: process.env.ADMIN_USER || 'admin',
     adminPass: process.env.ADMIN_PASS || '',
+    appBasePath: normalizeBasePath(process.env.APP_BASE_PATH || ''),
     appEnvironment: process.env.APP_ENVIRONMENT || 'unknown',
     backupBucket: process.env.BACKUP_BUCKET || 'pds-sbn-psi-archiveloader-backup',
     awsRegion: process.env.AWS_REGION || null,

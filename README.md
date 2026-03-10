@@ -8,6 +8,7 @@ First, you will need to configure the `.env` file that configures all the relate
 
 ### .env
 - PORT: Optional server port override. Defaults to `8989`.
+- APP_BASE_PATH: Optional URL base path for deployments behind a subpath, such as `/archive-loader`. Leave blank to serve from the site root.
 - MONGO_URL: Optional Mongo connection string override. Defaults to `mongodb://localhost:27017` in local development and `mongodb://mongo:27017` in Docker production mode.
 - HARVEST: The URL for your deployment of the [PDS Harvest Server](https://github.com/sbn-psi/harvest-server)
 - SOLR: The URL for your deployment of the [Legacy Solr Registry](https://github.com/sbn-psi/en-registry-solr)

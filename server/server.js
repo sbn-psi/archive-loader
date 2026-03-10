@@ -15,6 +15,11 @@ const app = express()
 app.use(express.json({ limit: '10mb' }))
 const helmet = require('helmet')
 app.use(helmet())
+
+const appBasePath = config.appBasePath
+const mountPath = appBasePath || '/'
+const appRouter = express.Router()
+
 startServer()
 
 function startServer() {
@@ -81,10 +86,18 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // // // PUBLIC ROUTES // // //
-app.post('/api/login', passport.authenticate('local'), (req, res) => {
+if (appBasePath) {
+    app.get('/', (req, res) => {
+        res.redirect(302, `${appBasePath}/`)
+    })
+}
+
+app.use(mountPath, appRouter)
+
+appRouter.post('/api/login', passport.authenticate('local'), (req, res) => {
     res.status(200).send({user: req.user})
 })
-app.use('/api/export', require('./routes/export'))
+appRouter.use('/api/export', require('./routes/export'))
 const reactDist = path.resolve(__dirname, '../frontend/dist')
 if (fs.existsSync(reactDist)) {
     const apiMatchers = [
@@ -92,14 +105,15 @@ if (fs.existsSync(reactDist)) {
     ]
     const isFrontendRequest = (req) => req.method === 'GET' && !apiMatchers.some((matches) => matches(req.path))
 
-    app.use(express.static(reactDist))
-    app.get('/app', (req, res) => {
-        res.redirect(301, '/')
+    appRouter.use(express.static(reactDist))
+    appRouter.get('/app', (req, res) => {
+        res.redirect(301, `${appBasePath || ''}/`)
     })
-    app.get('/app/*', (req, res) => {
-        res.redirect(301, req.path.replace(/^\/app/, '') || '/')
+    appRouter.get('/app/*', (req, res) => {
+        const nextPath = req.path.replace(/^\/app/, '') || '/'
+        res.redirect(301, `${appBasePath || ''}${nextPath}`)
     })
-    app.get('*', (req, res, next) => {
+    appRouter.get('*', (req, res, next) => {
         if (!isFrontendRequest(req)) {
             return next()
         }
@@ -108,8 +122,8 @@ if (fs.existsSync(reactDist)) {
 }
 
 // // // SECURE ROUTES // // //
-app.all('/api/*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
-app.get('/api/logout', (req, res) => {
+appRouter.all('/api/*', (req, res, next) => req.isAuthenticated() ? next() : res.sendStatus(403))
+appRouter.get('/api/logout', (req, res) => {
     req.logout(err => {
         if(err) {
             console.log(err)
@@ -118,37 +132,37 @@ app.get('/api/logout', (req, res) => {
         else res.sendStatus(204)
     })
 })
-app.get('/api/user', (req, res) => {
+appRouter.get('/api/user', (req, res) => {
     res.status(200).send({user: req.user})
 })
-app.use('/api/relationship-types', require('./routes/relationship-types'))
-app.use('/api/tags', require('./routes/tags'))
-app.use('/api/status', require('./routes/status'))
-app.use('/api/related', require('./routes/related'))
-app.use('/api/lookup', require('./routes/lookup'))
-app.use('/api/edit', require('./routes/edit'))
-app.use('/api/delete', require('./routes/delete'))
-app.use('/api/image/upload', imageUpload)
-app.use('/api/datasets', require('./routes/dataset-check'))
-app.use('/api/save', require('./routes/save-dataset'))
-app.use('/api/save', require('./routes/save-context-object'))
-app.use('/api/save', require('./routes/save-relationships'))
-app.use('/api/save', require('./routes/save-tags'))
-app.use('/api/solr', require('./routes/solr'))
-app.use('/api/import', require('./routes/import'))
+appRouter.use('/api/relationship-types', require('./routes/relationship-types'))
+appRouter.use('/api/tags', require('./routes/tags'))
+appRouter.use('/api/status', require('./routes/status'))
+appRouter.use('/api/related', require('./routes/related'))
+appRouter.use('/api/lookup', require('./routes/lookup'))
+appRouter.use('/api/edit', require('./routes/edit'))
+appRouter.use('/api/delete', require('./routes/delete'))
+appRouter.use('/api/image/upload', imageUpload)
+appRouter.use('/api/datasets', require('./routes/dataset-check'))
+appRouter.use('/api/save', require('./routes/save-dataset'))
+appRouter.use('/api/save', require('./routes/save-context-object'))
+appRouter.use('/api/save', require('./routes/save-relationships'))
+appRouter.use('/api/save', require('./routes/save-tags'))
+appRouter.use('/api/solr', require('./routes/solr'))
+appRouter.use('/api/import', require('./routes/import'))
 
 // // // SUPER SECURE ROUTES // // //
-app.all('/api/admin/*', (req, res, next) => req.user === adminUser ? next() : res.sendStatus(403))
-app.post('/api/admin/create-user', async function(req, res) {
+appRouter.all('/api/admin/*', (req, res, next) => req.user === adminUser ? next() : res.sendStatus(403))
+appRouter.post('/api/admin/create-user', async function(req, res) {
     const { username, password } = req.body
     const hash = await bcrypt.hash(password, 10)
     db.insert([{ username, password: hash }], db.users)
     res.sendStatus(201)
 })
-app.get('/api/admin/permission', async function(req, res) {
+appRouter.get('/api/admin/permission', async function(req, res) {
     res.status(200).send("Yep you're an admin")
 })
-app.get('/api/admin/backup', async function(req, res) {
+appRouter.get('/api/admin/backup', async function(req, res) {
     try {
         await backupManager.uploadBackup();
         res.status(200).send("Backup uploaded successfully");

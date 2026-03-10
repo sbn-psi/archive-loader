@@ -48,7 +48,8 @@ async function request<T>(input: string, init?: RequestInit): Promise<T> {
 
 export { ApiError };
 
-const API_BASE = "/api";
+const appBasePath = import.meta.env.BASE_URL === "/" ? "" : import.meta.env.BASE_URL.replace(/\/$/, "");
+const API_BASE = `${appBasePath}/api`;
 
 export const api = {
   getUser: () => request<LoginResponse>(`${API_BASE}/user`),

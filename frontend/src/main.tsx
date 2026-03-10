@@ -6,11 +6,12 @@ import App from "./App";
 import "./styles.css";
 
 const queryClient = new QueryClient();
+const appBasePath = import.meta.env.BASE_URL === "/" ? "" : import.meta.env.BASE_URL.replace(/\/$/, "");
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <BrowserRouter basename={appBasePath}>
         <App />
       </BrowserRouter>
     </QueryClientProvider>
