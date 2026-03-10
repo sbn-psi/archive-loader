@@ -86,7 +86,13 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // // // PUBLIC ROUTES // // //
-app.use(mountPath, appRouter)
+// Support both deployment modes:
+// 1. proxy preserves the configured base path when forwarding to Node
+// 2. proxy strips the configured base path before forwarding to Node
+if (appBasePath) {
+    app.use(appBasePath, appRouter)
+}
+app.use('/', appRouter)
 
 appRouter.post('/api/login', passport.authenticate('local'), (req, res) => {
     res.status(200).send({user: req.user})
