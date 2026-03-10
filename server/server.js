@@ -86,12 +86,6 @@ app.use(passport.initialize())
 app.use(passport.session())
 
 // // // PUBLIC ROUTES // // //
-if (appBasePath) {
-    app.get('/', (req, res) => {
-        res.redirect(302, `${appBasePath}/`)
-    })
-}
-
 app.use(mountPath, appRouter)
 
 appRouter.post('/api/login', passport.authenticate('local'), (req, res) => {
