@@ -84,9 +84,14 @@ describe("domain behavior parity", () => {
   });
 
   it("classifies dataset manage rows", () => {
-    const rows = classifyDatasetStatusRows([{ name: "Bundle", lid: "urn:nasa:pds:bundle::1.0", context: "mission_more_data" }]);
+    const rows = classifyDatasetStatusRows([
+      { name: "Bundle", lid: "urn:nasa:pds:bundle::1.0", context: "mission_more_data" },
+      { name: "Collection", lid: "urn:nasa:pds:bundle:document::1.0", context: "target_more_data" },
+    ]);
     expect(rows[0].is_bundle).toBe(true);
     expect(rows[0].context).toBe("Mission More Data");
+    expect(rows[1].is_bundle).toBe(false);
+    expect(rows[1].context).toBe("");
   });
 
   it("groups and flattens relationship types by order ranges", () => {

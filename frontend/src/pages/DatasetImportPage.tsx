@@ -106,6 +106,8 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
 
   const activeCollectionIndex = activeIndex - (bundle ? 1 : 0);
   const activeType = bundle && activeIndex === 0 ? "Bundle" : "Collection";
+  const isBundleForm = activeType === "Bundle";
+  const isCollectionForm = activeType === "Collection";
 
   return (
     <div className="grid two">
@@ -174,20 +176,23 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
                     onChange={(event) => setActiveRecord({ ...activeRecord, display_name: event.target.value })}
                   />
                 </div>
-                <div className="field">
-                  <label>Primary Context</label>
-                  <select
-                    value={activeRecord.primary_context ?? ""}
-                    onChange={(event) => setActiveRecord({ ...activeRecord, primary_context: event.target.value })}
-                  >
-                    <option value="">Select context</option>
-                    <option value="mission_instrument_data">Mission Instrument Data</option>
-                    <option value="mission_more_data">Mission More Data Page</option>
-                    <option value="target_derived_data">Target Derived Data Page</option>
-                    <option value="target_more_data">Target More Data Page</option>
-                    <option value="more_data">Both More Data Pages</option>
-                  </select>
-                </div>
+                {isBundleForm ? (
+                  <div className="field">
+                    <label>Primary Context</label>
+                    <select
+                      required
+                      value={activeRecord.primary_context ?? ""}
+                      onChange={(event) => setActiveRecord({ ...activeRecord, primary_context: event.target.value })}
+                    >
+                      <option value="">Select context</option>
+                      <option value="mission_instrument_data">Mission Instrument Data</option>
+                      <option value="mission_more_data">Mission More Data Page</option>
+                      <option value="target_derived_data">Target Derived Data Page</option>
+                      <option value="target_more_data">Target More Data Page</option>
+                      <option value="more_data">Both More Data Pages</option>
+                    </select>
+                  </div>
+                ) : null}
                 <div className="field">
                   <label>DOI</label>
                   <input value={activeRecord.doi ?? ""} onChange={(event) => setActiveRecord({ ...activeRecord, doi: event.target.value })} />
@@ -225,7 +230,7 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
                 </div>
               </div>
             </section>
-            {!bundle || activeIndex > 0 ? (
+            {isCollectionForm ? (
               <section className="page-section page-panel">
                 <div className="page-section-header">
                 <h3>Collection Example</h3>

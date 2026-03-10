@@ -234,6 +234,7 @@ export function classifyDatasetStatusRows(items: StatusListItem[]) {
         ...dataset,
         is_bundle: false,
         bundle_lid: dataset.lid.split(":").slice(0, 4).join(":"),
+        context: "",
       };
     }
 
