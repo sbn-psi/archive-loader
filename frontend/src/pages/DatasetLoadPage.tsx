@@ -51,34 +51,36 @@ export function DatasetLoadPage({ onError }: { onError: (message: string | null)
         />
       ) : null}
       {preview ? (
-        <div className="grid two">
-          <div className="page-card">
-            <h3>Detected Bundle</h3>
+        <div className="dataset-preview-layout">
+          <div className="page-card dataset-preview-summary">
+            <h3>Preview Summary</h3>
             {preview.bundle ? (
-              <>
-                <p><strong>Title:</strong> {preview.bundle.name}</p>
-                <p><strong>LIDVID:</strong> {preview.bundle.lidvid}</p>
-                <p><strong>URL:</strong> {preview.bundle.browseUrl}</p>
-              </>
+              <p>
+                <strong>Bundle:</strong> {preview.bundle.name} ({preview.bundle.lidvid})
+              </p>
             ) : (
               <p>No bundle detected.</p>
             )}
+            <p>
+              <strong>Collections:</strong> {preview.collections.length}
+            </p>
+            {preview.collections.length > 0 ? (
+              <ul className="dataset-preview-list">
+                {preview.collections.map((collection) => (
+                  <li key={collection.lidvid}>
+                    {collection.name} ({collection.lidvid})
+                  </li>
+                ))}
+              </ul>
+            ) : null}
           </div>
-          <div className="page-card">
-            <h3>Detected Collections</h3>
-            <ul>
-              {preview.collections.map((collection) => (
-                <li key={collection.lidvid}>
-                  {collection.name} ({collection.lidvid})
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="page-card" style={{ gridColumn: "1 / -1" }}>
+          <div className="page-card dataset-preview-card">
             <h3>Prepared Archive Data</h3>
-            <pre style={{ whiteSpace: "pre-wrap" }}>{preview.harvestOutput}</pre>
+            <div className="dataset-preview-output">
+              <pre>{preview.harvestOutput}</pre>
+            </div>
           </div>
-          <div className="button-row">
+          <div className="button-row dataset-preview-actions">
             <button
               type="button"
               className="button-primary"

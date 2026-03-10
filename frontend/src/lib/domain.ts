@@ -1,5 +1,6 @@
 import type {
   DatasetRecord,
+  HarvestResponse,
   LookupRelationship,
   RelationshipType,
   StatusListItem,
@@ -139,6 +140,51 @@ export function buildDatasetAutocomplete(
   );
 }
 
+export function prepDatasetsFromHarvest(harvested: Pick<HarvestResponse, "bundle" | "collections"> | null | undefined) {
+  const mapping = {
+    logical_identifier: "lidvid",
+    display_name: "name",
+    display_description: "abstract",
+    browse_url: "browseUrl",
+    target_lid: "target_lid",
+    target_name: "target_name",
+    mission_lid: "mission_lid",
+    instrument_lid: "instrument_lid",
+  } as const;
+
+  const prep = (fromHarvest?: HarvestResponse["bundle"] | HarvestResponse["collections"][number] | null): DatasetRecord | null => {
+    if (!fromHarvest) {
+      return null;
+    }
+
+    const dataset: DatasetRecord = {
+      tags: [],
+      tools: [],
+      publication: {},
+      example: {},
+      related_data: [],
+      superseded_data: [],
+      download_packages: [],
+    };
+
+    for (const [datasetKey, harvestKey] of Object.entries(mapping)) {
+      const value = fromHarvest[harvestKey as keyof typeof fromHarvest];
+      if (typeof value === "string" && value.length > 0) {
+        dataset[datasetKey as keyof DatasetRecord] = value as never;
+      }
+    }
+
+    return dataset;
+  };
+
+  return {
+    bundle: prep(harvested?.bundle),
+    collections: (harvested?.collections ?? [])
+      .map((collection) => prep(collection))
+      .filter((collection): collection is DatasetRecord => Boolean(collection)),
+  };
+}
+
 export const isValidUrn = (value?: string | null) =>
   Boolean(value && value.startsWith("urn:") && value.split(":").length > 3);
 
@@ -206,7 +252,7 @@ export function classifyDatasetStatusRows(items: StatusListItem[]) {
   });
 }
 
-export function groupItems<T extends Record<string, unknown>>(items: T[], groupBy?: string) {
+export function groupItems<T extends Record<string, unknown>>(items: T[], groupBy?: string, groupSort: "name" | "first-item" = "name") {
   const groups: Array<{ name?: string; items: T[] }> = [];
   const ungrouped: T[] = [];
 
@@ -228,7 +274,9 @@ export function groupItems<T extends Record<string, unknown>>(items: T[], groupB
     group.items.push(item);
   }
 
-  groups.sort((left, right) => (left.name ?? "").localeCompare(right.name ?? ""));
+  if (groupSort === "name") {
+    groups.sort((left, right) => (left.name ?? "").localeCompare(right.name ?? ""));
+  }
   return { groups, ungrouped };
 }
 

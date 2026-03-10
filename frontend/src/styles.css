@@ -482,6 +482,68 @@ select {
   top: 1rem;
 }
 
+.editor-tab-nav {
+  display: grid;
+  gap: 0;
+  border: 1px solid #d9e1e7;
+  border-radius: 4px;
+  overflow: hidden;
+  background: #f8fafb;
+}
+
+.editor-tab {
+  display: grid;
+  gap: 0.15rem;
+  width: 100%;
+  text-align: left;
+  padding: 0.8rem 0.95rem;
+  border: 0;
+  border-bottom: 1px solid #d9e1e7;
+  border-radius: 0;
+  background: transparent;
+  color: #3c576a;
+  cursor: pointer;
+}
+
+.editor-tab:last-child {
+  border-bottom: 0;
+}
+
+.editor-tab:hover,
+.editor-tab:focus-visible {
+  background: #eef3f6;
+  color: #2f4554;
+  box-shadow: none;
+}
+
+.editor-tab.is-active {
+  background: #dce8ef;
+  color: #2f4554;
+}
+
+.editor-tab-kind {
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.editor-tab-label {
+  font-weight: 600;
+  line-height: 1.3;
+  overflow-wrap: anywhere;
+}
+
+.editor-current-record {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  flex-wrap: wrap;
+  margin: -0.25rem 0 0.75rem;
+  color: #2f4554;
+}
+
 .page-section {
   margin-top: 1.4rem;
   padding-top: 1.1rem;
@@ -544,6 +606,51 @@ select {
 
 .field textarea {
   min-height: 120px;
+}
+
+.dataset-preview-summary {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.dataset-preview-layout {
+  display: grid;
+  gap: 1rem;
+}
+
+.dataset-preview-summary p,
+.dataset-preview-summary ul {
+  margin: 0;
+}
+
+.dataset-preview-list {
+  padding-left: 1.25rem;
+}
+
+.dataset-preview-card {
+  padding-bottom: 1rem;
+}
+
+.dataset-preview-output {
+  max-height: 26rem;
+  overflow: auto;
+  border: 1px solid #d9e1e7;
+  border-radius: 4px;
+  background: #f8fafb;
+  padding: 0.9rem 1rem;
+}
+
+.dataset-preview-output pre {
+  margin: 0;
+  white-space: pre-wrap;
+  word-break: break-word;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.95rem;
+  line-height: 1.45;
+}
+
+.dataset-preview-actions {
+  margin-top: -0.15rem;
 }
 
 .toolbar,

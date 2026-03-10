@@ -2,16 +2,15 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { buildDatasetAutocomplete, deriveSelectedTools, hydrateToolSelection, prepForForm, sanitizeFormObject } from "@/lib/domain";
-import type { DatasetRecord } from "@/types";
-import { ConnectedLinksPanel } from "@/components/ConnectedLinksPanel";
+import { buildDatasetAutocomplete, deriveSelectedTools, hydrateToolSelection, prepDatasetsFromHarvest, prepForForm, sanitizeFormObject } from "@/lib/domain";
+import type { DatasetRecord, HarvestResponse } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { PageIntro } from "@/components/PageIntro";
 import { RelatedToolsField } from "@/components/RelatedToolsField";
 import { RepeatStringList } from "@/components/RepeatStringList";
 import { ImageUploadField } from "@/components/ImageUploadField";
 import { RichTextEditor } from "@/components/RichTextEditor";
-import { getRecordEditHref, pageMeta } from "@/lib/navigation";
+import { pageMeta } from "@/lib/navigation";
 
 const templateModel = (): DatasetRecord => ({
   tags: [],
@@ -57,9 +56,10 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
 
     const harvested = sessionStorage.getItem("dataset-harvest");
     if (harvested && !edit) {
-      const parsed = JSON.parse(harvested) as { bundle: DatasetRecord | null; collections: DatasetRecord[] };
-      setBundle(parsed.bundle ? { ...templateModel(), ...parsed.bundle } : null);
-      setCollections(parsed.collections.map((collection) => ({ ...templateModel(), ...collection })));
+      const parsed = JSON.parse(harvested) as Pick<HarvestResponse, "bundle" | "collections">;
+      const mapped = prepDatasetsFromHarvest(parsed);
+      setBundle(mapped.bundle ? { ...templateModel(), ...mapped.bundle } : null);
+      setCollections(mapped.collections.map((collection) => ({ ...templateModel(), ...collection })));
     }
   }, [edit, editQuery.data]);
 
@@ -78,24 +78,6 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
     () => hydrateToolSelection(toolsQuery.data ?? [], (activeRecord?.tools as Array<string | { toolId: string; directUrl?: string }>) ?? []),
     [activeRecord?.tools, toolsQuery.data],
   );
-  const relatedLinks = useMemo(() => {
-    if (!activeRecord) {
-      return [];
-    }
-
-    return [
-      activeRecord.mission_lid
-        ? { label: "Open related mission", to: getRecordEditHref("mission", activeRecord.mission_lid), meta: activeRecord.mission_lid }
-        : null,
-      activeRecord.instrument_lid
-        ? { label: "Open related instrument", to: getRecordEditHref("instrument", activeRecord.instrument_lid), meta: activeRecord.instrument_lid }
-        : null,
-      activeRecord.target_lid
-        ? { label: "Open related target", to: getRecordEditHref("target", activeRecord.target_lid), meta: activeRecord.target_lid }
-        : null,
-    ].filter((item): item is { label: string; to: string; meta: string } => Boolean(item));
-  }, [activeRecord]);
-
   const currentTags = Array.isArray(activeRecord?.tags)
     ? activeRecord?.tags.map((tag) => (typeof tag === "string" ? tag : tag.name))
     : [];
@@ -122,26 +104,37 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
     return <LoadingState title="Loading dataset editor" detail="Preparing the selected dataset and supporting metadata." />;
   }
 
+  const activeCollectionIndex = activeIndex - (bundle ? 1 : 0);
+  const activeType = bundle && activeIndex === 0 ? "Bundle" : "Collection";
+
   return (
     <div className="grid two">
       {datasetPool.length > 1 ? (
         <div className="page-card editor-sidebar">
           <h3>Dataset Selection</h3>
+          <nav aria-label="Dataset selection" className="editor-tab-nav">
           {bundle ? (
-            <button type="button" className={activeIndex === 0 ? "button-secondary" : "ghost"} onClick={() => setActiveIndex(0)}>
-              {bundle.logical_identifier || "Bundle"}
+            <button
+              type="button"
+              className={activeIndex === 0 ? "editor-tab is-active" : "editor-tab"}
+              onClick={() => setActiveIndex(0)}
+            >
+              <span className="editor-tab-kind">Bundle</span>
+              <span className="editor-tab-label">{bundle.display_name || bundle.logical_identifier || "Bundle"}</span>
             </button>
           ) : null}
           {collections.map((collection, index) => (
             <button
               key={`${collection.logical_identifier ?? index}`}
               type="button"
-              className={activeIndex === index + (bundle ? 1 : 0) ? "button-secondary" : "ghost"}
+              className={activeIndex === index + (bundle ? 1 : 0) ? "editor-tab is-active" : "editor-tab"}
               onClick={() => setActiveIndex(index + (bundle ? 1 : 0))}
             >
-              {collection.logical_identifier || `Collection ${index + 1}`}
+              <span className="editor-tab-kind">Collection {index + 1}</span>
+              <span className="editor-tab-label">{collection.display_name || collection.logical_identifier || `Collection ${index + 1}`}</span>
             </button>
           ))}
+          </nav>
         </div>
       ) : null}
       <div className="page-card editor-card">
@@ -156,6 +149,12 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
             </button>
           }
         />
+        {datasetPool.length > 1 ? (
+          <div className="editor-current-record">
+            <span className="badge">{activeType}</span>
+            <strong>{activeRecord?.display_name || activeRecord?.logical_identifier || (activeType === "Bundle" ? "Bundle" : `Collection ${activeCollectionIndex + 1}`)}</strong>
+          </div>
+        ) : null}
         {activeRecord ? (
           <>
             <section className="page-section">
@@ -308,11 +307,6 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
           </>
         ) : null}
       </div>
-      <ConnectedLinksPanel
-        title="Related Records"
-        intro="Open the related mission, instrument, or target when you need to update it."
-        items={relatedLinks}
-      />
     </div>
   );
 }

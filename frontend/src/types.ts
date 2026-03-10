@@ -159,12 +159,22 @@ export type HarvestResponse = {
     lidvid: string;
     lid: string;
     browseUrl: string;
+    abstract?: string;
+    target_lid?: string;
+    target_name?: string;
+    mission_lid?: string;
+    instrument_lid?: string;
   } | null;
   collections: Array<{
     name: string;
     lidvid: string;
     lid: string;
     browseUrl: string;
+    abstract?: string;
+    target_lid?: string;
+    target_name?: string;
+    mission_lid?: string;
+    instrument_lid?: string;
   }>;
   harvestOutput: string;
 };

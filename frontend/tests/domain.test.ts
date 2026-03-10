@@ -6,6 +6,7 @@ import {
   groupRelationshipTypes,
   hydrateToolSelection,
   mergeRelationshipsByLid,
+  prepDatasetsFromHarvest,
   prepForForm,
   sanitizeFormObject,
 } from "@/lib/domain";
@@ -35,6 +36,40 @@ describe("domain behavior parity", () => {
       "Current",
     );
     expect(results).toEqual(["Current", "One", "Two"]);
+  });
+
+  it("maps harvested datasets into editor fields", () => {
+    const result = prepDatasetsFromHarvest({
+      bundle: {
+        name: "Psyche Bundle",
+        lidvid: "urn:nasa:pds:psyche.bundle::1.0",
+        lid: "urn:nasa:pds:psyche.bundle",
+        browseUrl: "https://example.test/browse",
+        abstract: "Imported description",
+        mission_lid: "urn:nasa:pds:mission",
+      },
+      collections: [
+        {
+          name: "Documents",
+          lidvid: "urn:nasa:pds:psyche.bundle:document::1.0",
+          lid: "urn:nasa:pds:psyche.bundle:document",
+          browseUrl: "https://example.test/document",
+        },
+      ],
+    });
+
+    expect(result.bundle).toMatchObject({
+      logical_identifier: "urn:nasa:pds:psyche.bundle::1.0",
+      display_name: "Psyche Bundle",
+      display_description: "Imported description",
+      browse_url: "https://example.test/browse",
+      mission_lid: "urn:nasa:pds:mission",
+    });
+    expect(result.collections[0]).toMatchObject({
+      logical_identifier: "urn:nasa:pds:psyche.bundle:document::1.0",
+      display_name: "Documents",
+      browse_url: "https://example.test/document",
+    });
   });
 
   it("merges relationship lookups by lid", () => {

@@ -118,6 +118,7 @@ export function ManagePage({
         showReady={mode === "missions"}
         showUpdatedAt
         groupBy={mode === "instruments" ? "spacecraft" : mode === "datasets" && showCollections ? "bundle_lid" : undefined}
+        groupSort={mode === "datasets" && showCollections ? "first-item" : "name"}
         groupLabels={lookups.data}
       />
     </div>

@@ -8,6 +8,7 @@ type ManageTableProps = {
   editHref: (lid: string) => string;
   onDelete: (item: StatusListItem) => void;
   groupBy?: string;
+  groupSort?: "name" | "first-item";
   showTags?: boolean;
   showContext?: boolean;
   showReady?: boolean;
@@ -104,7 +105,7 @@ export function ManageTable(props: ManageTableProps) {
       return sortDirection === "asc" ? comparison : -comparison;
     });
   }, [props.items, sortDirection, sortKey]);
-  const { groups, ungrouped } = groupItems(sortedItems, props.groupBy);
+  const { groups, ungrouped } = groupItems(sortedItems, props.groupBy, props.groupSort);
   const colSpan = 3 + (props.showContext ? 1 : 0) + (props.showTags ? 1 : 0) + (props.showReady ? 1 : 0) + (props.showUpdatedAt ? 1 : 0);
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
