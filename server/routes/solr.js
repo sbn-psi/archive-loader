@@ -95,7 +95,7 @@ function sync(suffix, force) {
         let completionStatus = {suffix}
     
         let successfulIndexes = await db.find({}, db.successfulIndexes)
-        let previousSync = successfulIndexes.length > 0 ? successfulIndexes.last().suffix : null
+        let previousSync = successfulIndexes.length > 0 ? successfulIndexes[successfulIndexes.length - 1].suffix : null
     
         let bailed
         // STEP 0: Ensure clean state in Solr
@@ -316,13 +316,13 @@ router.get('/fetchbackup', async function(req, res){
 
 router.get('/suffix-suggestion', async (req, res) => {
     let latest = await db.find({}, db.successfulIndexes)
-    let defaultSuffix = new Date().toISOString().slice(0,-14).replaceAll('-','')
+    let defaultSuffix = new Date().toISOString().slice(0,-14).replace(/-/g, '')
     let defaultIndex = 0
     if(latest.length === 0) { 
         res.status(200).send(defaultSuffix + defaultIndex)
         return
     }
-    latest = latest.last()
+    latest = latest[latest.length - 1]
     let lastSuffix = latest.suffix
     
     let lastIndex = lastSuffix.slice(defaultSuffix.length)
@@ -335,7 +335,7 @@ router.get('/suffix-suggestion', async (req, res) => {
 
 router.get('/last-index', async (req, res) => {
     let successfulIndexes = await db.find({}, db.successfulIndexes)
-    res.status(200).json(successfulIndexes.length > 0 ? successfulIndexes.last() : {})
+    res.status(200).json(successfulIndexes.length > 0 ? successfulIndexes[successfulIndexes.length - 1] : {})
 })
 
 function cleanup(suffix) {

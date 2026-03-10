@@ -16,10 +16,6 @@ COPY package*.json ./
 RUN npm ci --omit=dev
 
 COPY server ./server
-COPY static ./static
-COPY solr ./solr
-COPY solrconfigs ./solrconfigs
-COPY data ./data
 COPY .env.example ./
 COPY LICENSE ./
 COPY README.md ./

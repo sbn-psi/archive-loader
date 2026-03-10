@@ -1,5 +1,3 @@
-// internal modules
-require('../static/scripts/helpers.js')
 const db = require('./db.js')
 const backupManager = require('./backupManager.js')
 const fs = require('fs')

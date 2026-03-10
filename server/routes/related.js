@@ -34,7 +34,7 @@ async function related(desiredType, req, res) {
     try {
         const keys = Object.keys(req.query)
         assert(keys.length > 0, 'Expected a query parameter "spacecraft", "mission", "instrument", or "type"')
-        const type = keys.first()
+        const type = keys[0]
         assert(type, 'Expected a query parameter "spacecraft", "mission", "instrument", or "target"')
         const lid = req.query[type]
         const otherObjectDbKey = registryToFieldMap[desiredType]

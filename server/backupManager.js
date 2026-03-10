@@ -1,5 +1,3 @@
-// internal modules
-require('../static/scripts/helpers.js')
 const db = require('./db.js')
 const {streamList, standardChunk} = require('./utils.js')
 const { config } = require('./config.js')
