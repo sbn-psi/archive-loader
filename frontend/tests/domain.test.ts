@@ -5,6 +5,7 @@ import {
   flattenRelationshipTypeGroups,
   groupRelationshipTypes,
   hydrateToolSelection,
+  isBundle,
   mergeRelationshipsByLid,
   prepDatasetsFromHarvest,
   prepForForm,
@@ -92,6 +93,11 @@ describe("domain behavior parity", () => {
     expect(rows[0].context).toBe("Mission More Data");
     expect(rows[1].is_bundle).toBe(false);
     expect(rows[1].context).toBe("");
+  });
+
+  it("identifies bundles from dataset lids", () => {
+    expect(isBundle("urn:nasa:pds:bundle::1.0")).toBe(true);
+    expect(isBundle("urn:nasa:pds:bundle:document::1.0")).toBe(false);
   });
 
   it("groups and flattens relationship types by order ranges", () => {

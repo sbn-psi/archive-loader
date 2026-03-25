@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { buildDatasetAutocomplete, deriveSelectedTools, hydrateToolSelection, prepDatasetsFromHarvest, prepForForm, sanitizeFormObject } from "@/lib/domain";
+import { buildDatasetAutocomplete, deriveSelectedTools, hydrateToolSelection, isBundle, prepDatasetsFromHarvest, prepForForm, sanitizeFormObject } from "@/lib/domain";
 import type { DatasetRecord, HarvestResponse } from "@/types";
 import { LoadingState } from "@/components/LoadingState";
 import { PageIntro } from "@/components/PageIntro";
@@ -44,12 +44,12 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
   useEffect(() => {
     if (editQuery.data?.object) {
       const dataset = prepForForm(editQuery.data.object, templateModel)!;
-      if ((dataset.logical_identifier ?? "").split("::")[0].split(":").length === 4) {
-        setBundle(null);
-        setCollections([dataset]);
-      } else {
+      if (isBundle(dataset.logical_identifier)) {
         setBundle(dataset);
         setCollections([]);
+      } else {
+        setBundle(null);
+        setCollections([dataset]);
       }
       return;
     }
