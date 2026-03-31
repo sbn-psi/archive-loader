@@ -1,6 +1,7 @@
 import type {
   DatasetRecord,
   HarvestResponse,
+  JobCheckRecord,
   LookupRelationship,
   RelationshipType,
   StatusListItem,
@@ -319,4 +320,61 @@ export function flattenRelationshipTypeGroups(groups: Record<"always" | "sometim
 
 export function extractDistinctGroups(tags: TagRecord[]) {
   return [...new Set(tags.map((tag) => tag.group).filter((group): group is string => Boolean(group)))];
+}
+
+export function parseDelimitedLines(value: string) {
+  return [...new Set(value.split(/\r?\n|,/).map((item) => item.trim()).filter(Boolean))];
+}
+
+export function getJobStatusTone(status?: string | null) {
+  switch ((status || "").toLowerCase()) {
+    case "completed":
+    case "success":
+      return "success";
+    case "running":
+    case "in_progress":
+    case "processing":
+      return "info";
+    case "queued":
+    case "pending":
+      return "pending";
+    case "warning":
+      return "warning";
+    case "failed":
+    case "error":
+    case "cancelled":
+      return "danger";
+    default:
+      return "neutral";
+  }
+}
+
+export function humanizeJobStatus(status?: string | null) {
+  if (!status) {
+    return "Unknown";
+  }
+  return status
+    .replace(/[_-]+/g, " ")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+}
+
+export function formatTimestamp(value?: string | null) {
+  if (!value) {
+    return "Not available";
+  }
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return value;
+  }
+  return new Intl.DateTimeFormat(undefined, {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
+  }).format(date);
+}
+
+export function summarizeJobRequest(record: Pick<JobCheckRecord, "request">) {
+  return [record.request.depth, record.request.mode, record.request.file_types].filter(Boolean).join(" • ");
 }

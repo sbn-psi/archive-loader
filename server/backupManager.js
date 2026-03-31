@@ -42,7 +42,7 @@ async function generateAndUploadFile() {
 
     writeStream.write('{');
 
-    let databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments, db.targetRelationships, db.targetMissionRelationshipTypes, db.instrumentSpacecraftRelationshipTypes, db.tags, db.objectRelationships, db.tools];
+    let databases = [db.datasets, db.targets, db.missions, db.spacecraft, db.instruments, db.targetRelationships, db.targetMissionRelationshipTypes, db.instrumentSpacecraftRelationshipTypes, db.tags, db.objectRelationships, db.tools, db.jobChecks];
     let index = 0;
 
     for (let database of databases) {

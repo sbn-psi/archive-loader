@@ -38,6 +38,7 @@ const config = {
     isProduction: process.env.NODE_ENV === 'production',
     port: toInt(process.env.PORT, 8989),
     mongoUrl: process.env.MONGO_URL || (process.env.NODE_ENV === 'production' ? 'mongodb://mongo:27017' : 'mongodb://localhost:27017'),
+    pdsfetchUrl: process.env.PDSFETCH_URL || 'http://localhost:8000',
     harvestUrl: process.env.HARVEST || 'http://localhost:3009',
     solrUrl: process.env.SOLR || 'http://localhost:8983/solr',
     solrUser: process.env.SOLR_USER || null,

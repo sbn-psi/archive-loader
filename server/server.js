@@ -150,6 +150,7 @@ appRouter.use('/api/save', require('./routes/save-relationships'))
 appRouter.use('/api/save', require('./routes/save-tags'))
 appRouter.use('/api/solr', require('./routes/solr'))
 appRouter.use('/api/import', require('./routes/import'))
+appRouter.use('/api/job-checks', require('./routes/job-checks'))
 
 // // // SUPER SECURE ROUTES // // //
 appRouter.all('/api/admin/*', (req, res, next) => req.user === adminUser ? next() : res.sendStatus(403))

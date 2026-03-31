@@ -123,7 +123,6 @@ export const pageMeta = {
   registryIntegrity: {
     title: "Registry Integrity",
     subtitle: "Integrity checks will compare the external Registry against the archive and flag gaps or mismatches.",
-    visibility: "comingSoon",
   },
 } satisfies Record<string, PageMeta>;
 
@@ -228,7 +227,6 @@ export const navSections: NavSection[] = [
         id: "registry-integrity",
         label: pageMeta.registryIntegrity.title,
         to: "/registry-jobs/integrity",
-        visibility: "comingSoon",
       },
     ],
   },

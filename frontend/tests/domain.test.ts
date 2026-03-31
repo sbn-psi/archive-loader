@@ -4,9 +4,11 @@ import {
   deriveSelectedTools,
   flattenRelationshipTypeGroups,
   groupRelationshipTypes,
+  humanizeJobStatus,
   hydrateToolSelection,
   isBundle,
   mergeRelationshipsByLid,
+  parseDelimitedLines,
   prepDatasetsFromHarvest,
   prepForForm,
   sanitizeFormObject,
@@ -108,5 +110,13 @@ describe("domain behavior parity", () => {
     ]);
     expect(grouped.always).toHaveLength(1);
     expect(flattenRelationshipTypeGroups(grouped).map((type) => type.order)).toEqual([0, 100, 1000]);
+  });
+
+  it("parses LID lists from text input", () => {
+    expect(parseDelimitedLines("urn:a\nurn:b, urn:a")).toEqual(["urn:a", "urn:b"]);
+  });
+
+  it("humanizes job statuses", () => {
+    expect(humanizeJobStatus("in_progress")).toBe("In Progress");
   });
 });

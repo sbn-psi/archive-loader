@@ -10,6 +10,7 @@ First, you will need to configure the `.env` file that configures all the relate
 - PORT: Optional server port override. Defaults to `8989`.
 - APP_BASE_PATH: Optional URL base path for deployments behind a subpath, such as `/archive-loader`. Leave blank to serve from the site root.
 - MONGO_URL: Optional Mongo connection string override. Defaults to `mongodb://localhost:27017` in local development and `mongodb://mongo:27017` in Docker production mode.
+- PDSFETCH_URL: Optional base URL for the PdsFetch job API used by the Registry Integrity dashboard. Defaults to `http://localhost:8000`.
 - HARVEST: The URL for your deployment of the [PDS Harvest Server](https://github.com/sbn-psi/harvest-server)
 - SOLR: The URL for your deployment of the [Legacy Solr Registry](https://github.com/sbn-psi/en-registry-solr)
 - SOLR_USER: The user, if any, for your running solr instance
@@ -89,3 +90,15 @@ Add a target, instrument, mission or spacecraft. Paste the LID for the object in
 The solr registry (and anything that uses it) is not automatically updated with changes in Archive Loader; they must be manually pushed, which is a somewhat heavy process. Therefore, the process in place requires us to create new collections in solr, push over the data, and then atomically update aliases to tell solr to use those new collections. As such, a unique name is required for these new collections, and Archive Loader will suggest one for you.
 
 I tell you that to tell you this: Just click the button, and wait for the sync to finish. If there are any errors, or if the sync process seems to be taking too long (a few minutes or more), contact an administrator/developer.
+
+### Registry integrity jobs
+The Registry Integrity dashboard uses the external PdsFetch HTTP API to create `registry_verification` jobs, stores the returned job IDs in MongoDB, and refreshes their status on demand. The dashboard currently exposes all documented request options for that job type:
+
+- `lids`
+- `depth`
+- `mode`
+- `file_types`
+- `webhook_url`
+- `webhook_secret`
+
+Webhook secrets are forwarded to PdsFetch when a job is created, but Archive Loader intentionally stores only whether a secret was configured, not the secret value itself.

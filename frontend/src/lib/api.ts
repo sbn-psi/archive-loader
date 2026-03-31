@@ -4,9 +4,11 @@ import type {
   DatasetRecord,
   EditResponse,
   HarvestResponse,
+  JobCheckDetailResponse,
+  JobCheckListResponse,
   LoginResponse,
-  MissingContextDatasetsResponse,
   LookupRelationship,
+  MissingContextDatasetsResponse,
   ObjectRelationshipStatus,
   RelationshipType,
   StatusListResponse,
@@ -109,6 +111,23 @@ export const api = {
   getRelationshipStatus: () => request<ObjectRelationshipStatus[]>(`${API_BASE}/status/relationships`),
   getDatasetsMissingContext: () => request<MissingContextDatasetsResponse>(`${API_BASE}/status/datasets-missing-context`),
   getContextOverview: () => request<ContextOverviewResponse>(`${API_BASE}/status/context-overview`),
+  getJobChecks: (providerId: string) => request<JobCheckListResponse>(`${API_BASE}/job-checks/${encodeURIComponent(providerId)}`),
+  createJobCheck: (providerId: string, body: Record<string, unknown>) =>
+    request<{ record: JobCheckListResponse["results"][number] }>(`${API_BASE}/job-checks/${encodeURIComponent(providerId)}`, {
+      method: "POST",
+      body: JSON.stringify(body),
+    }),
+  getJobCheckDetail: (providerId: string, jobId: string, query?: Record<string, string | number | boolean | undefined>) => {
+    const search = new URLSearchParams();
+    for (const [key, value] of Object.entries(query ?? {})) {
+      if (value === undefined || value === null || value === "") {
+        continue;
+      }
+      search.set(key, String(value));
+    }
+    const suffix = search.size > 0 ? `?${search.toString()}` : "";
+    return request<JobCheckDetailResponse>(`${API_BASE}/job-checks/${encodeURIComponent(providerId)}/${encodeURIComponent(jobId)}${suffix}`);
+  },
 
   uploadImage: async (file: File) => {
     const body = new FormData();

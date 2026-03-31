@@ -19,6 +19,11 @@ const primaryCards = [
     description: "Stage the current Archive Loader content and publish it to Archive Navigator when ready.",
     to: "/publishing/archive-navigator",
   },
+  {
+    title: pageMeta.registryIntegrity.title,
+    description: "Create and monitor registry verification jobs against the external PdsFetch service.",
+    to: "/registry-jobs/integrity",
+  },
 ];
 
 const futureCards = [
@@ -31,11 +36,6 @@ const futureCards = [
     title: pageMeta.registryHarvest.title,
     description: "Load archive content into the external Registry once that workflow is available.",
     to: "/registry-jobs/harvest",
-  },
-  {
-    title: pageMeta.registryIntegrity.title,
-    description: "Compare Registry content against the archive to find gaps or drift.",
-    to: "/registry-jobs/integrity",
   },
 ];
 

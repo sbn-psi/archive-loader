@@ -178,3 +178,68 @@ export type HarvestResponse = {
   }>;
   harvestOutput: string;
 };
+
+export type JobCheckRecord = {
+  providerId: string;
+  jobId: string;
+  jobType: string;
+  title: string;
+  request: {
+    lids: string[];
+    depth: string;
+    mode: string;
+    file_types: string;
+    webhook_url?: string | null;
+    webhook_secret_configured?: boolean;
+  };
+  status: string;
+  summary: Record<string, unknown> | null;
+  createdBy: string | null;
+  createdAt: string | null;
+  updatedAt: string | null;
+  remoteCreatedAt: string | null;
+  remoteStartedAt: string | null;
+  remoteCompletedAt: string | null;
+  webhookConfigured: boolean;
+  webhookSecretConfigured: boolean;
+  syncError: string | null;
+};
+
+export type JobCheckListResponse = {
+  provider: {
+    id: string;
+    jobType: string;
+  };
+  count: number;
+  results: JobCheckRecord[];
+};
+
+export type JobCheckIssueList = {
+  warnings?: unknown[];
+  errors?: unknown[];
+  [key: string]: unknown;
+} | null;
+
+export type JobCheckResultsPage = {
+  page?: number;
+  page_size?: number;
+  total_pages?: number;
+  total?: number;
+  results?: Array<{
+    id?: string;
+    result_type?: string;
+    status?: string;
+    timestamp?: string;
+    result_data?: Record<string, unknown>;
+    [key: string]: unknown;
+  }>;
+  [key: string]: unknown;
+} | null;
+
+export type JobCheckDetailResponse = {
+  record: JobCheckRecord;
+  remoteJob: Record<string, unknown> | null;
+  summary: Record<string, unknown> | null;
+  issues: JobCheckIssueList;
+  results: JobCheckResultsPage;
+};

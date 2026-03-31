@@ -15,6 +15,7 @@ import { ReportsPage } from "@/pages/ReportsPage";
 import { WorkbenchPage } from "@/pages/WorkbenchPage";
 import { ConnectedRecordsPage } from "@/pages/ConnectedRecordsPage";
 import { ComingSoonPage } from "@/pages/ComingSoonPage";
+import { RegistryIntegrityPage } from "@/pages/RegistryIntegrityPage";
 import { navSections, pageMeta } from "@/lib/navigation";
 import { LoadingState } from "@/components/LoadingState";
 
@@ -356,7 +357,8 @@ export default function App() {
             <Route path="tools/reports" element={<ReportsPage onError={setGlobalError} />} />
             <Route path="registry-jobs/validate" element={<ComingSoonPage title={pageMeta.registryValidate.title} subtitle={pageMeta.registryValidate.subtitle} />} />
             <Route path="registry-jobs/harvest" element={<ComingSoonPage title={pageMeta.registryHarvest.title} subtitle={pageMeta.registryHarvest.subtitle} />} />
-            <Route path="registry-jobs/integrity" element={<ComingSoonPage title={pageMeta.registryIntegrity.title} subtitle={pageMeta.registryIntegrity.subtitle} />} />
+            <Route path="registry-jobs/integrity" element={<RegistryIntegrityPage onError={setGlobalError} />} />
+            <Route path="registry-jobs/integrity/:jobId" element={<RegistryIntegrityPage onError={setGlobalError} />} />
           </Route>
         </Route>
       </Routes>

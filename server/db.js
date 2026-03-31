@@ -18,6 +18,7 @@ const tagsCollection = 'tags'
 const objectRelationshipsCollection = 'objectRelationships'
 const toolsCollection = 'tools'
 const successfulIndexesCollection = 'successfulIndexes'
+const jobChecksCollection = 'jobChecks'
 
 const usersCollection = 'users'
 
@@ -66,6 +67,7 @@ function findPrimaryKey(type) {
         case targetMissionRelationshipTypesCollection:
         case targetSpacecraftRelationshipTypesCollection:return 'relationshipId'
         case toolsCollection: return 'toolId'
+        case jobChecksCollection: return 'jobKey'
         default: return null
     }
 }
@@ -84,6 +86,7 @@ module.exports = {
     objectRelationships: objectRelationshipsCollection,
     tools: toolsCollection,
     successfulIndexes: successfulIndexesCollection,
+    jobChecks: jobChecksCollection,
     users: usersCollection,
     client: new Promise(async (resolve, reject) => {
             try{await connect()} catch(err) {reject(err)}
