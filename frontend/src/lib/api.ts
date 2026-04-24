@@ -12,6 +12,7 @@ import type {
   StatusListResponse,
   TagRecord,
   ToolRecord,
+  SyncJobResponse,
 } from "@/types";
 
 class ApiError extends Error {
@@ -100,7 +101,12 @@ export const api = {
     }
   },
   getSuffixSuggestion: () => request<string>(`${API_BASE}/solr/suffix-suggestion`),
-  syncSolr: (suffix: string) => request<Record<string, unknown>>(`${API_BASE}/solr/sync`, { method: "POST", body: JSON.stringify({ suffix }) }),
+  startSyncSolr: (suffix: string, options?: { fullReload?: boolean }) =>
+    request<SyncJobResponse>(`${API_BASE}/solr/sync`, {
+      method: "POST",
+      body: JSON.stringify({ suffix, fullReload: options?.fullReload === true }),
+    }),
+  getSyncJob: (jobId: string) => request<SyncJobResponse>(`${API_BASE}/solr/sync/${encodeURIComponent(jobId)}`),
 
   getTargetRelationshipStatus: () =>
     request<{ targets: Array<{ lid: string; name: string }>; relationships: Record<string, unknown>[] }>(`${API_BASE}/status/target-relationships`),

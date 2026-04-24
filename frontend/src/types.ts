@@ -178,3 +178,44 @@ export type HarvestResponse = {
   }>;
   harvestOutput: string;
 };
+
+export type SyncJobResponse = {
+  id: string;
+  suffix: string;
+  status: "queued" | "running" | "completed" | "failed";
+  step: string;
+  message: string;
+  error?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  startedAt?: string | null;
+  finishedAt?: string | null;
+  publishProgress: {
+    totalCollections: number;
+    completedCollections: number;
+    currentCollection?: string | null;
+  };
+  arcnav: {
+    refreshMode: "incremental" | "full";
+    changedIdentifiers: number;
+    liveFlush: {
+      status: "pending" | "running" | "completed" | "failed" | "skipped";
+      message: string;
+    };
+    revalidate: {
+      mode: "incremental" | "full";
+      status: "pending" | "running" | "completed" | "failed" | "skipped";
+      total: number;
+      completed: number;
+      failed: number;
+      currentIdentifier?: string | null;
+      remoteJobId?: string | null;
+      message: string;
+      failures: Array<{
+        identifier: string;
+        error: string;
+      }>;
+    };
+  };
+  result?: Record<string, unknown> | null;
+};

@@ -9,6 +9,8 @@ const LID = require('../LogicalIdentifier')
 const got = require('got')
 const { xmlParser } = require('../utils.js')
 const { config } = require('../config.js')
+const { notifyArcnav } = require('../arcnav.js')
+const { createSyncJob, getSyncJob, mutateSyncJob, hasActiveSyncJob } = require('../syncJobs.js')
 
 const SOLR = config.solrUrl
 const solrAuth = [config.solrUser, config.solrPass]
@@ -88,27 +90,47 @@ function checkSolrIntegrity() {
     })
 }
 
-// runs through steps to push our database into solr registry format
-function sync(suffix, force) {
-    return new Promise(async (resolve, reject) => {
+function toErrorMessage(err) {
+    if(err instanceof Error) {
+        return err.message
+    }
+    return String(err)
+}
 
+// runs through steps to push our database into solr registry format
+async function sync(suffix, force, refreshMode, onProgress) {
         let completionStatus = {suffix}
     
-        let successfulIndexes = await db.find({}, db.successfulIndexes)
-        let previousSync = successfulIndexes.length > 0 ? successfulIndexes[successfulIndexes.length - 1].suffix : null
-    
-        let bailed
+        let successfulIndexes = await db.find({}, db.successfulIndexes, undefined, { includeTimestamp: true })
+        let previousSyncRecord = successfulIndexes.length > 0 ? successfulIndexes[successfulIndexes.length - 1] : null
+        let previousSync = previousSyncRecord ? previousSyncRecord.suffix : null
+        let previousPublishTimestamp = previousSyncRecord?._timestamp ? new Date(previousSyncRecord._timestamp) : null
+
+        onProgress?.({
+            step: 'Checking Solr availability',
+            message: 'Ensuring the publish target is ready.'
+        })
+
         // STEP 0: Ensure clean state in Solr
-        if(!force === true) {
-            await checkAvailability().catch(err => {
-                reject("Sync service unavailable. Please contact an administator.")
-                console.log(err)
-                bailed = true
-            })
+        if(force !== true) {
+            try {
+                await checkAvailability()
+            } catch(err) {
+                console.error('[sync] availability check failed:', err)
+                throw new Error("Sync service unavailable. Please contact an administator.")
+            }
         }
     
-        if(bailed) {return}
-    
+        onProgress?.({
+            step: 'Creating Solr collections',
+            message: 'Preparing new Solr collections for this publish.',
+            publishProgress: {
+                totalCollections: collections.length,
+                completedCollections: 0,
+                currentCollection: null
+            }
+        })
+
         // STEP 1: Create collections
         let createRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
             action: 'CREATE',
@@ -118,26 +140,70 @@ function sync(suffix, force) {
         }, null, ...solrAuth))
         try{ await Promise.all(createRequests) }
         catch(err) {
-            reject("Error creating collections in Solr: " + err.message)
-            return
+            throw new Error("Error creating collections in Solr: " + err.message)
         }
-    
+
+        onProgress?.({
+            step: 'Uploading publish data',
+            message: 'Sending current Archive Loader records to Solr.',
+            publishProgress: {
+                totalCollections: collections.length,
+                completedCollections: 0,
+                currentCollection: null
+            }
+        })
+
+        // Capture the DB-snapshot instant BEFORE any reads for this publish. This
+        // becomes both (a) the upper bound of the incremental revalidate diff and
+        // (b) the stored _timestamp that the NEXT publish resumes from. Anything
+        // saved after this instant is deliberately deferred to the next run, so
+        // we never tell Archive Navigator to revalidate a record whose Solr copy
+        // is still stale.
+        const publishSnapshotInstant = new Date()
+
         // STEP 2: Fill collections
-        let fillRequests = []
-        for (collection of collections) {
+        let completedCollections = 0
+        let fillRequests = collections.map(async (collection) => {
             let documents = await db.find({}, collection.dbName)
             completionStatus[collection.dbName] = documents.length
-            let request = httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents, collection.solrizeAttr) : documents, ...solrAuth)
-            fillRequests.push(request)
-        }
+            onProgress?.({
+                step: 'Uploading publish data',
+                message: `Uploading ${collection.collectionName}.`,
+                publishProgress: {
+                    totalCollections: collections.length,
+                    completedCollections,
+                    currentCollection: collection.collectionName
+                }
+            })
+            await httpRequest(`${SOLR}/${collection.collectionName}-${suffix}/update`, { commit: true }, collection.solrize ? solrize(documents, collection.solrizeAttr) : documents, ...solrAuth)
+            completedCollections += 1
+            onProgress?.({
+                step: 'Uploading publish data',
+                message: `Uploaded ${completedCollections} of ${collections.length} Solr collections.`,
+                publishProgress: {
+                    totalCollections: collections.length,
+                    completedCollections,
+                    currentCollection: completedCollections < collections.length ? collection.collectionName : null
+                }
+            })
+        })
         try { 
             await Promise.all(fillRequests)
         }
         catch(err) {
-            reject("Error posting to collections in Solr: " + err.message)
-            return
+            throw new Error("Error posting to collections in Solr: " + err.message)
         }
-    
+
+        onProgress?.({
+            step: 'Switching Solr aliases',
+            message: 'Activating the new Solr collections.',
+            publishProgress: {
+                totalCollections: collections.length,
+                completedCollections: collections.length,
+                currentCollection: null
+            }
+        })
+
         // STEP 3: Modify aliases
         let aliasRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
             action: 'CREATEALIAS',
@@ -146,35 +212,196 @@ function sync(suffix, force) {
         }, null, ...solrAuth))
         try{ await Promise.all(aliasRequests) }
         catch(err) {
-            reject("Error modifying aliases in Solr: " + err.message)
-            return
+            throw new Error("Error modifying aliases in Solr: " + err.message)
         }
-    
+
+        onProgress?.({
+            step: 'Recording publish',
+            message: 'Saving this publish as the latest successful run.',
+            publishProgress: {
+                totalCollections: collections.length,
+                completedCollections: collections.length,
+                currentCollection: null
+            }
+        })
+
         // STEP 4: Write successful sync to db
-        completionStatus._timestamp = new Date()
+        // Use the pre-upload snapshot instant so the next publish's incremental
+        // diff resumes from exactly the point captured in Solr.
+        completionStatus._timestamp = publishSnapshotInstant
         await db.insert([completionStatus], db.successfulIndexes)
-    
-        // STEP 5: Flush cache of context browser
-        try {
-            await got(config.contextBrowserFlushUrl, {
-                searchParams: {
-                    flush: true
+
+        onProgress?.({
+            step: 'Updating Archive Navigator',
+            message: refreshMode === 'full' ? 'Starting a full Archive Navigator refresh after the publish.' : 'Refreshing Archive Navigator after the publish.',
+            arcnav: {
+                refreshMode,
+                changedIdentifiers: 0,
+                liveFlush: {
+                    status: 'running',
+                    message: 'Refreshing Archive Navigator cache.'
+                },
+                revalidate: {
+                    mode: refreshMode,
+                    status: 'pending',
+                    total: 0,
+                    completed: 0,
+                    failed: 0,
+                    currentIdentifier: null,
+                    remoteJobId: null,
+                    message: refreshMode === 'full'
+                        ? 'Starting a full Archive Navigator refresh job. This can take several minutes.'
+                        : 'Calculating which records changed since the last publish.',
+                    failures: []
                 }
-            });
-        } catch(err) {
-            console.log(err)
-            // don't reject if this fails
-        }
+            }
+        })
+
+        // STEP 5: Notify Archive Navigator.
+        // Bound the incremental diff to `(previousPublishTimestamp, publishSnapshotInstant]`:
+        //   - `since` skips records already covered by prior publishes.
+        //   - `until` excludes anything written after our DB snapshot, which is
+        //     therefore NOT in the Solr collections we just uploaded. Those
+        //     records will have _timestamp > publishSnapshotInstant and will be
+        //     picked up by the next publish's diff automatically.
+        const arcnav = await notifyArcnav({
+            since: previousPublishTimestamp,
+            until: publishSnapshotInstant,
+            mode: refreshMode,
+            onLiveFlushProgress: (liveFlush) => {
+                onProgress?.({
+                    step: 'Updating Archive Navigator',
+                    message: liveFlush.message,
+                    arcnav: { liveFlush }
+                })
+            },
+            onRevalidateProgress: (revalidate) => {
+                onProgress?.({
+                    step: 'Updating Archive Navigator',
+                    message: revalidate.message,
+                    arcnav: { revalidate }
+                })
+            }
+        })
+
+        onProgress?.({
+            step: 'Updating Archive Navigator',
+            message: arcnav.revalidate.message,
+            arcnav: {
+                refreshMode,
+                changedIdentifiers: arcnav.changedIdentifiers.length,
+                liveFlush: arcnav.liveFlush,
+                revalidate: arcnav.revalidate
+            }
+        })
+
+        onProgress?.({
+            step: previousSync ? 'Cleaning up previous publish' : 'Finishing publish',
+            message: previousSync ? 'Removing the previous Solr collections.' : 'No previous publish collections need cleanup.'
+        })
     
         // STEP 6: Cleanup previous sync
-        try {
-            await cleanup(previousSync)
-        } catch (err) {
-            reject("Error cleaning up previous sync: " + err)
+        if(previousSync) {
+            try {
+                await cleanup(previousSync)
+            } catch (err) {
+                throw new Error("Error cleaning up previous sync: " + err)
+            }
         }
-        
-        resolve(completionStatus)
+
+        completionStatus.arcnav = {
+            refreshMode,
+            changedIdentifiers: arcnav.changedIdentifiers.length,
+            liveFlush: arcnav.liveFlush.status,
+            revalidate: {
+                mode: arcnav.revalidate.mode,
+                total: arcnav.revalidate.total,
+                completed: arcnav.revalidate.completed,
+                failed: arcnav.revalidate.failed,
+                status: arcnav.revalidate.status,
+                remoteJobId: arcnav.revalidate.remoteJobId
+            }
+        }
+
+        return {
+            ...completionStatus,
+            arcnav: {
+                refreshMode,
+                changedIdentifiers: arcnav.changedIdentifiers.length,
+                liveFlush: arcnav.liveFlush,
+                revalidate: arcnav.revalidate
+            }
+        }
+}
+
+async function runSyncJob(jobId, suffix, force, refreshMode) {
+    mutateSyncJob(jobId, (job) => {
+        job.status = 'running'
+        job.step = 'Starting publish'
+        job.message = 'Preparing publish.'
+        job.startedAt = new Date().toISOString()
+        job.publishProgress.totalCollections = collections.length
+        job.arcnav.refreshMode = refreshMode
+        job.arcnav.revalidate.mode = refreshMode
     })
+
+    try {
+        const result = await sync(suffix, force, refreshMode, (progress) => {
+            mutateSyncJob(jobId, (job) => {
+                if(progress.step) {
+                    job.step = progress.step
+                }
+                if(progress.message) {
+                    job.message = progress.message
+                }
+                if(progress.publishProgress) {
+                    job.publishProgress = {
+                        ...job.publishProgress,
+                        ...progress.publishProgress
+                    }
+                }
+                if(progress.arcnav) {
+                    job.arcnav = {
+                        ...job.arcnav,
+                        ...progress.arcnav,
+                        liveFlush: {
+                            ...job.arcnav.liveFlush,
+                            ...(progress.arcnav.liveFlush || {})
+                        },
+                        revalidate: {
+                            ...job.arcnav.revalidate,
+                            ...(progress.arcnav.revalidate || {})
+                        }
+                    }
+                }
+            })
+        })
+
+        mutateSyncJob(jobId, (job) => {
+            const incrementalFailures = result.arcnav?.revalidate?.failed || 0
+            const flushFailed = result.arcnav?.liveFlush?.status === 'failed'
+            job.status = 'completed'
+            job.step = incrementalFailures > 0 || flushFailed ? 'Publish completed with refresh issues' : 'Publish complete'
+            job.message = incrementalFailures > 0 || flushFailed
+                ? 'Publish completed, but Archive Navigator refresh reported issues.'
+                : 'Publish completed successfully.'
+            job.finishedAt = new Date().toISOString()
+            job.result = result
+            job.arcnav.refreshMode = result.arcnav?.refreshMode || job.arcnav.refreshMode
+            job.arcnav.changedIdentifiers = result.arcnav?.changedIdentifiers || 0
+            job.arcnav.liveFlush = result.arcnav?.liveFlush || job.arcnav.liveFlush
+            job.arcnav.revalidate = result.arcnav?.revalidate || job.arcnav.revalidate
+        })
+    } catch(err) {
+        const errorMessage = toErrorMessage(err)
+        mutateSyncJob(jobId, (job) => {
+            job.status = 'failed'
+            job.step = 'Publish failed'
+            job.message = errorMessage
+            job.error = errorMessage
+            job.finishedAt = new Date().toISOString()
+        })
+    }
 }
 
 // pull supplemented lids from the core registry and back them up to our solr instance
@@ -270,27 +497,26 @@ router.post('/sync', async function(req, res){
         return
     }
 
-    // we don't want to do backups every time now
-    /*
-    Promise.allSettled([
-        sync(req.body.suffix, req.body.force),
-        backup(req.body.suffix, req.body.ignoreBackup)
-    ]).then(promiseResults => {
-        const [syncStatus, backupStatus] = promiseResults
-        if(syncStatus.status === "fulfilled") {
-            let completionStatus = syncStatus.value
-            completionStatus.coreBackup = backupStatus.value || backupStatus.reason
-            res.status(200).json(completionStatus)
-        } else {
-            res.status(500).send(syncStatus.reason)
-        }
-    })
-    */
+    // Prevent overlapping publishes - they would race on Solr collection
+    // creation with the same suffix and corrupt the alias switch.
+    if(hasActiveSyncJob()) {
+        res.status(409).send('A publish is already in progress. Wait for it to finish before starting another.')
+        return
+    }
 
-    sync(req.body.suffix, req.body.force).then(
-        completionStatus => res.status(200).json(completionStatus),
-        err => res.status(500).send(err)
-    )
+    const refreshMode = req.body.fullReload === true ? 'full' : 'incremental'
+    const job = createSyncJob({ suffix: req.body.suffix, refreshMode })
+    void runSyncJob(job.id, req.body.suffix, req.body.force, refreshMode)
+    res.status(202).json(job)
+})
+
+router.get('/sync/:jobId', async function(req, res) {
+    const job = getSyncJob(req.params.jobId)
+    if(!job) {
+        res.status(404).send('Publish job not found')
+        return
+    }
+    res.status(200).json(job)
 })
 
 router.get('/fetchbackup', async function(req, res){
@@ -340,6 +566,10 @@ router.get('/last-index', async (req, res) => {
 
 function cleanup(suffix) {
     return new Promise(async (resolve, reject) => {
+        if(!suffix) {
+            resolve()
+            return
+        }
         
         let deleteRequests = collections.map(collection => httpRequest(`${SOLR}/admin/collections`, {
             action: 'DELETE',

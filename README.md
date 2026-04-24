@@ -16,6 +16,8 @@ First, you will need to configure the `.env` file that configures all the relate
 - SOLR_PASS: The password, if any, for your running solr instance
 - REGISTRY_URL: Optional override for the context-registry Solr endpoint used for lookups and supplemental metadata backup. Defaults to the SBN PDS alias endpoint.
 - CONTEXT_BROWSER_FLUSH_URL: Optional override for the context-browser cache flush URL used after Solr sync.
+- ARCNAV_REVALIDATE_URL: Optional POST endpoint for Archive Navigator refresh requests after a publish.
+- ARCNAV_REVALIDATE_SECRET: Shared secret sent with Archive Navigator refresh requests.
 - AUTH_SECRET: A randomized string for encrypting cookies
 - ADMIN_USER: Your preferred username for the admin user
 - ADMIN_PASS: Your preferred password for the admin user

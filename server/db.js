@@ -99,8 +99,15 @@ module.exports = {
         const bulkOperation = collection.initializeUnorderedBulkOp()
 
         const primaryKey = findPrimaryKey(type)
+        const now = new Date()
         for(doc of documents) {
             doc._isActive = true;
+            // Ensure every write to tracked collections has a freshness timestamp so
+            // downstream consumers (e.g. the Archive Navigator incremental refresh)
+            // can detect changes. Callers may override by pre-setting _timestamp.
+            if(!doc._timestamp) {
+                doc._timestamp = now
+            }
             if(!!primaryKey) {
                 bulkOperation.find({[primaryKey]: doc[primaryKey]}).upsert().replaceOne(doc)
             } else {
@@ -118,10 +125,11 @@ module.exports = {
     find: async function(inputFilter, type, fields, options) {
         await connect()
         const collection = db.collection(type)
-        let activeFilter = { _isActive: true }
+        let activeFilter = options?.includeInactive ? {} : { _isActive: true }
         Object.assign(activeFilter, inputFilter)
         const projection = fields ? fields.reduce((prev, current) => {
             prev[current] = 1
+            return prev
         }, { _id: 0}) : undefined
         const sort = options?.sort || { $natural: 1 }
         const limit = options?.limit || 0
@@ -155,8 +163,8 @@ module.exports = {
             _isActive: true,
             ...doc
         }
-        // do a soft delete
-        const result = await collection.updateOne(toUpdate, { $set: { _isActive: false }});
+        // do a soft delete; stamp _timestamp so incremental consumers pick up the removal
+        const result = await collection.updateOne(toUpdate, { $set: { _isActive: false, _timestamp: new Date() }});
 
         // flag the backup manager to upload the new data
         backupManager?.markAsDirty()

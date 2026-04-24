@@ -44,6 +44,8 @@ const config = {
     solrPass: process.env.SOLR_PASS || null,
     registryUrl: process.env.REGISTRY_URL || 'https://sbnpds4.psi.edu/solr/pds-alias/select',
     contextBrowserFlushUrl: process.env.CONTEXT_BROWSER_FLUSH_URL || 'https://arcnav.psi.edu/urn:nasa:pds:context:investigation:mission.orex',
+    arcnavRevalidateUrl: process.env.ARCNAV_REVALIDATE_URL || null,
+    arcnavRevalidateSecret: process.env.ARCNAV_REVALIDATE_SECRET || null,
     authSecret: process.env.AUTH_SECRET || '',
     adminUser: process.env.ADMIN_USER || 'admin',
     adminPass: process.env.ADMIN_PASS || '',
