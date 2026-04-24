@@ -31,11 +31,7 @@ export function TargetRelationshipsPage({ onError }: { onError: (message: string
 
   return (
     <div className="page-card">
-      <PageIntro
-        title={pageMeta.targetRelationships.title}
-        subtitle={pageMeta.targetRelationships.subtitle}
-        legacyLabel={pageMeta.targetRelationships.legacyLabel}
-      />
+      <PageIntro title={pageMeta.targetRelationships.title} subtitle={pageMeta.targetRelationships.subtitle} />
       {mode === "INITIAL" ? (
         <ul>
           {data.data.targets.map((target) => (

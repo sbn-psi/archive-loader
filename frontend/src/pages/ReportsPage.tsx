@@ -82,11 +82,7 @@ export function ReportsPage({ onError }: { onError: (message: string | null) => 
 
   return (
     <div className="page-card">
-      <PageIntro
-        title={pageMeta.publishingIssues.title}
-        subtitle={pageMeta.publishingIssues.subtitle}
-        legacyLabel={pageMeta.publishingIssues.legacyLabel}
-      />
+      <PageIntro title={pageMeta.publishingIssues.title} subtitle={pageMeta.publishingIssues.subtitle} />
       <SectionBlock
         title="Bundles Missing Context"
         subtitle="Bundle records that still need a primary context selected before publishing."

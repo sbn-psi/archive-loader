@@ -10,6 +10,11 @@ const primaryCards = [
     to: "/datasets/load",
   },
   {
+    title: "Update Datasets",
+    description: "Browse datasets already in Archive Loader and open any record for editing.",
+    to: "/datasets/manage",
+  },
+  {
     title: "Edit Context Objects",
     description: "Open missions, spacecraft, instruments, and targets for editing.",
     to: "/connected-records",

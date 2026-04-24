@@ -143,7 +143,6 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
         <PageIntro
           title={pageMeta.datasetDetails.title}
           subtitle={pageMeta.datasetDetails.subtitle}
-          legacyLabel={pageMeta.datasetDetails.legacyLabel}
           modeLabel={edit ? "Editing existing record" : "Setting up a new record"}
           actions={
             <button type="button" className="button-primary" onClick={() => void handleSave()}>

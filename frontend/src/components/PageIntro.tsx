@@ -3,20 +3,17 @@ import type { ReactNode } from "react";
 export function PageIntro({
   title,
   subtitle,
-  legacyLabel,
   modeLabel,
   actions,
 }: {
   title: string;
   subtitle?: string;
-  legacyLabel?: string;
   modeLabel?: string;
   actions?: ReactNode;
 }) {
   return (
     <div className="page-header-block">
       <div className="page-kickers">
-        {legacyLabel ? <span className="badge-warm">{legacyLabel}</span> : null}
         {modeLabel ? <span className="badge">{modeLabel}</span> : null}
       </div>
       <div className="page-header">

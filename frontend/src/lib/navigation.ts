@@ -5,7 +5,6 @@ export type NavItem = {
   label: string;
   to: string;
   description?: string;
-  legacyLabel?: string;
   visibility?: NavVisibility;
 };
 
@@ -18,7 +17,6 @@ export type NavSection = {
 export type PageMeta = {
   title: string;
   subtitle?: string;
-  legacyLabel?: string;
   visibility?: NavVisibility;
 };
 
@@ -30,17 +28,14 @@ export const pageMeta = {
   datasetsBrowse: {
     title: "Browse Datasets",
     subtitle: "Review datasets prepared for Archive Navigator and open any one for editing.",
-    legacyLabel: "Formerly dataset management",
   },
   datasetsLoad: {
     title: "Load Datasets",
     subtitle: "Preview archive content and bring detected bundle or collection records into the dataset editor.",
-    legacyLabel: "Formerly Load Archived Dataset",
   },
   datasetDetails: {
     title: "Dataset Details",
     subtitle: "Edit the display, access, and page content used for datasets that appear in Archive Navigator.",
-    legacyLabel: "Formerly Dataset Import",
   },
   contextObjectsHome: {
     title: "Context Objects",
@@ -49,57 +44,46 @@ export const pageMeta = {
   missionsBrowse: {
     title: "Missions",
     subtitle: "Browse mission records and open them for editing.",
-    legacyLabel: "Formerly mission management",
   },
   spacecraftBrowse: {
     title: "Spacecraft",
     subtitle: "Browse spacecraft records and open them for editing.",
-    legacyLabel: "Formerly spacecraft management",
   },
   instrumentsBrowse: {
     title: "Instruments",
     subtitle: "Browse instrument records and open them for editing.",
-    legacyLabel: "Formerly instrument management",
   },
   targetsBrowse: {
     title: "Targets",
     subtitle: "Browse target records and open them for editing.",
-    legacyLabel: "Formerly target management",
   },
   missionDetails: {
     title: "Mission Details",
     subtitle: "Edit mission display information and page content.",
-    legacyLabel: "Formerly Add Mission",
   },
   spacecraftDetails: {
     title: "Spacecraft Details",
     subtitle: "Edit spacecraft display information and page content.",
-    legacyLabel: "Formerly Add Spacecraft",
   },
   instrumentDetails: {
     title: "Instrument Details",
     subtitle: "Edit instrument display information and page content.",
-    legacyLabel: "Formerly Add Instrument",
   },
   targetDetails: {
     title: "Target Details",
     subtitle: "Edit target display information and page content.",
-    legacyLabel: "Formerly Add Target",
   },
   targetRelationships: {
     title: "Target Relationships",
     subtitle: "Review and update target-to-target relationships.",
-    legacyLabel: "Formerly Relate Targets",
   },
   publishing: {
     title: "Publish to Archive Navigator",
     subtitle: "Publish the current Archive Loader content to Archive Navigator.",
-    legacyLabel: "Formerly Sync Data",
   },
   publishingIssues: {
     title: "Publishing Issues",
     subtitle: "Review issues that can affect what appears on Archive Navigator.",
-    legacyLabel: "Formerly Reported Issues",
   },
   relationshipTypes: {
     title: "Relationship Types",
@@ -108,7 +92,6 @@ export const pageMeta = {
   tagGroups: {
     title: "Target Tag Groups",
     subtitle: "Organize target tags into reusable groups.",
-    legacyLabel: "Formerly Target Tags",
   },
   registryValidate: {
     title: "Validate Archive",

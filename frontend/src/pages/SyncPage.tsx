@@ -211,7 +211,7 @@ export function SyncPage({ onError }: { onError: (message: string | null) => voi
   if (!available.data) {
     return (
       <div className="page-card">
-        <PageIntro title={pageMeta.publishing.title} subtitle={pageMeta.publishing.subtitle} legacyLabel={pageMeta.publishing.legacyLabel} />
+        <PageIntro title={pageMeta.publishing.title} subtitle={pageMeta.publishing.subtitle} />
         <p>Publishing is unavailable right now.</p>
       </div>
     );
@@ -225,7 +225,6 @@ export function SyncPage({ onError }: { onError: (message: string | null) => voi
       <PageIntro
         title={pageMeta.publishing.title}
         subtitle={pageMeta.publishing.subtitle}
-        legacyLabel={pageMeta.publishing.legacyLabel}
         actions={
           <>
             {showIncrementalButton ? (

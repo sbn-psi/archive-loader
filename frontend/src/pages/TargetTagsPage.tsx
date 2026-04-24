@@ -21,7 +21,7 @@ export function TargetTagsPage({ onError }: { onError: (message: string | null) 
 
   return (
     <div className="page-card">
-      <PageIntro title={pageMeta.tagGroups.title} subtitle={pageMeta.tagGroups.subtitle} legacyLabel={pageMeta.tagGroups.legacyLabel} />
+      <PageIntro title={pageMeta.tagGroups.title} subtitle={pageMeta.tagGroups.subtitle} />
       {editing ? (
         <div className="page-card">
           <div className="form-page-header compact">

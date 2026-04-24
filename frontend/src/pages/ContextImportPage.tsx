@@ -17,7 +17,6 @@ import { getRecordEditHref } from "@/lib/navigation";
 type ContextConfig = {
   title: string;
   subtitle?: string;
-  legacyLabel?: string;
   entityType: string;
   editType: string;
   tagType: string;
@@ -203,7 +202,6 @@ export function ContextImportPage({
         <PageIntro
           title={config.title}
           subtitle={config.subtitle}
-          legacyLabel={config.legacyLabel}
           modeLabel={edit ? "Editing existing record" : "Setting up a new record"}
           actions={
             <button type="button" className="button-primary" onClick={() => void handleSave()}>

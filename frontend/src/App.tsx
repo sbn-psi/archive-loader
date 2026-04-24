@@ -127,7 +127,6 @@ const contextConfig = {
   targets: {
     title: pageMeta.targetDetails.title,
     subtitle: pageMeta.targetDetails.subtitle,
-    legacyLabel: pageMeta.targetDetails.legacyLabel,
     entityType: "targets",
     editType: "target",
     tagType: "targets",
@@ -139,7 +138,6 @@ const contextConfig = {
   missions: {
     title: pageMeta.missionDetails.title,
     subtitle: pageMeta.missionDetails.subtitle,
-    legacyLabel: pageMeta.missionDetails.legacyLabel,
     entityType: "missions",
     editType: "mission",
     tagType: "missions",
@@ -151,7 +149,6 @@ const contextConfig = {
   spacecraft: {
     title: pageMeta.spacecraftDetails.title,
     subtitle: pageMeta.spacecraftDetails.subtitle,
-    legacyLabel: pageMeta.spacecraftDetails.legacyLabel,
     entityType: "spacecraft",
     editType: "spacecraft",
     tagType: "spacecraft",
@@ -163,7 +160,6 @@ const contextConfig = {
   instruments: {
     title: pageMeta.instrumentDetails.title,
     subtitle: pageMeta.instrumentDetails.subtitle,
-    legacyLabel: pageMeta.instrumentDetails.legacyLabel,
     entityType: "instruments",
     editType: "instrument",
     tagType: "instruments",
@@ -217,7 +213,6 @@ export default function App() {
                 <ManagePage
                   title={pageMeta.datasetsBrowse.title}
                   subtitle={pageMeta.datasetsBrowse.subtitle}
-                  legacyLabel={pageMeta.datasetsBrowse.legacyLabel}
                   statusType="datasets"
                   entityType="dataset"
                   mode="datasets"
@@ -234,7 +229,6 @@ export default function App() {
                 <ManagePage
                   title={pageMeta.missionsBrowse.title}
                   subtitle={pageMeta.missionsBrowse.subtitle}
-                  legacyLabel={pageMeta.missionsBrowse.legacyLabel}
                   statusType="missions"
                   entityType="mission"
                   mode="missions"
@@ -248,7 +242,6 @@ export default function App() {
                 <ManagePage
                   title={pageMeta.spacecraftBrowse.title}
                   subtitle={pageMeta.spacecraftBrowse.subtitle}
-                  legacyLabel={pageMeta.spacecraftBrowse.legacyLabel}
                   statusType="spacecraft"
                   entityType="spacecraft"
                   mode="spacecraft"
@@ -262,7 +255,6 @@ export default function App() {
                 <ManagePage
                   title={pageMeta.instrumentsBrowse.title}
                   subtitle={pageMeta.instrumentsBrowse.subtitle}
-                  legacyLabel={pageMeta.instrumentsBrowse.legacyLabel}
                   statusType="instruments"
                   entityType="instrument"
                   mode="instruments"
@@ -276,7 +268,6 @@ export default function App() {
                 <ManagePage
                   title={pageMeta.targetsBrowse.title}
                   subtitle={pageMeta.targetsBrowse.subtitle}
-                  legacyLabel={pageMeta.targetsBrowse.legacyLabel}
                   statusType="targets"
                   entityType="target"
                   mode="targets"
@@ -290,7 +281,6 @@ export default function App() {
                 <ManagePage
                   title={pageMeta.missionsBrowse.title}
                   subtitle={pageMeta.missionsBrowse.subtitle}
-                  legacyLabel={pageMeta.missionsBrowse.legacyLabel}
                   statusType="missions"
                   entityType="mission"
                   mode="missions"
@@ -304,7 +294,6 @@ export default function App() {
                 <ManagePage
                   title={pageMeta.spacecraftBrowse.title}
                   subtitle={pageMeta.spacecraftBrowse.subtitle}
-                  legacyLabel={pageMeta.spacecraftBrowse.legacyLabel}
                   statusType="spacecraft"
                   entityType="spacecraft"
                   mode="spacecraft"
@@ -318,7 +307,6 @@ export default function App() {
                 <ManagePage
                   title={pageMeta.instrumentsBrowse.title}
                   subtitle={pageMeta.instrumentsBrowse.subtitle}
-                  legacyLabel={pageMeta.instrumentsBrowse.legacyLabel}
                   statusType="instruments"
                   entityType="instrument"
                   mode="instruments"
@@ -332,7 +320,6 @@ export default function App() {
                 <ManagePage
                   title={pageMeta.targetsBrowse.title}
                   subtitle={pageMeta.targetsBrowse.subtitle}
-                  legacyLabel={pageMeta.targetsBrowse.legacyLabel}
                   statusType="targets"
                   entityType="target"
                   mode="targets"

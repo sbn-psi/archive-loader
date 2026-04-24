@@ -13,11 +13,7 @@ export function DatasetLoadPage({ onError }: { onError: (message: string | null)
 
   return (
     <div className="page-card">
-      <PageIntro
-        title={pageMeta.datasetsLoad.title}
-        subtitle={pageMeta.datasetsLoad.subtitle}
-        legacyLabel={pageMeta.datasetsLoad.legacyLabel}
-      />
+      <PageIntro title={pageMeta.datasetsLoad.title} subtitle={pageMeta.datasetsLoad.subtitle} />
       <div className="field">
         <label>Archive URL</label>
         <input type="url" value={url} onChange={(event) => setUrl(event.target.value)} />

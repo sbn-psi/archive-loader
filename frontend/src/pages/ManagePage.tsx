@@ -14,7 +14,6 @@ const titleLookupField = ["title"];
 export function ManagePage({
   title,
   subtitle,
-  legacyLabel,
   statusType,
   entityType,
   mode,
@@ -22,7 +21,6 @@ export function ManagePage({
 }: {
   title: string;
   subtitle?: string;
-  legacyLabel?: string;
   statusType: string;
   entityType: string;
   mode: ManageMode;
@@ -80,7 +78,6 @@ export function ManagePage({
       <PageIntro
         title={title}
         subtitle={subtitle}
-        legacyLabel={legacyLabel}
         actions={
           <>
             {mode === "datasets" ? (
