@@ -6,7 +6,7 @@ import type { StatusListItem } from "@/types";
 type HierarchicalConfig = {
   groupField: string;
   isRoot: (item: StatusListItem) => boolean;
-  childLabel?: (count: number) => string;
+  rootVersion?: (item: StatusListItem) => string | null;
   orphanHeading?: string;
 };
 
@@ -25,10 +25,6 @@ type ManageTableProps = {
 };
 
 type SortKey = "name" | "lid" | "context" | "tag" | "is_ready" | "updated_at";
-
-function defaultChildLabel(count: number) {
-  return count === 1 ? "1 collection" : `${count} collections`;
-}
 
 function formatLastEdited(value?: string | null) {
   if (!value) {
@@ -58,7 +54,7 @@ function Row({
   showReady,
   showUpdatedAt,
   variant,
-  badge,
+  versionLabel,
 }: {
   item: StatusListItem;
   editHref: (lid: string) => string;
@@ -68,7 +64,7 @@ function Row({
   showReady?: boolean;
   showUpdatedAt?: boolean;
   variant?: "root" | "child";
-  badge?: string;
+  versionLabel?: string;
 }) {
   const firstTag = Array.isArray(item.tags) && item.tags.length > 0 ? item.tags[0] : null;
   const rowClass = variant === "child" ? "is-child" : variant === "root" ? "is-root" : undefined;
@@ -76,7 +72,7 @@ function Row({
     <tr className={rowClass}>
       <td className="col-name">
         {item.name}
-        {badge ? <span className="collection-count-badge">{badge}</span> : null}
+        {versionLabel ? <span className="version-badge">{versionLabel}</span> : null}
       </td>
       <td className="col-lid">{item.lid}</td>
       {showContext ? <td className={`col-context${item.context === "Missing Context!" ? " status-error" : ""}`}>{item.context}</td> : null}
@@ -168,15 +164,14 @@ export function ManageTable(props: ManageTableProps) {
           {hierarchical ? (
             <>
               {hierarchical.groups.map((group) => {
-                const count = group.children.length;
-                const badge = group.root && count > 0
-                  ? (props.hierarchical?.childLabel ?? defaultChildLabel)(count)
-                  : undefined;
+                const showVersions = group.roots.length > 1;
+                const versionFor = props.hierarchical?.rootVersion;
                 return (
                   <Fragment key={group.key}>
-                    {group.root ? (
+                    {group.roots.map((root) => (
                       <Row
-                        item={group.root}
+                        key={root.lid}
+                        item={root}
                         editHref={props.editHref}
                         onDelete={props.onDelete}
                         showTags={props.showTags}
@@ -184,9 +179,9 @@ export function ManageTable(props: ManageTableProps) {
                         showReady={props.showReady}
                         showUpdatedAt={props.showUpdatedAt}
                         variant="root"
-                        badge={badge}
+                        versionLabel={showVersions && versionFor ? versionFor(root) ?? undefined : undefined}
                       />
-                    ) : null}
+                    ))}
                     {group.children.map((child) => (
                       <Row
                         key={child.lid}

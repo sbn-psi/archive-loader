@@ -283,7 +283,7 @@ export function groupItems<T extends Record<string, unknown>>(items: T[], groupB
 
 export type HierarchicalGroup<T> = {
   key: string;
-  root?: T;
+  roots: T[];
   children: T[];
 };
 
@@ -305,12 +305,12 @@ export function buildHierarchicalGroups<T extends Record<string, unknown>>(
     }
     let group = groupsByKey.get(key);
     if (!group) {
-      group = { key, children: [] };
+      group = { key, roots: [], children: [] };
       groupsByKey.set(key, group);
       orderedKeys.push(key);
     }
     if (isRoot(item)) {
-      group.root = item;
+      group.roots.push(item);
     } else {
       group.children.push(item);
     }
@@ -320,7 +320,7 @@ export function buildHierarchicalGroups<T extends Record<string, unknown>>(
   const orphans: T[] = [...unkeyed];
   for (const key of orderedKeys) {
     const group = groupsByKey.get(key)!;
-    if (group.root) {
+    if (group.roots.length > 0) {
       groups.push(group);
     } else {
       orphans.push(...group.children);

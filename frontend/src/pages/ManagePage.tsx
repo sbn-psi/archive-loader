@@ -118,6 +118,10 @@ export function ManagePage({
             ? {
                 groupField: "bundle_lid",
                 isRoot: (item) => Boolean(item.is_bundle),
+                rootVersion: (item) => {
+                  const parts = item.lid.split("::");
+                  return parts.length > 1 && parts[1] ? `v${parts[1]}` : null;
+                },
                 orphanHeading: "Collections without a loaded bundle",
               }
             : undefined

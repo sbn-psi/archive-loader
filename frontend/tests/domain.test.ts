@@ -111,9 +111,28 @@ describe("domain behavior parity", () => {
     );
     expect(groups.map((g) => g.key)).toEqual(["b1", "b2"]);
     expect(groups[0].children.map((c) => c.lid)).toEqual(["b1:c1", "b1:c2"]);
-    expect(groups[0].root?.lid).toBe("b1");
+    expect(groups[0].roots.map((r) => r.lid)).toEqual(["b1"]);
     expect(groups[1].children).toEqual([]);
     expect(orphans.map((o) => o.lid)).toEqual(["orphan:c"]);
+  });
+
+  it("keeps multiple bundle versions as co-roots in the same group", () => {
+    const items = [
+      { lid: "urn:nasa:pds:foo::1.0", bundle_lid: "urn:nasa:pds:foo", is_bundle: true, name: "Foo" },
+      { lid: "urn:nasa:pds:foo::2.0", bundle_lid: "urn:nasa:pds:foo", is_bundle: true, name: "Foo" },
+      { lid: "urn:nasa:pds:foo:doc::1.0", bundle_lid: "urn:nasa:pds:foo", is_bundle: false, name: "Doc" },
+    ];
+    const { groups } = buildHierarchicalGroups(
+      items,
+      "bundle_lid",
+      (item) => Boolean((item as { is_bundle?: boolean }).is_bundle),
+    );
+    expect(groups).toHaveLength(1);
+    expect(groups[0].roots.map((r) => r.lid)).toEqual([
+      "urn:nasa:pds:foo::1.0",
+      "urn:nasa:pds:foo::2.0",
+    ]);
+    expect(groups[0].children.map((c) => c.lid)).toEqual(["urn:nasa:pds:foo:doc::1.0"]);
   });
 
   it("places child rows whose root never appears into orphans", () => {
