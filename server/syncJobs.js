@@ -82,6 +82,11 @@ module.exports = {
                     failed: 0,
                     currentIdentifier: null,
                     remoteJobId: null,
+                    statusUrl: null,
+                    attempted: 0,
+                    plannedPaths: [],
+                    paths: [],
+                    revalidatedPaths: [],
                     message: refreshMode === 'full'
                         ? 'Waiting to start a full Archive Navigator refresh.'
                         : 'Waiting to queue incremental refresh requests.',

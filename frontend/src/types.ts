@@ -210,6 +210,11 @@ export type SyncJobResponse = {
       failed: number;
       currentIdentifier?: string | null;
       remoteJobId?: string | null;
+      statusUrl?: string | null;
+      attempted?: number;
+      plannedPaths?: string[];
+      paths?: string[];
+      revalidatedPaths?: string[];
       message: string;
       failures: Array<{
         identifier: string;

@@ -177,6 +177,9 @@ export function SyncPage({ onError }: { onError: (message: string | null) => voi
 
   const failures = refreshProgress?.failures ?? [];
   const visibleFailures = showFailures ? failures : failures.slice(0, 10);
+  const plannedPathCount = refreshProgress?.plannedPaths?.length || refreshProgress?.paths?.length || refreshProgress?.total || 0;
+  const attemptedPathCount = refreshProgress?.attempted ?? refreshProgress?.completed ?? 0;
+  const revalidatedPathCount = refreshProgress?.revalidatedPaths?.length || refreshProgress?.completed || 0;
 
   const startPublish = async (fullReload: boolean) => {
     if (fullReload && typeof window !== "undefined") {
@@ -306,26 +309,28 @@ export function SyncPage({ onError }: { onError: (message: string | null) => voi
 
               {refreshProgress?.status === "pending" ? (
                 <p className="muted">Waiting to start Archive Navigator refresh.</p>
-              ) : isFullRefresh ? (
+              ) : (
                 <>
-                  <p className="muted">Full refresh requested for all Archive Navigator content.</p>
+                  {isFullRefresh ? (
+                    <p className="muted">Full refresh requested for all Archive Navigator content.</p>
+                  ) : null}
                   {refreshProgress?.remoteJobId ? (
                     <p className="muted">Refresh job: <code>{refreshProgress.remoteJobId}</code></p>
                   ) : null}
-                  {refreshProgress?.message ? <p className="muted">{refreshProgress.message}</p> : null}
-                </>
-              ) : (
-                <>
-                  {refreshProgress && refreshProgress.total > 0 ? (
+                  {refreshProgress?.statusUrl ? (
+                    <p className="muted">Status URL: <code>{refreshProgress.statusUrl}</code></p>
+                  ) : null}
+                  {plannedPathCount > 0 ? (
                     <p className="muted">
-                      {refreshProgress.completed} of {refreshProgress.total} records refreshed
-                      {refreshProgress.failed > 0 ? ` (${refreshProgress.failed} failed)` : null}
+                      {attemptedPathCount} of {plannedPathCount} paths attempted
+                      {(refreshProgress?.failed ?? 0) > 0 ? ` (${refreshProgress?.failed} failed)` : null}
+                      {revalidatedPathCount > 0 ? ` - ${revalidatedPathCount} revalidated` : null}
                     </p>
                   ) : refreshProgress?.status === "completed" ? (
                     <p className="muted">No records required refresh.</p>
                   ) : null}
                   {refreshProgress?.message ? <p className="muted">{refreshProgress.message}</p> : null}
-                  {currentJob.arcnav.changedIdentifiers > 0 ? (
+                  {!isFullRefresh && currentJob.arcnav.changedIdentifiers > 0 ? (
                     <p className="muted">Changed records detected: {currentJob.arcnav.changedIdentifiers}</p>
                   ) : null}
                   {refreshProgress?.currentIdentifier ? (

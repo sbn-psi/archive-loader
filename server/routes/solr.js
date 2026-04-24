@@ -249,6 +249,11 @@ async function sync(suffix, force, refreshMode, onProgress) {
                     failed: 0,
                     currentIdentifier: null,
                     remoteJobId: null,
+                    statusUrl: null,
+                    attempted: 0,
+                    plannedPaths: [],
+                    paths: [],
+                    revalidatedPaths: [],
                     message: refreshMode === 'full'
                         ? 'Starting a full Archive Navigator refresh job. This can take several minutes.'
                         : 'Calculating which records changed since the last publish.',
@@ -319,7 +324,12 @@ async function sync(suffix, force, refreshMode, onProgress) {
                 completed: arcnav.revalidate.completed,
                 failed: arcnav.revalidate.failed,
                 status: arcnav.revalidate.status,
-                remoteJobId: arcnav.revalidate.remoteJobId
+                remoteJobId: arcnav.revalidate.remoteJobId,
+                statusUrl: arcnav.revalidate.statusUrl,
+                attempted: arcnav.revalidate.attempted,
+                plannedPaths: arcnav.revalidate.plannedPaths,
+                paths: arcnav.revalidate.paths,
+                revalidatedPaths: arcnav.revalidate.revalidatedPaths
             }
         }
 

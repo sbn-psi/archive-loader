@@ -10,9 +10,10 @@ const trackedCollections = [
     db.spacecraft,
     db.instruments
 ]
-const fullRefreshPollIntervalMs = 2000
-const fullRefreshTimeoutMs = 20 * 60 * 1000
-const incrementalConcurrency = 6
+const revalidatePollIntervalMs = 2000
+const revalidateTimeoutMs = 20 * 60 * 1000
+const remoteRevalidateConcurrency = 2
+const remoteRevalidateBatchSize = 50
 const requestTimeoutMs = 30 * 1000
 const defaultRetry = {
     limit: 2,
@@ -44,6 +45,15 @@ function extractNumber(...values) {
     return null
 }
 
+function extractArray(...values) {
+    for(const value of values) {
+        if(Array.isArray(value)) {
+            return value
+        }
+    }
+    return []
+}
+
 function extractJobId(payload) {
     if(!payload || typeof payload !== 'object') {
         return null
@@ -56,6 +66,31 @@ function extractJobId(payload) {
         payload.data?.jobId,
         payload.result?.jobId
     ) ?? null
+}
+
+function extractStatusUrl(payload) {
+    if(!payload || typeof payload !== 'object') {
+        return null
+    }
+
+    return pickDefined(
+        payload.statusUrl,
+        payload.statusURL,
+        payload.url,
+        payload.data?.statusUrl,
+        payload.result?.statusUrl
+    ) ?? null
+}
+
+function resolveStatusUrl(statusUrl) {
+    if(!statusUrl) {
+        return null
+    }
+    try {
+        return new URL(statusUrl, config.arcnavRevalidateUrl).toString()
+    } catch {
+        return statusUrl
+    }
 }
 
 function withSecretHeader(extra) {
@@ -133,6 +168,11 @@ function makeIncrementalStatus(partial) {
         failed: 0,
         currentIdentifier: null,
         remoteJobId: null,
+        statusUrl: null,
+        attempted: 0,
+        plannedPaths: [],
+        paths: [],
+        revalidatedPaths: [],
         message: '',
         failures: [],
         ...partial
@@ -157,81 +197,30 @@ async function revalidateChangedIdentifiers(identifiers, onProgress) {
         })
     }
 
-    let completed = 0
-    let failed = 0
-    const failures = []
-    let cursor = 0
-
-    const emitProgress = () => {
-        const processed = completed + failed
-        const inFlightIndex = Math.min(cursor, total - 1)
-        const currentIdentifier = processed < total ? identifiers[inFlightIndex] : null
-        onProgress?.(makeIncrementalStatus({
-            status: processed < total ? 'running' : (failed > 0 ? 'failed' : 'completed'),
-            total,
-            completed,
-            failed,
-            currentIdentifier,
-            message: processed < total
-                ? `Refreshing ${Math.min(processed + 1, total)} of ${total} Archive Navigator records.`
-                : (failed > 0
-                    ? `Refreshed ${completed} Archive Navigator records with ${failed} failures.`
-                    : `Refreshed ${completed} Archive Navigator records.`),
-            failures: failures.slice()
-        }))
-    }
-
-    emitProgress()
-
-    const worker = async () => {
-        while(true) {
-            const index = cursor++
-            if(index >= total) {
-                return
-            }
-            const identifier = identifiers[index]
-            try {
-                await got.post(config.arcnavRevalidateUrl, {
-                    headers: withSecretHeader(),
-                    json: { identifier },
-                    timeout: { request: requestTimeoutMs },
-                    retry: defaultRetry
-                })
-                completed += 1
-            } catch(err) {
-                const message = toErrorMessage(err)
-                console.error(`[arcnav] revalidate failed for ${identifier}: ${message}`)
-                failed += 1
-                failures.push({ identifier, error: message })
-            }
-            emitProgress()
-        }
-    }
-
-    const workerCount = Math.max(1, Math.min(incrementalConcurrency, total))
-    await Promise.all(Array.from({ length: workerCount }, () => worker()))
-
-    return makeIncrementalStatus({
-        status: failed > 0 ? 'failed' : 'completed',
-        total,
-        completed,
-        failed,
-        message: failed > 0
-            ? `Refreshed ${completed} Archive Navigator records with ${failed} failures.`
-            : `Refreshed ${completed} Archive Navigator records.`,
-        failures: failures.slice()
+    return revalidateRemoteJob({
+        mode: 'incremental',
+        identifiers,
+        onProgress
     })
 }
 
-async function startFullRevalidateJob() {
+async function startRevalidateJob({ mode, identifiers = [] }) {
     // Deliberately NO retry on this POST: the endpoint is not idempotent and
     // a transient 5xx or response-side timeout after the remote accepted the
-    // job would cause us to start a second full reload. Network-level
+    // job would cause us to start a second refresh. Network-level
     // failures here are reported to the caller, which will surface them in
     // the job status.
+    const isFull = mode === 'full'
     const response = await got.post(config.arcnavRevalidateUrl, {
         headers: withSecretHeader(),
-        json: { all: true, async: true },
+        json: isFull
+            ? { all: true }
+            : {
+                all: false,
+                identifiers,
+                concurrency: remoteRevalidateConcurrency,
+                batchSize: remoteRevalidateBatchSize
+            },
         responseType: 'json',
         timeout: { request: requestTimeoutMs },
         retry: { limit: 0 }
@@ -240,9 +229,10 @@ async function startFullRevalidateJob() {
     return response.body
 }
 
-async function fetchFullRevalidateStatus(jobId) {
-    const response = await got(config.arcnavRevalidateUrl, {
-        searchParams: { jobId },
+async function fetchRevalidateStatus({ jobId, statusUrl }) {
+    const resolvedStatusUrl = resolveStatusUrl(statusUrl)
+    const response = await got(resolvedStatusUrl || config.arcnavRevalidateUrl, {
+        searchParams: resolvedStatusUrl ? undefined : { jobId },
         headers: withSecretHeader(),
         responseType: 'json',
         timeout: { request: requestTimeoutMs },
@@ -252,7 +242,23 @@ async function fetchFullRevalidateStatus(jobId) {
     return response.body
 }
 
-function normalizeRemoteStatus(payload, jobId) {
+function errorToFailure(error, index, fallbackIdentifier) {
+    if(error && typeof error === 'object') {
+        const identifier = pickDefined(error.identifier, error.lid, error.path, error.url, fallbackIdentifier, `error:${index + 1}`)
+        const message = pickDefined(error.error, error.message, error.detail, JSON.stringify(error))
+        return {
+            identifier: String(identifier),
+            error: String(message)
+        }
+    }
+
+    return {
+        identifier: fallbackIdentifier || `error:${index + 1}`,
+        error: String(error)
+    }
+}
+
+function normalizeRemoteStatus(payload, { jobId, statusUrl, mode, identifiers = [] }) {
     const rawStatus = pickDefined(
         payload?.status,
         payload?.state,
@@ -273,146 +279,165 @@ function normalizeRemoteStatus(payload, jobId) {
         statusText === 'done' ||
         statusText === 'success' ||
         statusText === 'succeeded'
-    const total = extractNumber(payload?.total, payload?.progress?.total, payload?.counts?.total, payload?.stats?.total) ?? 1
+    const plannedPaths = extractArray(payload?.plannedPaths, payload?.paths, payload?.data?.plannedPaths, payload?.result?.plannedPaths)
+    const paths = extractArray(payload?.paths, payload?.data?.paths, payload?.result?.paths)
+    const revalidatedPaths = extractArray(payload?.revalidatedPaths, payload?.data?.revalidatedPaths, payload?.result?.revalidatedPaths)
+    const errors = extractArray(payload?.errors, payload?.failures, payload?.failed, payload?.data?.errors, payload?.result?.errors)
+    const attempted = extractNumber(payload?.attempted, payload?.progress?.attempted, payload?.counts?.attempted, payload?.stats?.attempted)
+    const total = extractNumber(payload?.total, payload?.progress?.total, payload?.counts?.total, payload?.stats?.total) ??
+        (plannedPaths.length || paths.length || identifiers.length || (mode === 'full' ? 1 : 0))
     let completed = extractNumber(payload?.completed, payload?.progress?.completed, payload?.counts?.completed, payload?.stats?.completed)
-    let failed = extractNumber(payload?.failed, payload?.progress?.failed, payload?.counts?.failed, payload?.stats?.failed) ?? 0
+    let failed = extractNumber(payload?.failed, payload?.progress?.failed, payload?.counts?.failed, payload?.stats?.failed) ?? errors.length
     const statusMessage = pickDefined(payload?.message, payload?.detail, payload?.result?.message)
     const errorMessage = pickDefined(payload?.error, payload?.errorMessage)
 
     if(completed === null) {
-        completed = isCompleted ? total : 0
+        completed = revalidatedPaths.length || attempted || (isCompleted ? Math.max(total - failed, 0) : 0)
     }
     if(isFailed && failed === 0) {
         failed = 1
     }
 
     const normalizedStatus = isFailed ? 'failed' : (isCompleted ? 'completed' : 'running')
+    const refreshLabel = mode === 'full' ? 'full refresh' : 'incremental refresh'
     const message = typeof (errorMessage || statusMessage) === 'string' && (errorMessage || statusMessage)
         ? (errorMessage || statusMessage)
         : (normalizedStatus === 'completed'
-            ? `Archive Navigator full refresh job ${jobId} completed.`
-            : `Archive Navigator full refresh job ${jobId} is still running.`)
+            ? `Archive Navigator ${refreshLabel} job ${jobId} completed.`
+            : `Archive Navigator ${refreshLabel} job ${jobId} is still running.`)
+    const failures = errors.map((error, index) => errorToFailure(error, index, identifiers[index]))
+    if(normalizedStatus === 'failed' && failures.length === 0) {
+        failures.push({ identifier: `job:${jobId}`, error: message })
+    }
 
     return {
-        mode: 'full',
+        mode,
         status: normalizedStatus,
         total,
         completed,
         failed,
         currentIdentifier: null,
         remoteJobId: jobId,
+        statusUrl: resolveStatusUrl(statusUrl),
+        attempted: attempted ?? completed + failed,
+        plannedPaths,
+        paths,
+        revalidatedPaths,
         message,
-        failures: normalizedStatus === 'failed'
-            ? [{ identifier: `job:${jobId}`, error: message }]
-            : []
+        failures
     }
 }
 
-async function revalidateAllContent(onProgress) {
-    if(!config.arcnavRevalidateUrl || !config.arcnavRevalidateSecret) {
-        return {
-            mode: 'full',
-            status: 'skipped',
-            total: 1,
-            completed: 0,
-            failed: 0,
-            currentIdentifier: null,
-            remoteJobId: null,
-            message: 'Full Archive Navigator refresh is not configured.',
-            failures: []
-        }
-    }
-
-    onProgress?.({
-        mode: 'full',
-        status: 'running',
-        total: 1,
+function makeRevalidateStatus(partial) {
+    return {
+        mode: 'incremental',
+        status: 'pending',
+        total: 0,
         completed: 0,
         failed: 0,
         currentIdentifier: null,
         remoteJobId: null,
-        message: 'Starting full Archive Navigator refresh. This can take several minutes.',
-        failures: []
-    })
+        statusUrl: null,
+        attempted: 0,
+        plannedPaths: [],
+        paths: [],
+        revalidatedPaths: [],
+        message: '',
+        failures: [],
+        ...partial
+    }
+}
 
-    let jobId
-    try {
-        const payload = await startFullRevalidateJob()
-        jobId = extractJobId(payload)
-        if(!jobId) {
-            throw new Error(`Archive Navigator full refresh did not return a job ID: ${JSON.stringify(payload)}`)
-        }
-    } catch(err) {
-        const message = `Failed to start full Archive Navigator refresh: ${toErrorMessage(err)}`
-        console.error('[arcnav]', message)
-        return {
-            mode: 'full',
-            status: 'failed',
-            total: 1,
-            completed: 0,
-            failed: 1,
-            currentIdentifier: null,
-            remoteJobId: null,
-            message,
-            failures: [{ identifier: 'all', error: message }]
-        }
+async function revalidateRemoteJob({ mode, identifiers = [], onProgress }) {
+    if(!config.arcnavRevalidateUrl || !config.arcnavRevalidateSecret) {
+        return makeRevalidateStatus({
+            mode,
+            status: 'skipped',
+            total: mode === 'full' ? 1 : identifiers.length,
+            message: `${mode === 'full' ? 'Full' : 'Incremental'} Archive Navigator refresh is not configured.`
+        })
     }
 
-    onProgress?.({
-        mode: 'full',
+    onProgress?.(makeRevalidateStatus({
+        mode,
         status: 'running',
-        total: 1,
-        completed: 0,
-        failed: 0,
-        currentIdentifier: null,
-        remoteJobId: jobId,
-        message: `Full Archive Navigator refresh job ${jobId} started. Waiting for completion.`,
-        failures: []
-    })
+        total: mode === 'full' ? 1 : identifiers.length,
+        message: mode === 'full'
+            ? 'Queueing full Archive Navigator refresh. This can take several minutes.'
+            : `Queueing incremental Archive Navigator refresh for ${identifiers.length} changed records.`
+    }))
+
+    let jobId
+    let statusUrl
+    try {
+        const payload = await startRevalidateJob({ mode, identifiers })
+        jobId = extractJobId(payload)
+        statusUrl = extractStatusUrl(payload)
+        if(!jobId) {
+            throw new Error(`Archive Navigator ${mode} refresh did not return a job ID: ${JSON.stringify(payload)}`)
+        }
+        onProgress?.(normalizeRemoteStatus(payload, { jobId, statusUrl, mode, identifiers }))
+    } catch(err) {
+        const message = `Failed to start ${mode} Archive Navigator refresh: ${toErrorMessage(err)}`
+        console.error('[arcnav]', message)
+        return makeRevalidateStatus({
+            mode,
+            status: 'failed',
+            total: mode === 'full' ? 1 : identifiers.length,
+            message,
+            failed: 1,
+            failures: [{ identifier: mode === 'full' ? 'all' : 'identifiers', error: message }]
+        })
+    }
 
     const startedAt = Date.now()
-    while(Date.now() - startedAt < fullRefreshTimeoutMs) {
+    while(Date.now() - startedAt < revalidateTimeoutMs) {
         try {
-            const payload = await fetchFullRevalidateStatus(jobId)
-            const normalized = normalizeRemoteStatus(payload, jobId)
+            const payload = await fetchRevalidateStatus({ jobId, statusUrl })
+            const normalized = normalizeRemoteStatus(payload, { jobId, statusUrl, mode, identifiers })
             onProgress?.(normalized)
             if(normalized.status === 'completed' || normalized.status === 'failed') {
                 return normalized
             }
         } catch(err) {
-            const message = `Failed to poll full Archive Navigator refresh job ${jobId}: ${toErrorMessage(err)}`
+            const message = `Failed to poll ${mode} Archive Navigator refresh job ${jobId}: ${toErrorMessage(err)}`
             console.error('[arcnav]', message)
-            const failure = {
-                mode: 'full',
+            const failure = makeRevalidateStatus({
+                mode,
                 status: 'failed',
-                total: 1,
-                completed: 0,
+                total: mode === 'full' ? 1 : identifiers.length,
                 failed: 1,
-                currentIdentifier: null,
                 remoteJobId: jobId,
+                statusUrl: resolveStatusUrl(statusUrl),
                 message,
                 failures: [{ identifier: `job:${jobId}`, error: message }]
-            }
+            })
             onProgress?.(failure)
             return failure
         }
 
-        await sleep(fullRefreshPollIntervalMs)
+        await sleep(revalidatePollIntervalMs)
     }
 
-    const timeout = {
-        mode: 'full',
+    const timeout = makeRevalidateStatus({
+        mode,
         status: 'failed',
-        total: 1,
-        completed: 0,
+        total: mode === 'full' ? 1 : identifiers.length,
         failed: 1,
-        currentIdentifier: null,
         remoteJobId: jobId,
-        message: `Timed out waiting for full Archive Navigator refresh job ${jobId}.`,
+        statusUrl: resolveStatusUrl(statusUrl),
+        message: `Timed out waiting for ${mode} Archive Navigator refresh job ${jobId}.`,
         failures: [{ identifier: `job:${jobId}`, error: `Timed out waiting for job ${jobId}` }]
-    }
+    })
     onProgress?.(timeout)
     return timeout
+}
+
+async function revalidateAllContent(onProgress) {
+    return revalidateRemoteJob({
+        mode: 'full',
+        onProgress
+    })
 }
 
 module.exports = {
