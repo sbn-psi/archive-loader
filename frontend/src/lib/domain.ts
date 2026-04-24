@@ -281,6 +281,54 @@ export function groupItems<T extends Record<string, unknown>>(items: T[], groupB
   return { groups, ungrouped };
 }
 
+export type HierarchicalGroup<T> = {
+  key: string;
+  root?: T;
+  children: T[];
+};
+
+export function buildHierarchicalGroups<T extends Record<string, unknown>>(
+  items: T[],
+  groupField: string,
+  isRoot: (item: T) => boolean,
+): { groups: HierarchicalGroup<T>[]; orphans: T[] } {
+  const groupsByKey = new Map<string, HierarchicalGroup<T>>();
+  const orderedKeys: string[] = [];
+  const unkeyed: T[] = [];
+
+  for (const item of items) {
+    const rawKey = item[groupField];
+    const key = typeof rawKey === "string" ? rawKey : "";
+    if (!key) {
+      unkeyed.push(item);
+      continue;
+    }
+    let group = groupsByKey.get(key);
+    if (!group) {
+      group = { key, children: [] };
+      groupsByKey.set(key, group);
+      orderedKeys.push(key);
+    }
+    if (isRoot(item)) {
+      group.root = item;
+    } else {
+      group.children.push(item);
+    }
+  }
+
+  const groups: HierarchicalGroup<T>[] = [];
+  const orphans: T[] = [...unkeyed];
+  for (const key of orderedKeys) {
+    const group = groupsByKey.get(key)!;
+    if (group.root) {
+      groups.push(group);
+    } else {
+      orphans.push(...group.children);
+    }
+  }
+  return { groups, orphans };
+}
+
 export function getGroupTitleLookupLids(groups: Array<{ name?: string }>) {
   return groups.filter((group) => group.name?.startsWith("urn:")).map((group) => group.name!) as string[];
 }

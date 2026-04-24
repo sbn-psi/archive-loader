@@ -1,7 +1,14 @@
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
-import { groupItems } from "@/lib/domain";
+import { buildHierarchicalGroups, groupItems } from "@/lib/domain";
 import type { StatusListItem } from "@/types";
+
+type HierarchicalConfig = {
+  groupField: string;
+  isRoot: (item: StatusListItem) => boolean;
+  childLabel?: (count: number) => string;
+  orphanHeading?: string;
+};
 
 type ManageTableProps = {
   items: StatusListItem[];
@@ -14,9 +21,14 @@ type ManageTableProps = {
   showReady?: boolean;
   showUpdatedAt?: boolean;
   groupLabels?: Record<string, string>;
+  hierarchical?: HierarchicalConfig;
 };
 
 type SortKey = "name" | "lid" | "context" | "tag" | "is_ready" | "updated_at";
+
+function defaultChildLabel(count: number) {
+  return count === 1 ? "1 collection" : `${count} collections`;
+}
 
 function formatLastEdited(value?: string | null) {
   if (!value) {
@@ -45,6 +57,8 @@ function Row({
   showContext,
   showReady,
   showUpdatedAt,
+  variant,
+  badge,
 }: {
   item: StatusListItem;
   editHref: (lid: string) => string;
@@ -53,11 +67,17 @@ function Row({
   showContext?: boolean;
   showReady?: boolean;
   showUpdatedAt?: boolean;
+  variant?: "root" | "child";
+  badge?: string;
 }) {
   const firstTag = Array.isArray(item.tags) && item.tags.length > 0 ? item.tags[0] : null;
+  const rowClass = variant === "child" ? "is-child" : variant === "root" ? "is-root" : undefined;
   return (
-    <tr>
-      <td className="col-name">{item.name}</td>
+    <tr className={rowClass}>
+      <td className="col-name">
+        {item.name}
+        {badge ? <span className="collection-count-badge">{badge}</span> : null}
+      </td>
       <td className="col-lid">{item.lid}</td>
       {showContext ? <td className={`col-context${item.context === "Missing Context!" ? " status-error" : ""}`}>{item.context}</td> : null}
       {showTags ? (
@@ -105,7 +125,12 @@ export function ManageTable(props: ManageTableProps) {
       return sortDirection === "asc" ? comparison : -comparison;
     });
   }, [props.items, sortDirection, sortKey]);
-  const { groups, ungrouped } = groupItems(sortedItems, props.groupBy, props.groupSort);
+  const hierarchical = props.hierarchical
+    ? buildHierarchicalGroups(sortedItems, props.hierarchical.groupField, props.hierarchical.isRoot)
+    : null;
+  const { groups, ungrouped } = hierarchical
+    ? { groups: [], ungrouped: [] as StatusListItem[] }
+    : groupItems(sortedItems, props.groupBy, props.groupSort);
   const colSpan = 3 + (props.showContext ? 1 : 0) + (props.showTags ? 1 : 0) + (props.showReady ? 1 : 0) + (props.showUpdatedAt ? 1 : 0);
   const toggleSort = (key: SortKey) => {
     if (sortKey === key) {
@@ -140,25 +165,89 @@ export function ManageTable(props: ManageTableProps) {
           </tr>
         </thead>
         <tbody>
-          {ungrouped.map((item) => (
-            <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} showUpdatedAt={props.showUpdatedAt} />
-          ))}
-          {groups.map((group) => (
-            group.name ? (
-              <>
-                <tr key={`${group.name}-heading`}>
-                  <td colSpan={colSpan}>
-                    <strong>{props.groupLabels?.[group.name] ?? group.name}</strong>
-                  </td>
-                </tr>
-                {group.items.map((item) => (
+          {hierarchical ? (
+            <>
+              {hierarchical.groups.map((group) => {
+                const count = group.children.length;
+                const badge = group.root && count > 0
+                  ? (props.hierarchical?.childLabel ?? defaultChildLabel)(count)
+                  : undefined;
+                return (
+                  <Fragment key={group.key}>
+                    {group.root ? (
+                      <Row
+                        item={group.root}
+                        editHref={props.editHref}
+                        onDelete={props.onDelete}
+                        showTags={props.showTags}
+                        showContext={props.showContext}
+                        showReady={props.showReady}
+                        showUpdatedAt={props.showUpdatedAt}
+                        variant="root"
+                        badge={badge}
+                      />
+                    ) : null}
+                    {group.children.map((child) => (
+                      <Row
+                        key={child.lid}
+                        item={child}
+                        editHref={props.editHref}
+                        onDelete={props.onDelete}
+                        showTags={props.showTags}
+                        showContext={props.showContext}
+                        showReady={props.showReady}
+                        showUpdatedAt={props.showUpdatedAt}
+                        variant="child"
+                      />
+                    ))}
+                  </Fragment>
+                );
+              })}
+              {hierarchical.orphans.length > 0 ? (
+                <>
+                  <tr className="orphan-heading">
+                    <td colSpan={colSpan + 1}>
+                      {props.hierarchical?.orphanHeading ?? "Items without a matching parent"}
+                    </td>
+                  </tr>
+                  {hierarchical.orphans.map((item) => (
+                    <Row
+                      key={item.lid}
+                      item={item}
+                      editHref={props.editHref}
+                      onDelete={props.onDelete}
+                      showTags={props.showTags}
+                      showContext={props.showContext}
+                      showReady={props.showReady}
+                      showUpdatedAt={props.showUpdatedAt}
+                    />
+                  ))}
+                </>
+              ) : null}
+            </>
+          ) : (
+            <>
+              {ungrouped.map((item) => (
+                <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} showUpdatedAt={props.showUpdatedAt} />
+              ))}
+              {groups.map((group) => (
+                group.name ? (
+                  <Fragment key={`${group.name}-group`}>
+                    <tr>
+                      <td colSpan={colSpan}>
+                        <strong>{props.groupLabels?.[group.name] ?? group.name}</strong>
+                      </td>
+                    </tr>
+                    {group.items.map((item) => (
+                      <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} showUpdatedAt={props.showUpdatedAt} />
+                    ))}
+                  </Fragment>
+                ) : group.items.map((item) => (
                   <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} showUpdatedAt={props.showUpdatedAt} />
-                ))}
-              </>
-            ) : group.items.map((item) => (
-              <Row key={item.lid} item={item} editHref={props.editHref} onDelete={props.onDelete} showTags={props.showTags} showContext={props.showContext} showReady={props.showReady} showUpdatedAt={props.showUpdatedAt} />
-            ))
-          ))}
+                ))
+              ))}
+            </>
+          )}
         </tbody>
       </table>
     </div>

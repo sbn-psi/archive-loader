@@ -1,5 +1,6 @@
 import {
   buildDatasetAutocomplete,
+  buildHierarchicalGroups,
   classifyDatasetStatusRows,
   deriveSelectedTools,
   flattenRelationshipTypeGroups,
@@ -93,6 +94,39 @@ describe("domain behavior parity", () => {
     expect(rows[0].context).toBe("Mission More Data");
     expect(rows[1].is_bundle).toBe(false);
     expect(rows[1].context).toBe("");
+  });
+
+  it("builds hierarchical groups anchored by roots in sort order", () => {
+    const items = [
+      { lid: "b1", bundle_lid: "b1", is_bundle: true, name: "Bundle One" },
+      { lid: "b1:c1", bundle_lid: "b1", is_bundle: false, name: "C1a" },
+      { lid: "b1:c2", bundle_lid: "b1", is_bundle: false, name: "C1b" },
+      { lid: "b2", bundle_lid: "b2", is_bundle: true, name: "Bundle Two" },
+      { lid: "orphan:c", bundle_lid: "missing", is_bundle: false, name: "Orphan" },
+    ];
+    const { groups, orphans } = buildHierarchicalGroups(
+      items,
+      "bundle_lid",
+      (item) => Boolean((item as { is_bundle?: boolean }).is_bundle),
+    );
+    expect(groups.map((g) => g.key)).toEqual(["b1", "b2"]);
+    expect(groups[0].children.map((c) => c.lid)).toEqual(["b1:c1", "b1:c2"]);
+    expect(groups[0].root?.lid).toBe("b1");
+    expect(groups[1].children).toEqual([]);
+    expect(orphans.map((o) => o.lid)).toEqual(["orphan:c"]);
+  });
+
+  it("places child rows whose root never appears into orphans", () => {
+    const items = [
+      { lid: "c1", bundle_lid: "b1", is_bundle: false, name: "Only child" },
+    ];
+    const { groups, orphans } = buildHierarchicalGroups(
+      items,
+      "bundle_lid",
+      (item) => Boolean((item as { is_bundle?: boolean }).is_bundle),
+    );
+    expect(groups).toEqual([]);
+    expect(orphans.map((o) => o.lid)).toEqual(["c1"]);
   });
 
   it("identifies bundles from dataset lids", () => {

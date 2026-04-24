@@ -739,6 +739,55 @@ select {
   line-height: 1.25;
 }
 
+.manage-table tr.is-root td.col-name {
+  font-weight: 600;
+}
+
+.manage-table tr.is-child td.col-name {
+  position: relative;
+  padding-left: 2rem;
+  color: #4b4134;
+}
+
+.manage-table tr.is-child td.col-name::before {
+  content: "";
+  position: absolute;
+  left: 0.9rem;
+  top: 0;
+  bottom: 0;
+  border-left: 1px solid #d7cfbf;
+}
+
+.manage-table tr.is-child td.col-name::after {
+  content: "";
+  position: absolute;
+  left: 0.9rem;
+  top: 50%;
+  width: 0.75rem;
+  border-top: 1px solid #d7cfbf;
+}
+
+.manage-table .collection-count-badge {
+  margin-left: 0.5rem;
+  padding: 0.1rem 0.5rem;
+  border-radius: 999px;
+  background: #f1ebdf;
+  color: #7a6f5e;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+
+.manage-table tr.orphan-heading td {
+  padding-top: 1.25rem;
+  color: #7a6f5e;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid #ece6dc;
+}
+
 .button-row {
   display: flex;
   gap: 0.75rem;

@@ -54,15 +54,8 @@ export function ManagePage({
         })),
       );
     }
-    if (mode === "datasets" && showCollections) {
-      return getGroupTitleLookupLids(
-        [...new Set(items.map((item) => item.bundle_lid).filter((item): item is string => Boolean(item)))].map((name) => ({
-          name,
-        })),
-      );
-    }
     return [];
-  }, [items, mode, showCollections]);
+  }, [items, mode]);
 
   const lookups = useQuery({
     queryKey: ["group-lookups", statusType, groupLookupLids],
@@ -117,9 +110,18 @@ export function ManagePage({
         showTags={mode === "datasets" || mode === "targets" || mode === "spacecraft" || mode === "instruments"}
         showReady={mode === "missions"}
         showUpdatedAt
-        groupBy={mode === "instruments" ? "spacecraft" : mode === "datasets" && showCollections ? "bundle_lid" : undefined}
-        groupSort={mode === "datasets" && showCollections ? "first-item" : "name"}
+        groupBy={mode === "instruments" ? "spacecraft" : undefined}
+        groupSort="name"
         groupLabels={lookups.data}
+        hierarchical={
+          mode === "datasets" && showCollections
+            ? {
+                groupField: "bundle_lid",
+                isRoot: (item) => Boolean(item.is_bundle),
+                orphanHeading: "Collections without a loaded bundle",
+              }
+            : undefined
+        }
       />
     </div>
   );
