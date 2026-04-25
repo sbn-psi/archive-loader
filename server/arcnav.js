@@ -30,6 +30,10 @@ function sleep(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
+function elapsedMs(startedAt) {
+    return Date.now() - startedAt
+}
+
 function pickDefined(...values) {
     return values.find((value) => value !== undefined && value !== null)
 }
@@ -95,6 +99,83 @@ function withSecretHeader(extra) {
     return {
         'x-revalidate-secret': config.arcnavRevalidateSecret,
         ...(extra || {})
+    }
+}
+
+function truncateString(value, maxLength = 1000) {
+    const text = typeof value === 'string' ? value : JSON.stringify(value)
+    if(!text || text.length <= maxLength) {
+        return text
+    }
+    return `${text.slice(0, maxLength)}... [truncated ${text.length - maxLength} chars]`
+}
+
+function jsonByteLength(value) {
+    try {
+        return Buffer.byteLength(JSON.stringify(value), 'utf8')
+    } catch {
+        return null
+    }
+}
+
+function summarizeIdentifiers(identifiers = []) {
+    return {
+        count: identifiers.length,
+        first: identifiers.slice(0, 10),
+        last: identifiers.length > 10 ? identifiers.slice(-10) : []
+    }
+}
+
+function summarizeRevalidateBody(body) {
+    if(body?.identifiers) {
+        return {
+            keys: Object.keys(body),
+            identifiers: summarizeIdentifiers(body.identifiers),
+            byteLength: jsonByteLength(body)
+        }
+    }
+
+    return {
+        keys: Object.keys(body || {}),
+        body,
+        byteLength: jsonByteLength(body)
+    }
+}
+
+function summarizeRemotePayload(payload) {
+    if(!payload || typeof payload !== 'object') {
+        return payload
+    }
+
+    return {
+        keys: Object.keys(payload),
+        accepted: payload.accepted,
+        all: payload.all,
+        jobId: extractJobId(payload),
+        status: payload.status,
+        statusUrl: extractStatusUrl(payload),
+        identifiers: Array.isArray(payload.identifiers) ? summarizeIdentifiers(payload.identifiers) : undefined,
+        total: payload.total,
+        paths: Array.isArray(payload.paths) ? { count: payload.paths.length, first: payload.paths.slice(0, 10) } : undefined,
+        plannedPaths: Array.isArray(payload.plannedPaths) ? { count: payload.plannedPaths.length, first: payload.plannedPaths.slice(0, 10) } : undefined,
+        attempted: payload.attempted,
+        revalidatedPaths: Array.isArray(payload.revalidatedPaths) ? { count: payload.revalidatedPaths.length, first: payload.revalidatedPaths.slice(0, 10) } : undefined,
+        failed: Array.isArray(payload.failed) ? { count: payload.failed.length, first: payload.failed.slice(0, 10) } : payload.failed,
+        errors: Array.isArray(payload.errors) ? { count: payload.errors.length, first: payload.errors.slice(0, 10) } : payload.errors,
+        error: payload.error
+    }
+}
+
+function summarizeGotError(err) {
+    return {
+        name: err?.name,
+        code: err?.code,
+        event: err?.event,
+        message: toErrorMessage(err),
+        timings: err?.timings,
+        responseStatusCode: err?.response?.statusCode,
+        responseHeaders: err?.response?.headers,
+        responseBody: err?.response?.body ? truncateString(err.response.body) : undefined
     }
 }
 
@@ -208,32 +289,105 @@ async function startRevalidateJob({ mode, identifiers = [] }) {
     // job would cause us to start a second refresh. Network-level
     // failures here are reported to the caller, which will surface them in
     // the job status.
-    const response = await got.post(config.arcnavRevalidateUrl, {
-        headers: withSecretHeader(),
-        json: mode === 'full'
-            ? { all: true }
-            : {
-                identifiers
-            },
-        responseType: 'json',
-        timeout: { request: requestTimeoutMs },
-        retry: { limit: 0 }
+    const body = mode === 'full'
+        ? { all: true }
+        : {
+            identifiers
+        }
+    const startedAt = Date.now()
+    console.log('[arcnav] revalidate start request', {
+        method: 'POST',
+        url: config.arcnavRevalidateUrl,
+        mode,
+        timeoutMs: requestTimeoutMs,
+        retryLimit: 0,
+        headers: {
+            'x-revalidate-secret': config.arcnavRevalidateSecret ? '[configured]' : '[missing]'
+        },
+        body: summarizeRevalidateBody(body)
     })
 
-    return response.body
+    try {
+        const response = await got.post(config.arcnavRevalidateUrl, {
+            headers: withSecretHeader(),
+            json: body,
+            responseType: 'json',
+            timeout: { request: requestTimeoutMs },
+            retry: { limit: 0 }
+        })
+
+        console.log('[arcnav] revalidate start response', {
+            method: 'POST',
+            url: config.arcnavRevalidateUrl,
+            mode,
+            elapsedMs: elapsedMs(startedAt),
+            statusCode: response.statusCode,
+            headers: response.headers,
+            body: summarizeRemotePayload(response.body)
+        })
+
+        return response.body
+    } catch(err) {
+        console.error('[arcnav] revalidate start request failed', {
+            method: 'POST',
+            url: config.arcnavRevalidateUrl,
+            mode,
+            elapsedMs: elapsedMs(startedAt),
+            error: summarizeGotError(err)
+        })
+        throw err
+    }
 }
 
 async function fetchRevalidateStatus({ jobId, statusUrl }) {
     const resolvedStatusUrl = resolveStatusUrl(statusUrl)
-    const response = await got(resolvedStatusUrl || config.arcnavRevalidateUrl, {
-        searchParams: resolvedStatusUrl ? undefined : { jobId },
-        headers: withSecretHeader(),
-        responseType: 'json',
-        timeout: { request: requestTimeoutMs },
-        retry: defaultRetry
+    const url = resolvedStatusUrl || config.arcnavRevalidateUrl
+    const searchParams = resolvedStatusUrl ? undefined : { jobId }
+    const startedAt = Date.now()
+    console.log('[arcnav] revalidate status request', {
+        method: 'GET',
+        url,
+        searchParams,
+        jobId,
+        timeoutMs: requestTimeoutMs,
+        retry: defaultRetry,
+        headers: {
+            'x-revalidate-secret': config.arcnavRevalidateSecret ? '[configured]' : '[missing]'
+        }
     })
 
-    return response.body
+    try {
+        const response = await got(url, {
+            searchParams,
+            headers: withSecretHeader(),
+            responseType: 'json',
+            timeout: { request: requestTimeoutMs },
+            retry: defaultRetry
+        })
+
+        console.log('[arcnav] revalidate status response', {
+            method: 'GET',
+            url,
+            searchParams,
+            jobId,
+            elapsedMs: elapsedMs(startedAt),
+            statusCode: response.statusCode,
+            headers: response.headers,
+            body: summarizeRemotePayload(response.body)
+        })
+
+        return response.body
+    } catch(err) {
+        console.error('[arcnav] revalidate status request failed', {
+            method: 'GET',
+            url,
+            searchParams,
+            jobId,
+            elapsedMs: elapsedMs(startedAt),
+            error: summarizeGotError(err)
+        })
+        throw err
+    }
 }
 
 function errorToFailure(error, index, fallbackIdentifier) {
@@ -343,6 +497,16 @@ function makeRevalidateStatus(partial) {
 }
 
 async function revalidateRemoteJob({ mode, identifiers = [], onProgress }) {
+    console.log('[arcnav] revalidate remote job preparing', {
+        mode,
+        revalidateUrl: config.arcnavRevalidateUrl,
+        hasSecret: !!config.arcnavRevalidateSecret,
+        identifiers: summarizeIdentifiers(identifiers),
+        requestTimeoutMs,
+        pollIntervalMs: revalidatePollIntervalMs,
+        overallTimeoutMs: revalidateTimeoutMs
+    })
+
     if(!config.arcnavRevalidateUrl || !config.arcnavRevalidateSecret) {
         return makeRevalidateStatus({
             mode,
@@ -367,6 +531,13 @@ async function revalidateRemoteJob({ mode, identifiers = [], onProgress }) {
         const payload = await startRevalidateJob({ mode, identifiers })
         jobId = extractJobId(payload)
         statusUrl = extractStatusUrl(payload)
+        console.log('[arcnav] revalidate remote job accepted', {
+            mode,
+            jobId,
+            statusUrl,
+            resolvedStatusUrl: resolveStatusUrl(statusUrl),
+            response: summarizeRemotePayload(payload)
+        })
         if(!jobId) {
             throw new Error(`Archive Navigator ${mode} refresh did not return a job ID: ${JSON.stringify(payload)}`)
         }
@@ -385,10 +556,36 @@ async function revalidateRemoteJob({ mode, identifiers = [], onProgress }) {
     }
 
     const startedAt = Date.now()
+    let pollCount = 0
     while(Date.now() - startedAt < revalidateTimeoutMs) {
         try {
+            pollCount += 1
+            console.log('[arcnav] revalidate poll tick', {
+                mode,
+                jobId,
+                pollCount,
+                elapsedMs: elapsedMs(startedAt),
+                statusUrl: resolveStatusUrl(statusUrl)
+            })
             const payload = await fetchRevalidateStatus({ jobId, statusUrl })
             const normalized = normalizeRemoteStatus(payload, { jobId, statusUrl, mode, identifiers })
+            console.log('[arcnav] revalidate poll normalized', {
+                mode,
+                jobId,
+                pollCount,
+                normalized: {
+                    status: normalized.status,
+                    total: normalized.total,
+                    completed: normalized.completed,
+                    failed: normalized.failed,
+                    attempted: normalized.attempted,
+                    plannedPaths: normalized.plannedPaths?.length,
+                    paths: normalized.paths?.length,
+                    revalidatedPaths: normalized.revalidatedPaths?.length,
+                    failures: normalized.failures?.length,
+                    message: normalized.message
+                }
+            })
             onProgress?.(normalized)
             if(normalized.status === 'completed' || normalized.status === 'failed') {
                 return normalized
@@ -437,12 +634,41 @@ async function revalidateAllContent(onProgress) {
 module.exports = {
     async notifyArcnav({ since, until, mode = 'incremental', onLiveFlushProgress, onRevalidateProgress }) {
         const changedIdentifiers = mode === 'incremental' ? await collectChangedIdentifiers(since, until) : []
+        console.log('[arcnav] notify starting', {
+            mode,
+            since,
+            until,
+            changedIdentifiers: summarizeIdentifiers(changedIdentifiers),
+            flushUrl: config.contextBrowserFlushUrl,
+            revalidateUrl: config.arcnavRevalidateUrl,
+            hasRevalidateSecret: !!config.arcnavRevalidateSecret
+        })
         const liveFlush = await flushLiveArcnav()
+        console.log('[arcnav] live cache flush result', liveFlush)
         onLiveFlushProgress?.(liveFlush)
 
         const revalidate = mode === 'full'
             ? await revalidateAllContent(onRevalidateProgress)
             : await revalidateChangedIdentifiers(changedIdentifiers, onRevalidateProgress)
+        console.log('[arcnav] notify completed', {
+            mode,
+            changedIdentifierCount: changedIdentifiers.length,
+            liveFlush,
+            revalidate: {
+                status: revalidate.status,
+                total: revalidate.total,
+                completed: revalidate.completed,
+                failed: revalidate.failed,
+                remoteJobId: revalidate.remoteJobId,
+                statusUrl: revalidate.statusUrl,
+                attempted: revalidate.attempted,
+                plannedPaths: revalidate.plannedPaths?.length,
+                paths: revalidate.paths?.length,
+                revalidatedPaths: revalidate.revalidatedPaths?.length,
+                failures: revalidate.failures?.length,
+                message: revalidate.message
+            }
+        })
 
         return {
             changedIdentifiers,
