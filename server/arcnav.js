@@ -14,7 +14,7 @@ const revalidatePollIntervalMs = 2000
 const revalidateTimeoutMs = 20 * 60 * 1000
 const remoteRevalidateConcurrency = 2
 const remoteRevalidateBatchSize = 50
-const requestTimeoutMs = 30 * 1000
+const requestTimeoutMs = 5 * 60 * 1000
 const defaultRetry = {
     limit: 2,
     methods: ['GET', 'POST'],

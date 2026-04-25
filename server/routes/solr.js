@@ -216,22 +216,6 @@ async function sync(suffix, force, refreshMode, onProgress) {
         }
 
         onProgress?.({
-            step: 'Recording publish',
-            message: 'Saving this publish as the latest successful run.',
-            publishProgress: {
-                totalCollections: collections.length,
-                completedCollections: collections.length,
-                currentCollection: null
-            }
-        })
-
-        // STEP 4: Write successful sync to db
-        // Use the pre-upload snapshot instant so the next publish's incremental
-        // diff resumes from exactly the point captured in Solr.
-        completionStatus._timestamp = publishSnapshotInstant
-        await db.insert([completionStatus], db.successfulIndexes)
-
-        onProgress?.({
             step: 'Updating Archive Navigator',
             message: refreshMode === 'full' ? 'Starting a full Archive Navigator refresh after the publish.' : 'Refreshing Archive Navigator after the publish.',
             arcnav: {
@@ -300,19 +284,13 @@ async function sync(suffix, force, refreshMode, onProgress) {
             }
         })
 
-        onProgress?.({
-            step: previousSync ? 'Cleaning up previous publish' : 'Finishing publish',
-            message: previousSync ? 'Removing the previous Solr collections.' : 'No previous publish collections need cleanup.'
-        })
-    
-        // STEP 6: Cleanup previous sync
-        if(previousSync) {
-            try {
-                await cleanup(previousSync)
-            } catch (err) {
-                throw new Error("Error cleaning up previous sync: " + err)
-            }
-        }
+        const revalidateFailed = arcnav.revalidate.status === 'failed'
+        // Only advance the incremental refresh cursor after Archive Navigator
+        // accepts and completes the refresh. If the remote refresh fails, keep
+        // the old cursor so the same changed identifiers are retried next time.
+        completionStatus._timestamp = revalidateFailed
+            ? (previousPublishTimestamp || new Date(0))
+            : publishSnapshotInstant
 
         completionStatus.arcnav = {
             refreshMode,
@@ -330,6 +308,37 @@ async function sync(suffix, force, refreshMode, onProgress) {
                 plannedPaths: arcnav.revalidate.plannedPaths,
                 paths: arcnav.revalidate.paths,
                 revalidatedPaths: arcnav.revalidate.revalidatedPaths
+            }
+        }
+
+        onProgress?.({
+            step: 'Recording publish',
+            message: revalidateFailed
+                ? 'Saving this publish without advancing the Archive Navigator retry point.'
+                : 'Saving this publish as the latest successful run.',
+            publishProgress: {
+                totalCollections: collections.length,
+                completedCollections: collections.length,
+                currentCollection: null
+            }
+        })
+
+        // STEP 6: Write successful sync to db. The suffix is still recorded even
+        // when revalidate fails, but the timestamp may intentionally remain at
+        // the previous refresh point so incremental revalidate can retry.
+        await db.insert([completionStatus], db.successfulIndexes)
+
+        onProgress?.({
+            step: previousSync ? 'Cleaning up previous publish' : 'Finishing publish',
+            message: previousSync ? 'Removing the previous Solr collections.' : 'No previous publish collections need cleanup.'
+        })
+    
+        // STEP 7: Cleanup previous sync
+        if(previousSync) {
+            try {
+                await cleanup(previousSync)
+            } catch (err) {
+                throw new Error("Error cleaning up previous sync: " + err)
             }
         }
 
