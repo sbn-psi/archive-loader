@@ -12,8 +12,6 @@ const trackedCollections = [
 ]
 const revalidatePollIntervalMs = 2000
 const revalidateTimeoutMs = 20 * 60 * 1000
-const remoteRevalidateConcurrency = 2
-const remoteRevalidateBatchSize = 50
 const requestTimeoutMs = 5 * 60 * 1000
 const defaultRetry = {
     limit: 2,
@@ -210,16 +208,12 @@ async function startRevalidateJob({ mode, identifiers = [] }) {
     // job would cause us to start a second refresh. Network-level
     // failures here are reported to the caller, which will surface them in
     // the job status.
-    const isFull = mode === 'full'
     const response = await got.post(config.arcnavRevalidateUrl, {
         headers: withSecretHeader(),
-        json: isFull
+        json: mode === 'full'
             ? { all: true }
             : {
-                all: false,
-                identifiers,
-                concurrency: remoteRevalidateConcurrency,
-                batchSize: remoteRevalidateBatchSize
+                identifiers
             },
         responseType: 'json',
         timeout: { request: requestTimeoutMs },

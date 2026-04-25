@@ -215,6 +215,23 @@ async function sync(suffix, force, refreshMode, onProgress) {
             throw new Error("Error modifying aliases in Solr: " + err.message)
         }
 
+        let cleanupPreviousSyncResult = Promise.resolve(null)
+        if(previousSync) {
+            onProgress?.({
+                step: 'Cleaning up previous publish',
+                message: 'Removing the previous Solr collections.',
+                publishProgress: {
+                    totalCollections: collections.length,
+                    completedCollections: collections.length,
+                    currentCollection: null
+                }
+            })
+            cleanupPreviousSyncResult = cleanup(previousSync).then(
+                () => null,
+                (err) => err
+            )
+        }
+
         onProgress?.({
             step: 'Updating Archive Navigator',
             message: refreshMode === 'full' ? 'Starting a full Archive Navigator refresh after the publish.' : 'Refreshing Archive Navigator after the publish.',
@@ -328,19 +345,15 @@ async function sync(suffix, force, refreshMode, onProgress) {
         // the previous refresh point so incremental revalidate can retry.
         await db.insert([completionStatus], db.successfulIndexes)
 
-        onProgress?.({
-            step: previousSync ? 'Cleaning up previous publish' : 'Finishing publish',
-            message: previousSync ? 'Removing the previous Solr collections.' : 'No previous publish collections need cleanup.'
-        })
-    
-        // STEP 7: Cleanup previous sync
-        if(previousSync) {
-            try {
-                await cleanup(previousSync)
-            } catch (err) {
-                throw new Error("Error cleaning up previous sync: " + err)
-            }
+        const cleanupError = await cleanupPreviousSyncResult
+        if(cleanupError) {
+            throw new Error("Error cleaning up previous sync: " + cleanupError)
         }
+
+        onProgress?.({
+            step: 'Finishing publish',
+            message: previousSync ? 'Previous Solr collections removed.' : 'No previous publish collections need cleanup.'
+        })
 
         return {
             ...completionStatus,
