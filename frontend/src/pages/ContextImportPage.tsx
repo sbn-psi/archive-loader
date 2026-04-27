@@ -319,7 +319,7 @@ export function ContextImportPage({
           />
           {config.editType === "target" ? (
             <RichTextEditor
-              label="Supplemental HTML - Middle"
+              label="Supplemental HTML - More Data page"
               value={record.derived_html ?? ""}
               onChange={(next) => setRecord({ ...record, derived_html: next })}
               onError={onError}
@@ -327,7 +327,7 @@ export function ContextImportPage({
           ) : null}
           {config.editType === "mission" ? (
             <RichTextEditor
-              label="Full Page HTML"
+              label="Supplemental HTML - More Data page"
               value={record.other_html ?? ""}
               onChange={(next) => setRecord({ ...record, other_html: next })}
               onError={onError}
