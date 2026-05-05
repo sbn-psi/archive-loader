@@ -2,7 +2,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
 import { LoadingState } from "@/components/LoadingState";
-import type { ContextOverviewGroup, RecentContextItem } from "@/types";
+import type { ContextOverviewGroup, ContextOverviewResponse, RecentContextItem } from "@/types";
 import { getRecordEditHref } from "@/lib/navigation";
 
 function formatLastEdited(value?: string | null) {
@@ -29,8 +29,14 @@ function recordLinks(items: RecentContextItem[]) {
   ));
 }
 
-export function RecentContextActivity() {
-  const overview = useQuery({ queryKey: ["status", "context-overview"], queryFn: api.getContextOverview });
+export function RecentContextActivity({ overview }: { overview?: ContextOverviewResponse }) {
+  const overviewQuery = useQuery({
+    queryKey: ["status", "context-overview"],
+    queryFn: api.getContextOverview,
+    enabled: !overview,
+  });
+  const overviewData = overview ?? overviewQuery.data;
+  const loading = !overview && (overviewQuery.isLoading || overviewQuery.isFetching);
 
   return (
     <section className="page-section">
@@ -40,10 +46,10 @@ export function RecentContextActivity() {
           <p className="page-subtitle">Recent work grouped by mission when possible.</p>
         </div>
       </div>
-      {overview.isLoading ? <LoadingState compact title="Loading recent activity" detail="Looking up the latest mission and context-object edits." /> : null}
-      {!overview.isLoading && overview.data ? (
+      {loading ? <LoadingState compact title="Loading recent activity" detail="Looking up the latest mission and context-object edits." /> : null}
+      {!loading && overviewData ? (
         <div className="stack-list">
-          {overview.data.groups.map((group: ContextOverviewGroup) => (
+          {overviewData.groups.map((group: ContextOverviewGroup) => (
             <div key={group.mission.lid} className="page-panel">
               <div className="page-panel-header">
                 <div>
@@ -74,29 +80,29 @@ export function RecentContextActivity() {
               ) : null}
             </div>
           ))}
-          {overview.data.standalone.targets.length > 0 || overview.data.standalone.spacecraft.length > 0 || overview.data.standalone.instruments.length > 0 ? (
+          {overviewData.standalone.targets.length > 0 || overviewData.standalone.spacecraft.length > 0 || overviewData.standalone.instruments.length > 0 ? (
             <div className="page-panel page-panel-muted">
               <div className="page-panel-header">
                 <div>
                   <h3>Other Recently Edited Records</h3>
                 </div>
               </div>
-              {overview.data.standalone.targets.length > 0 ? (
+              {overviewData.standalone.targets.length > 0 ? (
                 <div className="recent-row">
                   <div className="recent-label">Targets</div>
-                  <div className="pill-row">{recordLinks(overview.data.standalone.targets)}</div>
+                  <div className="pill-row">{recordLinks(overviewData.standalone.targets)}</div>
                 </div>
               ) : null}
-              {overview.data.standalone.spacecraft.length > 0 ? (
+              {overviewData.standalone.spacecraft.length > 0 ? (
                 <div className="recent-row">
                   <div className="recent-label">Spacecraft</div>
-                  <div className="pill-row">{recordLinks(overview.data.standalone.spacecraft)}</div>
+                  <div className="pill-row">{recordLinks(overviewData.standalone.spacecraft)}</div>
                 </div>
               ) : null}
-              {overview.data.standalone.instruments.length > 0 ? (
+              {overviewData.standalone.instruments.length > 0 ? (
                 <div className="recent-row">
                   <div className="recent-label">Instruments</div>
-                  <div className="pill-row">{recordLinks(overview.data.standalone.instruments)}</div>
+                  <div className="pill-row">{recordLinks(overviewData.standalone.instruments)}</div>
                 </div>
               ) : null}
             </div>

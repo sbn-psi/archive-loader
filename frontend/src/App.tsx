@@ -22,7 +22,6 @@ function useAuthBootstrap() {
   return useQuery({
     queryKey: ["auth", "user"],
     queryFn: api.getUser,
-    retry: false,
   });
 }
 
@@ -170,6 +169,22 @@ const contextConfig = {
   },
 } as const;
 
+function DatasetImportRoute({ onError }: { onError: (message: string | null) => void }) {
+  const location = useLocation();
+  return <DatasetImportPage key={`${location.pathname}?${location.search}`} onError={onError} />;
+}
+
+function ContextImportRoute({
+  config,
+  onError,
+}: {
+  config: (typeof contextConfig)[keyof typeof contextConfig];
+  onError: (message: string | null) => void;
+}) {
+  const location = useLocation();
+  return <ContextImportPage key={`${location.pathname}?${location.search}`} config={config} onError={onError} />;
+}
+
 export default function App() {
   const queryClient = useQueryClient();
   const navigate = useNavigate();
@@ -221,7 +236,7 @@ export default function App() {
               }
             />
             <Route path="datasets/load" element={<DatasetLoadPage onError={setGlobalError} />} />
-            <Route path="datasets/import" element={<DatasetImportPage onError={setGlobalError} />} />
+            <Route path="datasets/import" element={<DatasetImportRoute onError={setGlobalError} />} />
             <Route path="connected-records" element={<ConnectedRecordsPage />} />
             <Route
               path="connected-records/missions"
@@ -327,10 +342,10 @@ export default function App() {
                 />
               }
             />
-            <Route path="targets/import" element={<ContextImportPage config={contextConfig.targets} onError={setGlobalError} />} />
-            <Route path="missions/import" element={<ContextImportPage config={contextConfig.missions} onError={setGlobalError} />} />
-            <Route path="spacecraft/import" element={<ContextImportPage config={contextConfig.spacecraft} onError={setGlobalError} />} />
-            <Route path="instruments/import" element={<ContextImportPage config={contextConfig.instruments} onError={setGlobalError} />} />
+            <Route path="targets/import" element={<ContextImportRoute config={contextConfig.targets} onError={setGlobalError} />} />
+            <Route path="missions/import" element={<ContextImportRoute config={contextConfig.missions} onError={setGlobalError} />} />
+            <Route path="spacecraft/import" element={<ContextImportRoute config={contextConfig.spacecraft} onError={setGlobalError} />} />
+            <Route path="instruments/import" element={<ContextImportRoute config={contextConfig.instruments} onError={setGlobalError} />} />
             <Route path="connected-records/targets/relationships" element={<TargetRelationshipsPage onError={setGlobalError} />} />
             <Route path="targets/relate" element={<TargetRelationshipsPage onError={setGlobalError} />} />
             <Route path="settings/tags" element={<TargetTagsPage onError={setGlobalError} />} />

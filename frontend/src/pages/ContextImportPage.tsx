@@ -42,11 +42,13 @@ export function ContextImportPage({
   const queryClient = useQueryClient();
   const [params] = useSearchParams();
   const edit = params.get("edit");
+  const editQueryKey = useMemo(() => ["edit", config.editType, edit] as const, [config.editType, edit]);
   const [record, setRecord] = useState<ContextObjectRecord>(templateModel());
   const [relationships, setRelationships] = useState<Record<string, LookupRelationship[]>>({});
+  const [saving, setSaving] = useState(false);
 
   const editQuery = useQuery({
-    queryKey: ["edit", config.editType, edit],
+    queryKey: editQueryKey,
     queryFn: () => api.getContextEdit(config.editType, edit!),
     enabled: Boolean(edit),
   });
@@ -57,6 +59,15 @@ export function ContextImportPage({
     queryFn: () => api.getRelationshipTypes(config.relationshipType),
     enabled: config.relationshipTo !== "bundle",
   });
+
+  useEffect(() => {
+    if (!edit) {
+      return;
+    }
+    return () => {
+      queryClient.removeQueries({ queryKey: editQueryKey, exact: true });
+    };
+  }, [edit, editQueryKey, queryClient]);
 
   useEffect(() => {
     if (!editQuery.data) {
@@ -156,7 +167,11 @@ export function ContextImportPage({
   );
 
   const handleSave = async () => {
+    if (saving) {
+      return;
+    }
     try {
+      setSaving(true);
       onError(null);
       const payload = sanitizeFormObject(record, templateModel);
       await api.saveContextObject(config.entityType, payload!);
@@ -168,15 +183,17 @@ export function ContextImportPage({
       }
       await queryClient.invalidateQueries({ queryKey: ["status", config.entityType] });
       if (edit) {
-        await queryClient.invalidateQueries({ queryKey: ["edit", config.editType, edit] });
+        queryClient.removeQueries({ queryKey: editQueryKey, exact: true });
       }
       navigate(`/${config.entityType}/manage`);
     } catch (error) {
       onError(error instanceof Error ? error.message : "Save failed");
+    } finally {
+      setSaving(false);
     }
   };
 
-  if ((edit && editQuery.isLoading) || tags.isLoading || toolsQuery.isLoading || relationshipTypes.isLoading) {
+  if ((edit && (editQuery.isLoading || editQuery.isFetching || !editQuery.data)) || tags.isLoading || toolsQuery.isLoading || relationshipTypes.isLoading) {
     return <LoadingState title="Loading editor" detail="Preparing the record, tags, tools, and related metadata." />;
   }
 
@@ -204,8 +221,8 @@ export function ContextImportPage({
           subtitle={config.subtitle}
           modeLabel={edit ? "Editing existing record" : "Setting up a new record"}
           actions={
-            <button type="button" className="button-primary" onClick={() => void handleSave()}>
-              Save
+            <button type="button" className="button-primary" onClick={() => void handleSave()} disabled={saving}>
+              {saving ? "Saving" : "Save"}
             </button>
           }
         />

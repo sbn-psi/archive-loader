@@ -11,12 +11,13 @@ export function TargetRelationshipsPage({ onError }: { onError: (message: string
   const [mode, setMode] = useState<RelationshipMode>("INITIAL");
   const [selectedTarget, setSelectedTarget] = useState<{ lid: string; name: string } | null>(null);
   const [relationship, setRelationship] = useState<string>("");
+  const [saving, setSaving] = useState(false);
   const data = useQuery({
     queryKey: ["target-relationships"],
     queryFn: api.getTargetRelationshipStatus,
   });
 
-  if (data.isLoading || !data.data) {
+  if (data.isLoading || data.isFetching || !data.data) {
     return <LoadingState title="Loading target relationships" detail="Fetching targets and their current relationship graph." />;
   }
 
@@ -80,8 +81,10 @@ export function TargetRelationshipsPage({ onError }: { onError: (message: string
                   <button
                     type="button"
                     className="button-secondary"
+                    disabled={saving}
                     onClick={async () => {
                       try {
+                        setSaving(true);
                         const payload =
                           relationship === "parentOf"
                             ? { parent_ref: selectedTarget?.lid, child_ref: target.lid }
@@ -95,6 +98,8 @@ export function TargetRelationshipsPage({ onError }: { onError: (message: string
                         setSelectedTarget(null);
                       } catch (error) {
                         onError(error instanceof Error ? error.message : "Relationship save failed");
+                      } finally {
+                        setSaving(false);
                       }
                     }}
                   >

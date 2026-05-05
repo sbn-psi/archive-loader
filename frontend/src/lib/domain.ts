@@ -41,7 +41,7 @@ export function sanitizeFormObject<T extends Record<string, unknown>>(
 
   const sanitized = templateModel();
   for (const [key, value] of Object.entries(formObject)) {
-    if (!Object.prototype.hasOwnProperty.call(formObject, key) || key.startsWith("$$") || !hasValue(value)) {
+    if (key === "updated_at" || !Object.prototype.hasOwnProperty.call(formObject, key) || key.startsWith("$$") || !hasValue(value)) {
       continue;
     }
     if (Array.isArray(value)) {

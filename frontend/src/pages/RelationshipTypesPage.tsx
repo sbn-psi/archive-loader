@@ -23,19 +23,26 @@ function RelationshipTypeColumn({
   const [draftName, setDraftName] = useState("");
   const [draftGroup, setDraftGroup] = useState<"always" | "sometimes" | "never">("never");
   const [draftGroups, setDraftGroups] = useState<Record<"always" | "sometimes" | "never", RelationshipType[]> | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  if (query.isLoading || !query.data) {
+  if (query.isLoading || query.isFetching || !query.data) {
     return <LoadingState title={`Loading ${title.toLowerCase()}`} detail="Fetching saved relationship types." compact />;
   }
 
   const grouped = draftGroups ?? groupRelationshipTypes(query.data);
   const save = async (groups: typeof grouped) => {
+    if (saving) {
+      return;
+    }
     try {
+      setSaving(true);
       await api.saveRelationshipTypes(type, flattenRelationshipTypeGroups(groups));
       setDraftGroups(null);
       await query.refetch();
     } catch (error) {
       onError(error instanceof Error ? error.message : "Relationship type save failed");
+    } finally {
+      setSaving(false);
     }
   };
 
@@ -44,8 +51,8 @@ function RelationshipTypeColumn({
       <div className="form-page-header compact">
         <h2>{title}</h2>
         <div className="form-page-actions">
-          <button type="button" className="button-primary" onClick={() => void save(grouped)}>
-            Save Changes
+          <button type="button" className="button-primary" onClick={() => void save(grouped)} disabled={saving}>
+            {saving ? "Saving" : "Save Changes"}
           </button>
         </div>
       </div>
@@ -98,12 +105,16 @@ function RelationshipTypeColumn({
                 <button
                   type="button"
                   className="button-danger ghost-danger"
+                  disabled={saving}
                   onClick={async () => {
                     try {
+                      setSaving(true);
                       await api.removeRelationshipType(type, item);
                       await query.refetch();
                     } catch (error) {
                       onError(error instanceof Error ? error.message : "Relationship type remove failed");
+                    } finally {
+                      setSaving(false);
                     }
                   }}
                 >

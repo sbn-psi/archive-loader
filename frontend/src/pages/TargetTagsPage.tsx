@@ -12,8 +12,9 @@ export function TargetTagsPage({ onError }: { onError: (message: string | null) 
     queryFn: () => api.getTags("targets"),
   });
   const [editing, setEditing] = useState<{ name: string; group?: string; newGroup?: string } | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  if (tags.isLoading || !tags.data) {
+  if (tags.isLoading || tags.isFetching || !tags.data) {
     return <LoadingState title="Loading target tags" detail="Fetching existing tags and tag groups." />;
   }
 
@@ -30,8 +31,10 @@ export function TargetTagsPage({ onError }: { onError: (message: string | null) 
               <button
                 type="button"
                 className="button-primary"
+                disabled={saving}
                 onClick={async () => {
                   try {
+                    setSaving(true);
                     const original = tags.data.find((tag) => tag.name === editing.name);
                     if (!original) {
                       return;
@@ -41,10 +44,12 @@ export function TargetTagsPage({ onError }: { onError: (message: string | null) 
                     await tags.refetch();
                   } catch (error) {
                     onError(error instanceof Error ? error.message : "Tag save failed");
+                  } finally {
+                    setSaving(false);
                   }
                 }}
               >
-                Save Group
+                {saving ? "Saving" : "Save Group"}
               </button>
             </div>
           </div>
@@ -90,12 +95,20 @@ export function TargetTagsPage({ onError }: { onError: (message: string | null) 
                 <button
                   type="button"
                   className="button-danger ghost-danger"
+                  disabled={saving}
                   onClick={async () => {
                     if (!window.confirm(`Delete ${tag.name}?`)) {
                       return;
                     }
-                    await api.deleteTag(tag.type, tag.name);
-                    await tags.refetch();
+                    try {
+                      setSaving(true);
+                      await api.deleteTag(tag.type, tag.name);
+                      await tags.refetch();
+                    } catch (error) {
+                      onError(error instanceof Error ? error.message : "Tag delete failed");
+                    } finally {
+                      setSaving(false);
+                    }
                   }}
                 >
                   Delete

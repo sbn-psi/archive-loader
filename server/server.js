@@ -94,6 +94,13 @@ if (appBasePath) {
 }
 app.use('/', appRouter)
 
+appRouter.use('/api', (req, res, next) => {
+    res.set('Cache-Control', 'no-store')
+    res.set('Pragma', 'no-cache')
+    res.set('Expires', '0')
+    next()
+})
+
 appRouter.post('/api/login', passport.authenticate('local'), (req, res) => {
     res.status(200).send({user: req.user})
 })

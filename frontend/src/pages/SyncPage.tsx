@@ -207,7 +207,7 @@ export function SyncPage({ onError }: { onError: (message: string | null) => voi
     }
   };
 
-  if (lastIndex.isLoading || available.isLoading) {
+  if (lastIndex.isLoading || lastIndex.isFetching || available.isLoading || available.isFetching) {
     return <LoadingState title="Loading publishing status" detail="Checking service availability and the most recent publish." />;
   }
 

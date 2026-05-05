@@ -28,11 +28,12 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
   const [params] = useSearchParams();
   const edit = params.get("edit");
   const initialType = params.get("type") ?? "Bundle";
+  const editQueryKey = useMemo(() => ["edit", "datasets", edit] as const, [edit]);
 
   const tags = useQuery({ queryKey: ["tags", "datasets"], queryFn: () => api.getTags("datasets") });
   const toolsQuery = useQuery({ queryKey: ["tools"], queryFn: api.getTools });
   const editQuery = useQuery({
-    queryKey: ["edit", "datasets", edit],
+    queryKey: editQueryKey,
     queryFn: () => api.getDatasetEdit(edit!),
     enabled: Boolean(edit),
   });
@@ -40,6 +41,16 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
   const [bundle, setBundle] = useState<DatasetRecord | null>(initialType === "Bundle" ? templateModel() : null);
   const [collections, setCollections] = useState<DatasetRecord[]>(initialType === "Collection" ? [templateModel()] : []);
   const [activeIndex, setActiveIndex] = useState(0);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    if (!edit) {
+      return;
+    }
+    return () => {
+      queryClient.removeQueries({ queryKey: editQueryKey, exact: true });
+    };
+  }, [edit, editQueryKey, queryClient]);
 
   useEffect(() => {
     if (editQuery.data?.object) {
@@ -60,8 +71,9 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
       const mapped = prepDatasetsFromHarvest(parsed);
       setBundle(mapped.bundle ? { ...templateModel(), ...mapped.bundle } : null);
       setCollections(mapped.collections.map((collection) => ({ ...templateModel(), ...collection })));
+      setActiveIndex(0);
     }
-  }, [edit, editQuery.data]);
+  }, [edit, editQuery.data, initialType]);
 
   const activeRecord = bundle && activeIndex === 0 ? bundle : collections[Math.max(0, activeIndex - (bundle ? 1 : 0))];
   const setActiveRecord = (record: DatasetRecord) => {
@@ -83,7 +95,11 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
     : [];
 
   const handleSave = async () => {
+    if (saving) {
+      return;
+    }
     try {
+      setSaving(true);
       onError(null);
       await api.saveDatasets({
         bundle: sanitizeFormObject(bundle, templateModel),
@@ -92,15 +108,17 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
       sessionStorage.removeItem("dataset-harvest");
       await queryClient.invalidateQueries({ queryKey: ["status", "datasets"] });
       if (edit) {
-        await queryClient.invalidateQueries({ queryKey: ["edit", "datasets", edit] });
+        queryClient.removeQueries({ queryKey: editQueryKey, exact: true });
       }
       navigate("/datasets/manage");
     } catch (error) {
       onError(error instanceof Error ? error.message : "Dataset save failed");
+    } finally {
+      setSaving(false);
     }
   };
 
-  if ((edit && editQuery.isLoading) || tags.isLoading || toolsQuery.isLoading) {
+  if ((edit && (editQuery.isLoading || editQuery.isFetching || !editQuery.data)) || tags.isLoading || toolsQuery.isLoading) {
     return <LoadingState title="Loading dataset editor" detail="Preparing the selected dataset and supporting metadata." />;
   }
 
@@ -145,8 +163,8 @@ export function DatasetImportPage({ onError }: { onError: (message: string | nul
           subtitle={pageMeta.datasetDetails.subtitle}
           modeLabel={edit ? "Editing existing record" : "Setting up a new record"}
           actions={
-            <button type="button" className="button-primary" onClick={() => void handleSave()}>
-              Save
+            <button type="button" className="button-primary" onClick={() => void handleSave()} disabled={saving}>
+              {saving ? "Saving" : "Save"}
             </button>
           }
         />

@@ -21,6 +21,8 @@ const successfulIndexesCollection = 'successfulIndexes'
 
 const usersCollection = 'users'
 
+const derivedApiFields = ['updated_at']
+
 let db
 let client
 let connectionPromise
@@ -101,6 +103,7 @@ module.exports = {
         const primaryKey = findPrimaryKey(type)
         const now = new Date()
         for(doc of documents) {
+            stripDerivedApiFields(doc)
             doc._isActive = true;
             // Ensure every write to tracked collections has a freshness timestamp so
             // downstream consumers (e.g. the Archive Navigator incremental refresh)
@@ -177,6 +180,7 @@ module.exports = {
         const bulkOperation = collection.initializeUnorderedBulkOp()
 
         for(doc of documents) {
+            stripDerivedApiFields(doc)
             doc._isActive = true;
             bulkOperation.find({
                 target: doc.target,
@@ -226,13 +230,20 @@ module.exports = {
 
 function hideInternalProperties(doc, options) {
     const visible = Object.keys(doc)
+        .filter(key => !derivedApiFields.includes(key))
         .filter(key => !key.startsWith('_') || (options?.includeTimestamp && key === '_timestamp'))
         .reduce((obj, key) => {
             obj[key] = doc[key];
             return obj;
         }, {});
-    if(!visible.updated_at && doc._timestamp) {
+    if(doc._timestamp) {
         visible.updated_at = new Date(doc._timestamp).toISOString()
     }
     return visible
+}
+
+function stripDerivedApiFields(doc) {
+    for(const field of derivedApiFields) {
+        delete doc[field]
+    }
 }

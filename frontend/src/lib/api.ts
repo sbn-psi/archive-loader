@@ -28,6 +28,7 @@ class ApiError extends Error {
 
 async function request<T>(input: string, init?: RequestInit): Promise<T> {
   const response = await fetch(input, {
+    cache: "no-store",
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
@@ -122,10 +123,14 @@ export const api = {
     const response = await fetch(`${API_BASE}/image/upload`, {
       method: "POST",
       body,
+      cache: "no-store",
       credentials: "include",
     });
     const payload = await response.json();
     if (!response.ok) {
+      if (response.status === 403 && typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("archive-loader:forbidden"));
+      }
       throw new ApiError(response.status, payload);
     }
     return payload as { url: string };

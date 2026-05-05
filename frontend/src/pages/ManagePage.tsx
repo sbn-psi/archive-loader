@@ -69,7 +69,7 @@ export function ManagePage({
     enabled: groupLookupLids.length > 0,
   });
 
-  if (status.isLoading) {
+  if (status.isLoading || status.isFetching) {
     return <LoadingState title={`Loading ${title.toLowerCase()}`} detail="Fetching the latest records for this view." />;
   }
 

@@ -16,8 +16,8 @@ import {
 describe("domain behavior parity", () => {
   it("sanitizes tags and trims empty repeated objects", () => {
     const result = sanitizeFormObject(
-      { tags: [{ name: "science" }], related_data: [{}, { name: "Kept" }] },
-      () => ({ tags: [], related_data: [] }),
+      { tags: [{ name: "science" }], related_data: [{}, { name: "Kept" }], updated_at: "2024-01-01T00:00:00.000Z" },
+      () => ({ tags: [], related_data: [], updated_at: undefined as string | undefined }),
     );
     expect(result).toEqual({ tags: ["science"], related_data: [{ name: "Kept" }] });
   });

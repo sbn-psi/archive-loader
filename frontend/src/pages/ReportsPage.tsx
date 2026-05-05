@@ -44,13 +44,21 @@ export function ReportsPage({ onError }: { onError: (message: string | null) => 
 
   if (
     targetTypes.isLoading ||
+    targetTypes.isFetching ||
     instrumentTypes.isLoading ||
+    instrumentTypes.isFetching ||
     relationships.isLoading ||
+    relationships.isFetching ||
     datasetsMissingContext.isLoading ||
+    datasetsMissingContext.isFetching ||
     missions.isLoading ||
+    missions.isFetching ||
     spacecraft.isLoading ||
+    spacecraft.isFetching ||
     targets.isLoading ||
-    instruments.isLoading
+    targets.isFetching ||
+    instruments.isLoading ||
+    instruments.isFetching
   ) {
     return <LoadingState title="Loading reports" detail="Gathering relationship types and current publishing issues." />;
   }
