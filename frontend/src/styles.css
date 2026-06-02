@@ -250,6 +250,16 @@ select {
   line-height: 1.5;
 }
 
+.sync-debug-target {
+  margin: 0.75rem 0 0;
+  color: #8aa0ad;
+  font-size: 0.75rem;
+}
+
+.sync-debug-target code {
+  color: inherit;
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;

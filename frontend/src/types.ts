@@ -179,6 +179,12 @@ export type HarvestResponse = {
   harvestOutput: string;
 };
 
+export type SolrStatusResponse = {
+  available: boolean;
+  solrUrl: string;
+  arcnavRevalidateUrl: string | null;
+};
+
 export type SyncJobResponse = {
   id: string;
   suffix: string;

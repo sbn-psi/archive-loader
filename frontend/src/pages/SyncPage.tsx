@@ -52,7 +52,7 @@ export function SyncPage({ onError }: { onError: (message: string | null) => voi
   const suggestion = useQuery({
     queryKey: ["sync", "suggestion"],
     queryFn: api.getSuffixSuggestion,
-    enabled: available.data === true,
+    enabled: available.data?.available === true,
   });
 
   const syncJob = useQuery({
@@ -211,11 +211,21 @@ export function SyncPage({ onError }: { onError: (message: string | null) => voi
     return <LoadingState title="Loading publishing status" detail="Checking service availability and the most recent publish." />;
   }
 
-  if (!available.data) {
+  if (!available.data?.available) {
     return (
       <div className="page-card">
         <PageIntro title={pageMeta.publishing.title} subtitle={pageMeta.publishing.subtitle} />
         <p>Publishing is unavailable right now.</p>
+        {available.data?.solrUrl ? (
+          <p className="muted">
+            Solr target: <code>{available.data.solrUrl}</code>
+          </p>
+        ) : null}
+        {available.data?.arcnavRevalidateUrl ? (
+          <p className="muted">
+            Archive Navigator revalidate: <code>{available.data.arcnavRevalidateUrl}</code>
+          </p>
+        ) : null}
       </div>
     );
   }
@@ -379,6 +389,12 @@ export function SyncPage({ onError }: { onError: (message: string | null) => voi
         <h3>Last Successful Publish</h3>
         <pre>{JSON.stringify(lastIndex.data ?? {}, null, 2)}</pre>
       </div>
+      <p className="muted sync-debug-target">
+        Solr target: <code>{available.data.solrUrl}</code>
+        {" · "}
+        Archive Navigator revalidate:{" "}
+        {available.data.arcnavRevalidateUrl ? <code>{available.data.arcnavRevalidateUrl}</code> : <span>not configured</span>}
+      </p>
     </div>
   );
 }

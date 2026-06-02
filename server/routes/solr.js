@@ -516,7 +516,11 @@ function backup(suffix, ignoreBackup) {
 
 router.get('/status', async function(req, res) {
     checkAvailability().then(
-        () => res.sendStatus(200),
+        () => res.status(200).json({
+            available: true,
+            solrUrl: SOLR,
+            arcnavRevalidateUrl: config.arcnavRevalidateUrl
+        }),
         () => res.sendStatus(503))
 })
 

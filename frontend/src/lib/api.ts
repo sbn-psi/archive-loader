@@ -13,6 +13,7 @@ import type {
   TagRecord,
   ToolRecord,
   SyncJobResponse,
+  SolrStatusResponse,
 } from "@/types";
 
 class ApiError extends Error {
@@ -93,12 +94,11 @@ export const api = {
   ingestHarvest: (xml: string) => request(`${API_BASE}/solr/harvest`, { method: "POST", body: JSON.stringify({ xml }) }),
 
   getLastIndex: () => request<Record<string, number | string>>(`${API_BASE}/solr/last-index`),
-  getSyncStatus: async () => {
+  getSyncStatus: async (): Promise<SolrStatusResponse> => {
     try {
-      await request(`${API_BASE}/solr/status`);
-      return true;
+      return await request<SolrStatusResponse>(`${API_BASE}/solr/status`);
     } catch {
-      return false;
+      return { available: false, solrUrl: "", arcnavRevalidateUrl: null };
     }
   },
   getSuffixSuggestion: () => request<string>(`${API_BASE}/solr/suffix-suggestion`),
