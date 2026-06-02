@@ -5,10 +5,13 @@ services:
     build: .
     ports:
       - "8989:8989"
-    links:
-      - mongo
+    depends_on:
+      mongo:
+        condition: service_started
+      solr:
+        condition: service_healthy
     environment:
-      - NODE_ENV=production
+      NODE_ENV: production
     env_file:
       - ./.env
   mongo:
@@ -19,5 +22,64 @@ services:
       - "27017:27017"
     volumes:
       - 'archiveloader-data:/data/db'
+  zookeeper:
+    image: zookeeper:3.9
+    restart: unless-stopped
+    environment:
+      ZOO_4LW_COMMANDS_WHITELIST: ruok
+    volumes:
+      - 'archiveloader-zk-data:/data'
+      - 'archiveloader-zk-datalog:/datalog'
+    healthcheck:
+      test: ["CMD-SHELL", "echo ruok | nc -w 2 localhost 2181 | grep imok"]
+      interval: 5s
+      timeout: 3s
+      retries: 24
+  security-init:
+    image: ${REGISTRY_IMAGE:-en-registry-solr:local}
+    profiles: ["solr-setup"]
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    volumes:
+      - ./deploy/solr/security/security.json:/run/secrets/solr-security.json:ro
+    entrypoint: ["/bin/bash", "-c"]
+    command:
+      - solr zk cp /run/secrets/solr-security.json zk:security.json -z zookeeper:2181
+  solr:
+    image: ${REGISTRY_IMAGE:-en-registry-solr:local}
+    restart: unless-stopped
+    depends_on:
+      zookeeper:
+        condition: service_healthy
+    ports:
+      - "${SOLR_PORT:-8983}:8983"
+    environment:
+      ZK_HOST: zookeeper:2181
+    env_file:
+      - ./deploy/solr/solr-admin.env
+    volumes:
+      - 'archiveloader-solr-data:/var/solr'
+    healthcheck:
+      test: ["CMD-SHELL", "curl --silent --fail --user \"$${SOLR_ADMIN_USER}:$${SOLR_ADMIN_PASSWORD}\" http://localhost:8983/solr/admin/info/system?wt=json >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+  collections-init:
+    image: ${REGISTRY_IMAGE:-en-registry-solr:local}
+    profiles: ["solr-setup"]
+    depends_on:
+      solr:
+        condition: service_healthy
+    env_file:
+      - ./.env
+      - ./deploy/solr/solr-admin.env
+    environment:
+      SOLR_URL: http://solr:8983/solr
+      ZK_HOST: zookeeper:2181
+    entrypoint: ["/opt/sbn-registry/bin/bootstrap-collections.sh"]
 volumes: 
   archiveloader-data:
+  archiveloader-solr-data:
+  archiveloader-zk-data:
+  archiveloader-zk-datalog:

@@ -59,6 +59,10 @@ typings/
 
 # dotenv environment variables file
 .env
+.env.bak
+deploy/solr/solr-admin.env
+deploy/solr/security/security.json
+deploy/solr/security/*.bak
 
 # next.js build output
 .next

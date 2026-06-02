@@ -11,9 +11,11 @@ First, you will need to configure the `.env` file that configures all the relate
 - APP_BASE_PATH: Optional URL base path for deployments behind a subpath, such as `/archive-loader`. Leave blank to serve from the site root.
 - MONGO_URL: Optional Mongo connection string override. Defaults to `mongodb://localhost:27017` in local development and `mongodb://mongo:27017` in Docker production mode.
 - HARVEST: The URL for your deployment of the [PDS Harvest Server](https://github.com/sbn-psi/harvest-server)
-- SOLR: The URL for your deployment of the [Legacy Solr Registry](https://github.com/sbn-psi/en-registry-solr)
-- SOLR_USER: The user, if any, for your running solr instance
-- SOLR_PASS: The password, if any, for your running solr instance
+- REGISTRY_IMAGE: Docker image tag for the [Legacy Solr Registry](https://github.com/sbn-psi/en-registry-solr) service used by Docker Compose. Defaults to `en-registry-solr:local`.
+- SOLR_PORT: Host port published by the in-stack Solr service. Defaults to `8983`.
+- SOLR: The Solr URL used by the Archive Loader server. In Docker Compose this should be `http://solr:8983/solr`; for local development outside Compose it can point at any reachable Solr registry.
+- SOLR_USER: The Solr user Archive Loader uses for collection administration and updates.
+- SOLR_PASS: The Solr password Archive Loader uses for collection administration and updates.
 - REGISTRY_URL: Optional override for the context-registry Solr endpoint used for lookups and supplemental metadata backup. Defaults to the SBN PDS alias endpoint.
 - CONTEXT_BROWSER_FLUSH_URL: Optional override for the context-browser cache flush URL used after Solr sync.
 - ARCNAV_REVALIDATE_URL: Optional POST endpoint for Archive Navigator refresh requests after a publish.
@@ -28,16 +30,38 @@ First, you will need to configure the `.env` file that configures all the relate
 - BACKUP_BUCKET: Optional S3 bucket name for JSON backups. Defaults to `pds-sbn-psi-archiveloader-backup`.
 
 ### Docker deployment
-This application is hosted as a docker container, and should be instantiated along with the database by using docker-compose:
+This application is hosted as a Docker container, and should be instantiated along with MongoDB, ZooKeeper, and the managed Solr registry by using Docker Compose.
+
+Build or pull the Solr registry image first. For a local sibling checkout:
 
 ```bash
-$ docker-compose build
-$ docker-compose up -d
+$ cd ../en-registry-solr
+$ deploy/sbn-solr/scripts/build-image.sh
+$ cd ../archive-loader
 ```
 
-If you have the correct `.env` file created, this will build and run your server at `http://localhost:8989/` by default. The Docker image now also builds the React frontend during `docker-compose build`, and the React app is served from the site root.
+Then generate the Solr credentials and bootstrap the SolrCloud collections:
+
+```bash
+$ cp .env.example .env
+$ deploy/solr/scripts/generate-solr-secrets.sh
+$ deploy/solr/scripts/setup-solr.sh
+```
+
+`generate-solr-secrets.sh` writes Archive Loader's Solr connection values to `.env`, Solr admin/reader values to `deploy/solr/solr-admin.env`, and the generated BasicAuth payload to `deploy/solr/security/security.json`. Those generated files are ignored by git.
+
+After Solr setup, build and run the full application stack:
+
+```bash
+$ docker compose build app
+$ docker compose up -d app
+```
+
+If you have the correct `.env` file created, this will build and run your server at `http://localhost:8989/` by default. The Docker image now also builds the React frontend during `docker compose build`, and the React app is served from the site root.
 
 If the Archive Loader is running properly, you should see the React frontend at `http://localhost:8989/`. The legacy AngularJS files are still kept in `static/` for reference, but they are no longer served by default.
+
+See `deploy/solr/README.md` for Solr credential generation, health checks, and registry image update commands. The active Solr configsets are supplied by the registry image.
 
 ### PDS Schema
 
@@ -45,7 +69,7 @@ Part of this stack includes a service that will back up a copy of the PDS regist
 
 ## Development
 
-It may be useful to run this application outside of docker-compose for a faster build-run cycle. To do so, make sure your local `.env` contains valid Mongo, Solr, harvest, and AWS/S3 settings. You will also need a `data` directory in the root (create it if it doesn't exist). Then, in two separate terminals, run these commands in order:
+It may be useful to run this application outside of Docker Compose for a faster build-run cycle. To do so, make sure your local `.env` contains valid Mongo, Solr, harvest, and AWS/S3 settings. You will also need a `data` directory in the root (create it if it doesn't exist). Then, in two separate terminals, run these commands in order:
 
 ```bash
 $ npm run mongo-dev
@@ -57,7 +81,7 @@ $ nodemon
 
 ## Troubleshooting
 
-If you're having trouble running the server, try running docker-compose without the -d flag. This will then log the output of the output to the terminal, and you can see what might be going wrong.
+If you're having trouble running the server, try running `docker compose up app` without the `-d` flag. This logs the application, MongoDB, ZooKeeper, and Solr startup output to the terminal.
 
 If you need to connect to the database directly, you can do so by running:
 
@@ -65,7 +89,7 @@ If you need to connect to the database directly, you can do so by running:
 $ docker exec -it mongo bash
 ```
 
-which will put you inside a [bash environment of the databse](https://docs.mongodb.com/manual/mongo/), and then run:
+which will put you inside a [bash environment of the database](https://docs.mongodb.com/manual/mongo/), and then run:
 
 ```bash
 $ mongo
