@@ -47,6 +47,7 @@ cat > "$SECURITY_FILE" <<EOF
 {
   "authentication": {
     "class": "solr.BasicAuthPlugin",
+    "realm": "Solr",
     "blockUnknown": true,
     "credentials": {
       "${SOLR_ADMIN_USER}": "${admin_hash}",

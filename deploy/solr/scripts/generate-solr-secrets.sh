@@ -6,10 +6,35 @@ SOLR_DIR=$(cd "${SCRIPT_DIR}/.." && pwd)
 REPO_ROOT=$(cd "${SCRIPT_DIR}/../../.." && pwd)
 APP_ENV="${REPO_ROOT}/.env"
 SOLR_ADMIN_ENV="${SOLR_DIR}/solr-admin.env"
+OVERWRITE=${OVERWRITE:-false}
 
-if [ -e "$SOLR_ADMIN_ENV" ] && [ "${OVERWRITE:-false}" != "true" ]; then
+is_placeholder() {
+  case "$1" in
+    ""|" //REPLACEME//"|"REPLACEME"|"//REPLACEME//") return 0 ;;
+    *) return 1 ;;
+  esac
+}
+
+env_value() {
+  local key=$1
+  grep -E "^${key}=" "$APP_ENV" | tail -1 | cut -d= -f2-
+}
+
+if [ -e "$SOLR_ADMIN_ENV" ] && [ "$OVERWRITE" != "true" ]; then
   echo "${SOLR_ADMIN_ENV} already exists. Set OVERWRITE=true to replace it." >&2
   exit 1
+fi
+
+if [ -f "$APP_ENV" ] && [ "$OVERWRITE" != "true" ]; then
+  for key in SOLR SOLR_USER SOLR_PASS; do
+    if grep -q "^${key}=" "$APP_ENV"; then
+      value=$(env_value "$key")
+      if ! is_placeholder "$value"; then
+        echo "${APP_ENV} already has ${key}. Set OVERWRITE=true to replace app-facing Solr settings." >&2
+        exit 1
+      fi
+    fi
+  done
 fi
 
 password() {
@@ -45,8 +70,16 @@ if [ -f "$APP_ENV" ]; then
       printf '%s=%s\n' "$key" "$value" >> "$APP_ENV"
     fi
   }
-  set_env REGISTRY_IMAGE "en-registry-solr:local"
-  set_env SOLR_PORT "8983"
+  set_default_env() {
+    local key=$1
+    local value=$2
+    if ! grep -q "^${key}=" "$APP_ENV"; then
+      [ -s "$APP_ENV" ] && [ "$(tail -c 1 "$APP_ENV")" != "" ] && printf '\n' >> "$APP_ENV"
+      printf '%s=%s\n' "$key" "$value" >> "$APP_ENV"
+    fi
+  }
+  set_default_env REGISTRY_IMAGE "en-registry-solr:local"
+  set_default_env SOLR_PORT "8983"
   set_env SOLR "http://solr:8983/solr"
   set_env SOLR_USER "archive-loader"
   set_env SOLR_PASS "$loader_password"
